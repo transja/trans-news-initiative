@@ -2,8 +2,41 @@
     import { onMount, getContext } from "svelte";
     import tniLogo from "$svg/logos/TNI.svg";
     import { activePage } from "$runes/misc.svelte.js";
+    import * as d3 from "d3";
 
     const copy = getContext("copy");
+    let transposePath;
+    let letterA;
+
+    function drawInPath() {
+        transposePath = d3.select("#coming-soon #transposePath");
+        letterA = d3.select("#coming-soon #letter-a")
+
+        let pathElement = transposePath.node();
+        if (!pathElement) return;
+
+        let pathLen = pathElement.getTotalLength();
+
+        transposePath
+            .attr("stroke-dasharray", (d) => pathLen)
+            .attr("stroke-dashoffset", (d) => pathLen)
+            .transition()
+            .delay(500)
+            .duration(1000)
+            .ease(d3.easeLinear)
+            .attr("stroke-dashoffset", 0);
+        
+        letterA 
+            .transition()
+            .delay(1000)
+            .duration(250)
+            .ease(d3.easeLinear)
+            .style("opacity", 0);
+    }
+
+    onMount(() => {
+        drawInPath();
+    })
 </script>
 
 {#if activePage.page == "home"}
