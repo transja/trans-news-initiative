@@ -9,9 +9,9 @@
 		activePage.page = btn;
 	}
 
-	$effect(() => {
-		console.log(activePage.page)
-	});
+	// $effect(() => {
+	// 	console.log(activePage.page)
+	// });
 </script>
 
 <header>
@@ -66,16 +66,31 @@
 		font-size: var(--12px);
 		background: transparent;
 		border-radius: 0;
-		border-bottom: 2px solid transparent;
+		position: relative;
+	}
+
+	button::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 0%;
+		height: 2px;
+		background-image: linear-gradient(to right, #5bcefa, #f5a9b8);
+		pointer-events: none;
+		transition: width 0.25s linear;
+	}
+
+	button.active::after, button:hover::after {
+		width: 100%;
 	}
 
 	button.active {
-		border-bottom: 2px solid var(--tni-yellow);
 		font-weight: 700;
 		pointer-events: none;
 	}
 
 	button:hover {
-		border-bottom: 2px solid var(--color-gray-1000);
+		
 	}
 </style>

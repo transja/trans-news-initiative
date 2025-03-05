@@ -82,3 +82,8 @@ svg {
 	width: 100%;
 	height: auto;
 }
+
+#transGradient {
+	--color-stop-0: #5bcefa;
+	--color-stop-1: #f5a9b8;
+}

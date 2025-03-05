@@ -44,6 +44,7 @@
             </div>
         </div>
     </div>
+    <p class="copyright">{copy.copyright}</p>
 </section>
 {/if}
 
@@ -51,7 +52,7 @@
     #about {
         width: 100%;
         position: absolute;
-        padding: 10rem 1rem 2rem 1rem;
+        padding: 10rem 1rem 1rem 1rem;
         font-family: var(--sans);
     }
 
@@ -66,6 +67,12 @@
     p {
         font-size: var(--18px);
         line-height: 1.65;
+    }
+
+    .copyright {
+        font-size: var(--12px);
+        font-style: italic;
+        margin: 0;
     }
 
     :global(#about a:hover) {
@@ -157,7 +164,7 @@
 
     @media (max-width: 600px) {
         #about {
-            padding: 8rem 1rem 2rem 1rem;
+            padding: 8rem 1rem 1rem 1rem;
         }
 
         .inner {
