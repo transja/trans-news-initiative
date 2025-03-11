@@ -1,7 +1,7 @@
 <script>
 	let {
 		title = "Trans News Initiative",
-		description = "A database and analysis of legislation and news coverage affecting trans communities.",
+		description = "A database and analysis of government actions and news coverage affecting trans communities.",
 		url = "https://transnewsinit.org",
 		keywords = "trans, transgender, government action, executive order, legisaltion, law, news, coverage, articles, reporting, data, analysis",
 		preloadFont = []
