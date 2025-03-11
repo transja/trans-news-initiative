@@ -1,39 +1,49 @@
 <script>
     import { onMount, getContext } from "svelte";
-    import tniLogo from "$svg/logos/TNI.svg";
+    import tniLogo from "$svg/logos/TNI_animate.svg";
     import { activePage } from "$runes/misc.svelte.js";
     import * as d3 from "d3";
 
     const copy = getContext("copy");
     let transposePath;
     let letterA;
-    let gradientStyle = `linear-gradient(to right, var(--color-stop-1) 50%, var(--color-stop-0) 50%)`;
 
     function drawInPath() {
         transposePath = d3.select("#coming-soon #transposePath");
-        letterA = d3.select("#coming-soon #letter-a")
+        letterA = d3.select("#coming-soon #letter-a");
 
         let pathElement = transposePath.node();
         if (!pathElement) return;
 
         let pathLen = pathElement.getTotalLength();
 
+        // Stop ongoing transitions to prevent overlaps
+        transposePath.interrupt();
+        letterA.interrupt();
+
+        // Reset to initial state
         transposePath
-            .attr("stroke-dasharray", (d) => pathLen)
-            .attr("stroke-dashoffset", (d) => pathLen)
+            .attr("stroke-dasharray", pathLen)
+            .attr("stroke-dashoffset", pathLen);
+
+        letterA.style("opacity", 1); // Reset letter A visibility
+
+        // Restart animation
+        transposePath
             .transition()
             .delay(500)
             .duration(1000)
             .ease(d3.easeLinear)
             .attr("stroke-dashoffset", 0);
-        
-        letterA 
+
+        letterA
             .transition()
             .delay(1500)
             .duration(500)
             .ease(d3.easeLinear)
             .style("opacity", 0);
     }
+
 
     function handleMouseMove(event) {
         const { left, width } = event.currentTarget.getBoundingClientRect();
@@ -69,6 +79,12 @@
     onMount(() => {
         drawInPath();
     })
+
+    $effect(() => {
+		if (activePage.page == "home") {
+            drawInPath();
+        }
+	});
 </script>
 
 {#if activePage.page == "home"}

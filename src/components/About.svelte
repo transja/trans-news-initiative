@@ -44,7 +44,7 @@
             </div>
         </div>
     </div>
-    <p class="copyright">{copy.copyright}</p>
+    <p class="copyright">{@html copy.copyright}</p>
 </section>
 {/if}
 

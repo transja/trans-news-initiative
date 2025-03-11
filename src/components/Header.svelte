@@ -1,5 +1,5 @@
 <script>
-	import tniLogo from "$svg/logos/TNI.svg";
+	import tniLogo from "$svg/logos/TNI_static.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 
