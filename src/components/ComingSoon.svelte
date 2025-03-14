@@ -90,7 +90,9 @@
 {#if activePage.page == "home"}
     <section id="coming-soon">
         <div class="inner">
-            <div class="col" on:mousemove={handleMouseMove} on:mouseleave={handleMouseLeave}>
+            <div class="col" role="presentation" 
+                onmousemove={handleMouseMove} 
+                onmouseleave={handleMouseLeave}>
                 {@html tniLogo}
             </div>
             <div class="col">
@@ -151,16 +153,6 @@
         stroke-miterlimit: 10;
         stroke-width: 3px;
         fill: none;
-    }
-
-    #transGradient {
-        --color-stop-0: #5bcefa;
-        --color-stop-1: #A8BBD9
-        --color-stop-2: #f5a9b8;
-        width: 100%;
-        height: 100px; /* Adjust as needed */
-        background: var(--gradient);
-        transition: all 0.1s ease-out;
     }
 
     @media (max-width: 720px) {

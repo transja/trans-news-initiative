@@ -48,13 +48,6 @@
 		width: 80px;
 	}
 
-	p {
-		font-family: var(--sans);
-		font-weight: 700;
-		text-transform: uppercase;
-		font-size: var(--14px);
-	}
-
 	nav {
 		display: flex;
 		flex-direction: row;
@@ -88,9 +81,5 @@
 	button.active {
 		font-weight: 700;
 		pointer-events: none;
-	}
-
-	button:hover {
-		
 	}
 </style>

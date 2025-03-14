@@ -11,10 +11,6 @@
 
 {#if activePage.page == "home"}
   <footer>
-    <!-- <div class="left">
-      <p class="copyright">{copy.copyright}</p>
-    </div> -->
-    <!-- <div class="right"> -->
       <p>A collaboration between</p>
       <div class="org-wrapper">
         {#each copy.orgBios as org, i}
@@ -23,7 +19,6 @@
           </a>
         {/each}
       </div>
-    <!-- </div> -->
   </footer>
 {/if}
 
@@ -41,17 +36,6 @@
     bottom: 0;
     left: 0;
     z-index: 1000;
-  }
-
-  .copyright {
-    font-size: var(--12px);
-    font-style: italic;
-  }
-
-  .right {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
   }
 
   .org-wrapper {
