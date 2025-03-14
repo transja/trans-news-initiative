@@ -15,9 +15,6 @@ const config = {
 	preprocess,
 	kit: {
 		adapter: adapterStatic({ strict: false }),
-		prerender: {
-			handleHttpError: 'ignore' // This will ignore all HTTP errors during prerendering
-		}
 	}
 };
 
