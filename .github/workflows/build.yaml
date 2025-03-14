@@ -38,13 +38,10 @@ jobs:
       run: |
         npm install
         grunt production
-    - name: Copy CNAME from SRC
-      run: cp src/CNAME docs/
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        # Upload entire repository
-        path: './docs'
+        path: './build'
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
