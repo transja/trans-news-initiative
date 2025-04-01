@@ -14,7 +14,7 @@
       <p>A collaboration between</p>
       <div class="org-wrapper">
         {#each copy.orgBios as org, i}
-          <a href={org.website}>
+          <a href={org.website} aria-label="Learn more about {org.name}">
             {@html logos[i]}
           </a>
         {/each}
