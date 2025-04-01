@@ -2,11 +2,7 @@
 
 **NOTE**: This uses Svelte 5 and is under active migration (not all features will work). For the less adventurous, use the [previous version](https://github.com/the-pudding/svelte-starter) (with Svelte 4).
 
-This [starter template](https://github.com/the-pudding/svelte-starter) aims to quickly scaffold a [SvelteKit](https://kit.svelte.dev/) project, designed around data-driven, visual stories at [The Pudding](https://pudding.cool).
-
-### Notes
-* _Do not use or reproduce The Pudding logos or fonts without written permission._
-* _Prettier Formatting: Disable any text editor Prettier extensions to take advantage of the built-in rules._
+This [starter template](https://github.com/the-pudding/svelte-starter) aims to quickly scaffold a [SvelteKit](https://kit.svelte.dev/) project, designed around data-driven, visual stories. It was develop by [The Pudding](https://pudding.cool).
 
 ### Features
 
@@ -46,11 +42,6 @@ This generates a directory called `build` with the statically rendered app.
 A shortcut for github pages:
 ```bash
 make github
-```
-
-Deploying to Pudding AWS:
-```bash
-make pudding
 ```
 
 ## Style
@@ -97,9 +88,6 @@ Located in `src/components`.
 // Usage
 import Example from "$components/Example.svelte";
 ```
-
-* `Footer.svelte`: Pudding recirculation and social links.
-* `Header.svelte`: Pudding masthead.
 
 ### Helper Components
 
