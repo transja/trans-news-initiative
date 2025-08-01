@@ -1,12 +1,14 @@
 <script>
 	import useWindowDimensions from "$runes/useWindowDimensions.svelte.js";
-	import SigmaMap from "../../components/SigmaMap.svelte";
-	import Histogram from "../../components/Histogram.svelte";
-	import csvdata from "../../data/clustered_articles.csv";
+
+	import csvdata from "../../data/articles_with_themes.csv";
 	import { MousePointerClick, Pointer } from "@lucide/svelte";
 	import { fade } from "svelte/transition";
 
-	import { writable, derived } from "svelte/store";
+	// components
+	import SigmaMap from "../../components/SigmaMap.svelte";
+	import Histogram from "../../components/Histogram.svelte";
+	import DataControls from "../../components/DataControls.svelte";
 
 	// Process data and filter for top 15 largest clusters
 	const processedData = csvdata
@@ -20,7 +22,6 @@
 		.filter((item) => item.cluster != "-1")
 		.filter((item) => !isNaN(item.UMAP1) && !isNaN(item.UMAP2));
 
-	// Get all publish dates for histogram
 	const allDates = processedData.map((d) => d.publish_date).filter(Boolean);
 
 	const minDate = allDates.length
@@ -31,30 +32,38 @@
 		? new Date(Math.max(...allDates.map((d) => new Date(d))))
 		: new Date();
 
-	// 1. Declare dateRange FIRST
-	const dateRange = writable([minDate, maxDate]);
-
-	console.log(maxDate);
-
-	// 2. Then declare filteredData and articleCount
-	const filteredData = derived(dateRange, ($dateRange) =>
-		processedData.filter((item) => {
-			const d = new Date(item.publish_date);
-			return d >= $dateRange[0] && d <= $dateRange[1];
-		})
-	);
-
-	const articleCount = derived(
-		filteredData,
-		($filteredData) => $filteredData.length
-	);
-
-	const isSameMonth = derived(dateRange, ([$start, $end]) => {
-		return (
-			$start.getFullYear() === $end.getFullYear() &&
-			$start.getMonth() === $end.getMonth()
-		);
+	let filters = $state({
+		topic: "All",
+		publisher: "All",
+		dateRange: {
+			start: minDate,
+			end: maxDate
+		}
 	});
+
+	const filteredData = $derived(
+		processedData
+			.filter((item) => {
+				const d = new Date(item.publish_date);
+				return d >= filters.dateRange.start && d <= filters.dateRange.end;
+			})
+			// .filter((item) => {
+			// 	if (filters.publisher === "All") {
+			// 		return true;
+			// 	}
+			// 	return item.media_name === filters.publisher;
+			// })
+	);
+
+	const articleCount = $derived(filteredData.length);
+
+	const isSameMonth = $derived(
+		filters.dateRange.start.getFullYear() ===
+			filters.dateRange.end.getFullYear() &&
+			filters.dateRange.start.getMonth() === filters.dateRange.end.getMonth()
+	);
+
+	$inspect(isSameMonth);
 
 	// Overlay state
 	let showOverlay = $state(true);
@@ -66,21 +75,19 @@
 	function handleDownload() {
 		console.log("Download the data clicked");
 	}
-
-	// $inspect($dateRange);
 </script>
 
 {#snippet dateRangeInfo()}
-	{#if $isSameMonth}
-		In {$dateRange[0].toLocaleDateString(undefined, {
+	{#if isSameMonth}
+		In {filters.dateRange.start.toLocaleDateString(undefined, {
 			year: "numeric",
 			month: "long"
 		})}, we found
 	{:else}
-		Between {$dateRange[0].toLocaleDateString(undefined, {
+		Between {filters.dateRange.start.toLocaleDateString(undefined, {
 			year: "numeric",
 			month: "long"
-		})} and {$dateRange[1].toLocaleDateString(undefined, {
+		})} and {filters.dateRange.end.toLocaleDateString(undefined, {
 			year: "numeric",
 			month: "long"
 		})}
@@ -99,7 +106,7 @@
 					{@render dateRangeInfo()}, we found
 				</div>
 				<div class="overlay-count">
-					{$articleCount.toLocaleString()} news articles
+					{articleCount.toLocaleString()} news articles
 				</div>
 
 				<div class="overlay-desc">
@@ -113,21 +120,23 @@
 
 	<SigmaMap
 		allData={processedData}
-		visibleData={$filteredData}
-		dateRange={$dateRange}
+		visibleData={filteredData}
 		onShare={handleShare}
 		onDownload={handleDownload}
 		height={showOverlay ? "100vh" : "calc(100vh - 300px)"}
+		{filters}
 	/>
 
 	{#if !showOverlay}
 		<div transition:fade>
-			<Histogram data={processedData} {dateRange} {minDate} {maxDate} />
+			<Histogram data={processedData} {filters} {minDate} {maxDate} />
 
 			<div class="selection-info">
 				{@render dateRangeInfo()},
-				<b>{$articleCount.toLocaleString()}</b> articles match your selections
+				<b>{articleCount.toLocaleString()}</b> articles match your selections
 			</div>
+
+			<!-- <DataControls data={processedData} bind:filters /> -->
 		</div>
 	{/if}
 </div>

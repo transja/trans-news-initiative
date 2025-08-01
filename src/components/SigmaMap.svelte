@@ -2,15 +2,13 @@
 	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
 
-	const { allData = [], visibleData = [], height = "100vh" } = $props();
+	const { allData = [], visibleData = [], height = "100vh", filters } = $props();
 
 	let container;
 	let sigmaInstance;
 	let graph = $state(null);
 	const defaultNodeSize = 3;
 	let tooltipEl;
-
-	$inspect(allData.length, visibleData.length);
 
 	onMount(async () => {
 		if (!browser || !allData || allData.length === 0) return;
@@ -35,6 +33,8 @@
 				title: item.title,
 				x: item.UMAP1,
 				y: item.UMAP2,
+				topic: item.topic,
+				url: item.url,
 				size: defaultNodeSize,
 				color: getClusterColor(item.cluster),
 				cluster: item.cluster,
@@ -196,6 +196,22 @@
 
 		graph.forEachNode((node) => {
 			graph.setNodeAttribute(node, "hidden", !visibleNodeIds.has(node));
+			
+			// Update node colors based on topic filter
+			const nodeData = allData.find(d => d.id === node);
+			if (nodeData) {
+				if (filters.topic === "All") {
+					// Use original cluster colors
+					graph.setNodeAttribute(node, "color", getClusterColor(nodeData.cluster));
+				} else {
+					// If topic is selected, make matching nodes orange, others gray
+					if (nodeData.topic === filters.topic) {
+						graph.setNodeAttribute(node, "color", "#ff8c00"); // Orange
+					} else {
+						graph.setNodeAttribute(node, "color", "#d1d5db"); // Gray
+					}
+				}
+			}
 		});
 
 		// sigmaInstance.getCamera().animatedReset({ duration: 600 });

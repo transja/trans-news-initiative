@@ -2,7 +2,7 @@
 	import { ChevronLeft, ChevronRight } from "@lucide/svelte";
 
 	// Props
-	let { data, dateRange } = $props();
+	let { data, filters  } = $props();
 
 	// Process histogram data - group articles by month
 	const histogramData = $derived.by(() => {
@@ -44,8 +44,8 @@
 		const totalMonths = histogramData.length;
 		const hoverIndex = Math.round(percent * (totalMonths - 1));
 
-		const startDate = $dateRange[0];
-		const endDate = $dateRange[1];
+		const startDate = filters.dateRange.start;
+		const endDate = filters.dateRange.end;
 
 		const startIndex = findClosestMonthIndex(startDate);
 		// For finding the end index, we should use the start of the month
@@ -74,7 +74,10 @@
 			Date.UTC(finalEndDate.getUTCFullYear(), finalEndDate.getUTCMonth() + 1, 0)
 		);
 
-		$dateRange = [finalStartDate, finalEndOfMonth];
+		filters.dateRange = {
+			start: finalStartDate,
+			end: finalEndOfMonth
+		};
 	}
 
 	function findClosestMonthIndex(targetDate) {
@@ -135,7 +138,6 @@
 		hoveredIndex = -1;
 	}
 
-	$inspect(histogramBarWidth);
 </script>
 
 <div class="histogram-controls">
@@ -155,7 +157,7 @@
 				{#each histogramData as item, i}
 					{@const height = maxCount > 0 ? (item.count / maxCount) * 100 : 0}
 					{@const isInRange =
-						item.month >= $dateRange[0] && item.month <= $dateRange[1]}
+						item.month >= filters.dateRange.start && item.month <= filters.dateRange.end}
 					<div
 						class="histogram-bar"
 						style="height: {height}%"
@@ -178,7 +180,7 @@
 			{/each}
 		</div>
 
-		{#if $dateRange[0] && $dateRange[1]}
+		{#if filters.dateRange.start && filters.dateRange.end}
 			{#snippet scrubberContent()}
 				{@const getMonthPosition = (targetDate, handleType = "start") => {
 					if (histogramData.length === 0) return 0;
@@ -204,8 +206,8 @@
 
 					return handleType === "end" ? percent + barWidthPercent : percent;
 				}}
-				{@const startPercent = getMonthPosition($dateRange[0], "start")}
-				{@const endPercent = getMonthPosition($dateRange[1], "end")}
+				{@const startPercent = getMonthPosition(filters.dateRange.start, "start")}
+				{@const endPercent = getMonthPosition(filters.dateRange.end, "end")}
 
 				<div
 					class="histogram-scrubber"
