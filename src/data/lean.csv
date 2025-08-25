@@ -1,0 +1,241 @@
+id,homepage,domain,url_search_string,label,notes,platform,pub_country,pub_state,media_type,stories_per_week,first_story,primary_language,coverage_geography,coverage_primary_content,media_bias_allsides,1media_bias_ground_news,2voter_tweets,3voter_tweets,lean1,1lean,2lean,3lean,avgLean,aggLean
+4415,http://www.cnet.com/,cnet.com,,cnet.com,,online_news,USA,,digital_native,623,,en,national,technology,center,center,center,center,0,0,0,0,0,center
+1104,http://www.forbes.com/,forbes.com,,Forbes,,online_news,USA,,print_native,2253,,en,national,business,center,center,center,center,0,0,0,0,0,center
+1105,http://fortune.com/,fortune.com,,fortune.com,,online_news,USA,,print_native,464,,en,national,business,center,center,center,,0,0,0,,0,center
+20060,https://www.bizjournals.com,bizjournals.com,,bizjournals.com,,online_news,USA,,digital_native,,,en,national,business,center,,center,,0,,0,,0,center
+370876,http://buy.barrons.com/,barrons.com,,buy.barrons.com,,online_news,,,,0,,,national,business,center,center,,center,0,0,,0,0,center
+19562,http://www.marketwatch.com,marketwatch.com,,Market Watch,,online_news,USA,,,285,,en,national,business,center,center,lean right,center,0,0,1,0,0.3333333333,center
+20273,http://www.ibtimes.com,ibtimes.com,,ibtimes.com,,online_news,,,,473,,,global,business,center,center,lean left,center,0,0,-1,0,-0.3333333333,center
+18704,http://www.thewrap.com,thewrap.com,,The Wrap,,online_news,USA,,digital_native,315,,en,national,entertainment,center,lean left,center,center,0,-1,0,0,-0.3333333333,center
+9,http://www.chicagotribune.com/,chicagotribune.com,,chicagotribune.com,,online_news,USA,US-IL,print_native,914,,,state,news,center,center,center,center,0,0,0,0,0,center
+10,http://www.chron.com/,chron.com,,chron.com,,online_news,USA,US-TX,print_native,166,,en,state,news,center,center,center,center,0,0,0,0,0,center
+13,http://www.newsday.com/,newsday.com,,Newsday,,online_news,USA,US-NY,print_native,1905,,,state,news,center,center,center,center,0,0,0,0,0,center
+22,http://www.tampabay.com/,tampabay.com,,Tampa Bay Times,,online_news,USA,US-FL,print_native,254,,en,state,news,center,center,center,lean left,0,0,0,-1,-0.3333333333,center
+36,http://www.jsonline.com/,jsonline.com,,Milwaukee Journal Sentinel,,online_news,USA,US-WI,print_native,294,,en,state,news,center,,center,center,0,,0,0,0,center
+39,http://www.sun-sentinel.com/,sun-sentinel.com,,South Florida Sun-Sentinel,,online_news,USA,US-FL,print_native,497,,en,state,news,center,,center,lean left,0,,0,-1,-0.5,center
+41,http://www.dispatch.com/,dispatch.com,,Columbus Dispatch,,online_news,USA,US-OH,print_native,231,,en,state,news,center,center,center,center,0,0,0,0,0,center
+45,http://www.post-gazette.com/,post-gazette.com,,Pittsburgh Post-Gazette,,online_news,USA,US-PA,print_native,341,,en,state,news,center,center,lean left,center,0,0,-1,0,-0.3333333333,center
+52,http://www.twincities.com/,twincities.com,,St.Paul Pioneer-Press,,online_news,USA,US-MN,print_native,1591,,en,state,news,center,center,center,center,0,0,0,0,0,center
+54,http://www.omaha.com/,omaha.com,,Omaha World-Herald,,online_news,USA,US-NE,print_native,258,,en,state,news,center,center,lean right,center,0,0,1,0,0.3333333333,center
+57,http://buffalonews.com,buffalonews.com,,The Buffalo News,,online_news,USA,US-NY,print_native,1,,,state,news,center,center,center,lean left,0,0,0,-1,-0.3333333333,center
+59,http://www.courant.com/,courant.com,,Hartford Courant,,online_news,USA,US-CT,print_native,557,,en,state,news,center,center,center,center,0,0,0,0,0,center
+1089,http://www.reuters.com/,reuters.com,,Reuters,stopped official rss support in 2020,online_news,USA,,other,5263,,,global,news,center,center,lean left,center,0,0,-1,0,-0.3333333333,center
+1098,https://newsweek.com,newsweek.com,,newsweek.com,,online_news,,,,1779,,en,national,news,center,center,lean left,,0,0,-1,,-0.5,center
+22732,https://wsj.com,wsj.com,,wsj.com,,online_news,,,,360,,,national,news,center,center,center,center,0,0,0,0,0,center
+1641,http://www.cleveland.com/,cleveland.com,,cleveland.com,,online_news,USA,US-OH,digital_native,895,,en,state,news,center,center,center,center,0,0,0,0,0,center
+1706,http://www.upi.com/,upi.com,,UPI,,online_news,USA,,other,378,,,global,news,center,center,center,center,0,0,0,0,0,center
+19854,http://www.rollcall.com/,rollcall.com,,rollcall.com,,online_news,USA,,print_native,53,,en,national,news,center,,center,center,0,,0,0,0,center
+21038,http://www.c-span.org,c-span.org,,CSPAN,,online_news,USA,,video_broadcast,,,en,national,news,center,,center,center,0,,0,0,0,center
+33,http://www.mysanantonio.com/,mysanantonio.com,,San Antonio Express News,,online_news,USA,US-TX,video_broadcast,243,,en,state,news,center,center,center,center,0,0,0,0,0,center
+26310,http://www.rutlandherald.com,rutlandherald.com,,rutlandherald.com,,online_news,USA,US-VT,print_native,135,,en,state,news,center,center,,,0,0,,,0,center
+26590,http://cincinnati.com,cincinnati.com,,cincinnati.com,,online_news,USA,US-OH,digital_native,216,,en,state,news,center,center,center,center,0,0,0,0,0,center
+27063,http://www.pewstates.org,pewstates.org,,pewstates.org,,online_news,,,,42,,,national,news,center,center,,,0,0,,,0,center
+39573,http://www.staradvertiser.com/,staradvertiser.com,,Honolulu Advertiser,,online_news,USA,US-HI,print_native,318,,en,state,news,center,,center,lean left,0,,0,-1,-0.5,center
+1490,http://www.mlive.com,mlive.com,,MLive.com,,online_news,,,,1084,,en,state,news,center,,center,center,0,,0,0,0,center
+79209,http://pilotonline.com/#spider,pilotonline.com,,pilotonline.com,,online_news,USA,US-VA,print_native,445,,en,state,news,center,center,center,center,0,0,0,0,0,center
+20992,http://www.indystar.com,indystar.com,,indystar.com,,online_news,,,,254,,,state,news,center,center,center,center,0,0,0,0,0,center
+31,http://www.denverpost.com/,denverpost.com,,The Denver Post,,online_news,USA,US-CO,print_native,323,,en,state,news,center,center,center,lean left,0,0,0,-1,-0.3333333333,center
+4438,http://techcrunch.com,techcrunch.com,,TechCrunch,,online_news,USA,,,195,,en,national,technology,center,center,center,center,0,0,0,0,0,center
+20410,http://www.livescience.com,livescience.com,,livescience.com,,online_news,USA,US-NY,digital_native,78,,en,national,technology,center,center,center,center,0,0,0,0,0,center
+5982,http://www.businessweek.com/,businessweek.com,,businessweek.com,,online_news,USA,,print_native,,,en,national,business,lean left,lean left,center,,-1,-1,0,,-0.5,center
+18710,http://businessinsider.com,businessinsider.com,,businessinsider.com,,online_news,USA,,digital_native,581,,en,national,business,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+21208,https://people.com,people.com,,people.com,,online_news,,,,1402,,,national,entertainment,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+14,http://sfgate.com,sfgate.com,,sfgate.com,,online_news,USA,US-CA,digital_native,1449,,en,state,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+19,http://www.startribune.com/,startribune.com,,Star Tribune,,online_news,USA,US-MN,print_native,206,,,state,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+26,http://www.sacbee.com/,sacbee.com,,Sac Bee,,online_news,USA,US-CA,print_native,,,en,state,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+35,http://www.mercurynews.com/,mercurynews.com,,San Jose Mercury News,,online_news,USA,US-CA,print_native,588,,en,state,news,lean left,,center,center,-1,,0,0,0,center
+1100,https://usnews.com,usnews.com,,usnews.com,,online_news,USA,,print_native,,,en,national,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+1752,https://cbsnews.com,cbsnews.com,,cbsnews.com,,online_news,USA,US-NY,video_broadcast,1564,,,national,news,lean left,lean left,,center,-1,-1,,0,-0.5,center
+1755,https://cnbc.com,cnbc.com,,cnbc.com,,online_news,USA,,video_broadcast,304,,en,national,news,lean left,center,center,center,-1,0,0,0,0,center
+18342,http://politico.com,politico.com,,politico.com,,online_news,,,,140,,en,national,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+19260,http://abcnews.go.com,abcnews.go.com,,abcnews.go.com,,online_news,USA,US-NY,,610,,,national,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+18482,http://bloomberg.com,bloomberg.com,,bloomberg.com,,online_news,USA,US-NY,,2460,,,national,news,lean left,lean left,center,center,-1,-1,0,0,-0.3333333333,center
+268225,http://sandiegouniontribune.com/,sandiegouniontribune.com,,San Diego Union Tribune,,online_news,USA,US-CA,print_native,587,,en,state,news,lean left,center,center,center,-1,0,0,0,0,center
+366306,http://espn.com/,espn.com,,espn.com,,online_news,,,,472,,,national,sports,lean left,lean left,,center,-1,-1,,0,-0.5,center
+25848,http://www.cbssports.com,cbssports.com,,cbssports.com,,online_news,USA,,video_broadcast,4068,,en,national,sports,lean left,center,,center,-1,0,,0,0,center
+19194,http://www.billboard.com,billboard.com,,Billboard,,online_news,USA,,print_native,428,,en,national,entertainment,left,center,center,center,-2,0,0,0,0,center
+147704,http://arkansasonline.com/,arkansasonline.com,,arkansasonline.com,,online_news,,,,656,,,state,news,left,center,center,lean right,-2,0,0,1,0.3333333333,center
+21619,http://www.thestreet.com,thestreet.com,,The Street,,online_news,USA,,digital_native,282,,en,national,business,,lean right,center,lean left,,1,0,-1,0,center
+22041,http://www.benzinga.com,benzinga.com,,Benzinga,,online_news,USA,,digital_native,88,,en,national,business,,center,,lean left,,0,,-1,-0.5,center
+5856,http://www.eonline.com/,eonline.com,,E! Online,,online_news,USA,,video_broadcast,449,,en,national,entertainment,,center,center,lean left,,0,0,-1,-0.3333333333,center
+24621,http://hollywoodlife.com,hollywoodlife.com,,hollywoodlife.com,,online_news,,,,79,,en,national,entertainment,,lean left,,center,,-1,,0,-0.5,center
+24757,http://www.usmagazine.com,usmagazine.com,,US Weekly,,online_news,USA,,print_native,828,,en,national,entertainment,,,center,center,,,0,0,0,center
+25336,http://www.eurweb.com,eurweb.com,,eurweb,,online_news,USA,,digital_native,136,,en,national,entertainment,,,,center,,,,0,0,center
+33514,http://www.parade.com#spider,parade.com,,Parade,,online_news,USA,,print_native,,,en,national,entertainment,,,center,center,,,0,0,0,center
+690347,http://s.ign.com/,ign.com,,s.ign.com,,online_news,,,,671,,,national,entertainment,,center,,center,,0,,0,0,center
+86303,http://www.accesshollywood.com/#spider,accesshollywood.com,,Access Hollywood,,online_news,USA,,digital_native,,,en,national,entertainment,,,center,,,,0,,0,center
+140484,http://thrillist.com/,thrillist.com,,thrillist.com,,online_news,,,,17,,en,national,entertainment,,,,center,,,,0,0,center
+146969,http://axs.com/,axs.com,,axs.com,,online_news,USA,,digital_native,,,en,national,entertainment,,,,center,,,,0,0,center
+25128,http://www.azcentral.com,azcentral.com,,AZCentral,,online_news,USA,US-AZ,digital_native,402,,en,state,news,,lean left,center,center,,-1,0,0,-0.3333333333,center
+29827,http://www.rttnews.com#spider,rttnews.com,,rttnews,,online_news,USA,,digital_native,452,,en,global,news,,center,,,,0,,,0,center
+25933,http://www.syracuse.com,syracuse.com,,syracuse.com,,online_news,,,,706,,,state,news,,,center,center,,,0,0,0,center
+1855715,http://amp.fayobserver.com/,fayobserver.com,,amp.fayobserver.com,,online_news,,,,,,,state,news,,,center,lean right,,,0,1,0.5,center
+74242,http://www.norwichbulletin.com/#spider,norwichbulletin.com,,norwichbulletin.com,,online_news,USA,US-CT,print_native,,,en,state,news,,,,center,,,,0,0,center
+1289242,http://amp.ledger-enquirer.com/,ledger-enquirer.com,,amp.ledger-enquirer.com,,online_news,,,,,,,state,news,,,,center,,,,0,0,center
+85364,http://www.newsy.com/#spider,newsy.com,,newsy,,online_news,USA,,digital_native,242,,en,national,news,,,center,lean left,,,0,-1,-0.5,center
+107659,http://mintpressnews.com/,mintpressnews.com,,MintPress News,,online_news,USA,,digital_native,4,,en,national,news,,,center,center,,,0,0,0,center
+173769,http://augustachronicle.com/,augustachronicle.com,,augustachronicle.com,,online_news,,,,56,,,state,news,,,,center,,,,0,0,center
+259449,http://cherokeephoenix.org/,cherokeephoenix.org,,Cherokee Phoenix,,online_news,USA,,,20,,,national,news-native,,center,,lean left,,0,,-1,-0.5,center
+24901,http://bleacherreport.com,bleacherreport.com,,Bleacher Report,,online_news,USA,,digital_native,1109,,en,national,sports,,,,center,,,,0,0,center
+860476,http://s.sbnation.com/,sbnation.com,,s.sbnation.com,,online_news,,,,129,,,national,sports,,,,center,,,,0,0,center
+98456,http://sportingnews.com,sportingnews.com,,Sporting News - Real Insight. Real Fans. Real Conversations.,,online_news,,,,3285,,en,natinal,sports,,center,,lean right,,0,,1,0.5,center
+22116,http://www.techradar.com,techradar.com,,techradar.com,,online_news,GBR,,,556,,,national,technology,,center,,lean right,,0,,1,0.5,center
+18747,http://www.zdnet.com,zdnet.com,,zdnet.com,,online_news,,,,221,,,national,technology,,center,center,center,,0,0,0,0,center
+4420,http://engadget.com,engadget.com,,Engadget,,online_news,,,,227,,en,national,technology,,lean left,center,center,,-1,0,0,-0.3333333333,center
+367245,http://qz.com/,qz.com,,Quartz,,online_news,,,,382,,,national,business,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+1274884,http://files.saturdayeveningpost.com/,saturdayeveningpost.com,,files.saturdayeveningpost.com,,online_news,,,,12,,,national,entertainment,center,,,lean left,0,,,-1,-1,lean left
+3,http://www.csmonitor.com/,csmonitor.com,,csmonitor.com,,online_news,USA,US-MA,print_native,66,,en,global,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+12,http://www.dallasnews.com/,dallasnews.com,,Dallas Morning News,,online_news,USA,US-TX,print_native,,,en,state,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+30,http://www.kansascity.com/,kansascity.com,,Kansas City Star,,online_news,USA,US-MO,print_native,,,en,state,news,center,lean left,center,lean left,0,-1,0,-1,-0.6666666667,lean left
+34,http://www.baltimoresun.com/,baltimoresun.com,,Baltimore Sun,,online_news,USA,US-MD,print_native,657,,en,state,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+38,http://www.orlandosentinel.com/,orlandosentinel.com,,Orlando Sentinel,,online_news,USA,US-FL,print_native,524,,en,state,news,center,lean left,center,lean left,0,-1,0,-1,-0.6666666667,lean left
+5915,http://www.fivethirtyeight.com/,fivethirtyeight.com,,FiveThirtyEight,,online_news,USA,,digital_native,2,,en,national,news,center,,lean left,left,0,,-1,-2,-1.5,lean left
+21091,http://www.observer.com,observer.com,,observer.com,,online_news,USA,,digital_native,56,,en,national,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+1723,http://www.pri.org,pri.org,,PRI,,online_news,,,video_broadcast,11,,en,global,news,center,,lean left,left,0,,-1,-2,-1.5,lean left
+24940,http://seattletimes.com/,seattletimes.com,,seattletimes.com,,online_news,USA,US-WA,print_native,734,,en,state,news,center,lean left,lean left,lean left,0,-1,-1,-1,-1,lean left
+27,http://www.stltoday.com/,stltoday.com,,St. Louis Post Dispatch,,online_news,USA,US-MO,print_native,687,,en,state,news,center,lean left,center,lean left,0,-1,0,-1,-0.6666666667,lean left
+111288,http://centralmaine.com/,centralmaine.com,,centralmaine.com,,online_news,,,,320,,,state,news,center,center,,left,0,0,,-2,-1,lean left
+62552,http://elnuevodia.com/,elnuevodia.com,,El Nuevo Dia,,online_news,PRI,,print_native,806,,,state,news-hispanic,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+1743487,http://amp.providencejournal.com/,providencejournal.com,,amp.providencejournal.com,,online_news,,,,,,,state,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+18733,http://www.oregonlive.com,oregonlive.com,,oregonlive.com,,online_news,,,,627,,,state,news,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+18351,http://arstechnica.com,arstechnica.com,,arstechnica.com,,online_news,USA,,digital_native,84,,en,national,technology,center,center,lean left,lean left,0,0,-1,-1,-0.6666666667,lean left
+18393,http://www.opensecrets.org,opensecrets.org,,OpenSecrets,,online_news,USA,US-DC,digital_native,3,,en,national,service,center,,,lean left,0,,,-1,-1,lean left
+18496,http://www.hollywoodreporter.com,hollywoodreporter.com,,Hollywood Reporter,,online_news,USA,,print_native,371,,en,national,entertainment,lean left,lean left,lean left,center,-1,-1,-1,0,-0.6666666667,lean left
+19076,http://variety.com,variety.com,,variety.com,,online_news,USA,,print_native,486,,en,national,entertainment,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+26924,http://www.inquisitr.com,inquisitr.com,,Inquisitr,,online_news,USA,,digital_native,168,,en,national,entertainment,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+366942,http://bustle.com/,bustle.com,,bustle.com,,online_news,,,,116,,,national,entertainment,lean left,lean left,lean left,left,-1,-1,-1,-2,-1.333333333,lean left
+20487,http://www.gq.com,gq.com,,GQ,,online_news,,,,78,,en,national,entertainment,lean left,lean left,lean left,left,-1,-1,-1,-2,-1.333333333,lean left
+20401,http://www.dailydot.com,dailydot.com,,Daily Dot,,online_news,USA,,,227,,en,national,entertainment,lean left,,lean left,left,-1,,-1,-2,-1.5,lean left
+1,http://nytimes.com,nytimes.com,,New York Times,,online_news,USA,US-NY,print_native,2230,,,national,news,lean left,,lean left,lean left,-1,,-1,-1,-1,lean left
+2,https://washingtonpost.com,washingtonpost.com,,washingtonpost.com,,online_news,USA,US-DC,print_native,142,,,national,news,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+4,http://www.usatoday.com,usatoday.com,,USA Today,,online_news,USA,US-OH,print_native,1886,,,national,news,lean left,lean left,center,left,-1,-1,0,-2,-1,lean left
+6,http://latimes.com,latimes.com,,latimes.com,,online_news,USA,US-CA,print_native,747,,,state,news,lean left,lean left,lean left,left,-1,-1,-1,-2,-1.333333333,lean left
+28,http://www.miamiherald.com/,miamiherald.com,,miamiherald.com,,online_news,USA,US-FL,print_native,15,,en,state,news,lean left,lean left,center,left,-1,-1,0,-2,-1,lean left
+1095,http://www.cnn.com/,cnn.com,,CNN,,online_news,USA,US-GA,video_broadcast,1187,,,global,news,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+1096,http://www.npr.org/,npr.org,,npr.org,,online_news,USA,,video_broadcast,406,,,national,news,lean left,lean left,left,lean left,-1,-1,-2,-1,-1.333333333,lean left
+4419,http://www.time.com/time/,time.com,,time.com,,online_news,USA,,,118,,en,national,news,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+21542,http://theweek.com,theweek.com,,The Week,,online_news,USA,,print_native,72,,en,national,news,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+17,http://www.ajc.com/,ajc.com,,ajc.com,,online_news,USA,US-GA,print_native,916,,en,state,news,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+26140,http://www.gazettenet.com,gazettenet.com,,gazettenet.com,,online_news,USA,US-MA,print_native,132,,en,state,news,lean left,lean left,lean left,left,-1,-1,-1,-2,-1.333333333,lean left
+27343,http://grist.org/,grist.org,,Grist,,online_news,USA,US-WA,digital_native,18,,en,national,news,lean left,lean left,lean left,left,-1,-1,-1,-2,-1.333333333,lean left
+34663,http://www.breakingnews.com#spider,breakingnews.com,,NBC Breaking News,,online_news,USA,,digital_native,,,,national,news,lean left,lean left,,,-1,-1,,,-1,lean left
+367274,http://theconversation.com/,theconversation.com,,theconversation.com,,online_news,,,,482,,,national,news,lean left,center,lean left,lean left,-1,0,-1,-1,-0.6666666667,lean left
+57166,http://univision.com/,univision.com,,univision.com,,online_news,USA,US-AZ,video_broadcast,,,es,global,news-hispanic,lean left,lean left,lean left,,-1,-1,-1,,-1,lean left
+22529,http://www.philly.com,philly.com,,philly.com,,online_news,,,,2996,,,state,news,lean left,lean left,lean left,,-1,-1,-1,,-1,lean left
+104828,http://www.vox.com/,vox.com,,vox.com,,online_news,USA,,digital_native,49,,,national,news,lean left,left,lean left,lean left,-1,-2,-1,-1,-1.333333333,lean left
+136431,http://berkshireeagle.com/,berkshireeagle.com,,berkshireeagle.com,,online_news,USA,US-MA,print_native,199,,en,state,news,lean left,center,lean left,left,-1,0,-1,-2,-1,lean left
+1093,http://www.pbs.org/newshour/,pbs.org,,pbs.org,,online_news,,,,201,,en,national,news,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+20262,http://www.freep.com,freep.com,,freep.com,,online_news,USA,US-MI,print_native,280,,en,state,news,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+25499,https://nbcnews.com,nbcnews.com,,nbcnews.com,,online_news,USA,,,487,,en,national,news,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+798,http://factcheck.org/,factcheck.org,,FactCheck,,online_news,USA,,digital_native,5,,en,national,service,lean left,,lean left,lean left,-1,,-1,-1,-1,lean left
+24745,http://www.nbcsports.com/,nbcsports.com,,NBC Sports,,online_news,USA,,video_broadcast,155,,en,national,sports,lean left,lean left,center,lean left,-1,-1,0,-1,-0.6666666667,lean left
+4469,http://gizmodo.com,gizmodo.com,,Gizmodo,,online_news,USA,,,146,,en,national,technology,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+20263,http://www.scientificamerican.com,scientificamerican.com,,scientificamerican.com,,online_news,,,,173,,,national,technology,lean left,lean left,lean left,lean left,-1,-1,-1,-1,-1,lean left
+19508,http://www.theverge.com,theverge.com,,theverge,,online_news,,,,188,,,national,technology,lean left,lean left,lean left,center,-1,-1,-1,0,-0.6666666667,lean left
+25915,http://www.postandcourier.com,postandcourier.com,,postandcourier.com,,online_news,,,,513,,,state,news,lean right,center,lean left,lean left,1,0,-1,-1,-0.6666666667,lean left
+5521,http://www.rollingstone.com,rollingstone.com,,Rolling Stone,,online_news,USA,,print_native,259,,en,national,entertainment,left,,lean left,left,-2,,-1,-2,-1.5,lean left
+5527,http://mashable.com,mashable.com,,Mashable!,,online_news,USA,,digital_native,359,,en,national,entertainment,left,left,center,lean left,-2,-2,0,-1,-1,lean left
+6218,http://buzzfeed.com,buzzfeed.com,,buzzfeed.com,,online_news,USA,,digital_native,1288,,,national,entertainment,left,lean left,center,lean left,-2,-1,0,-1,-0.6666666667,lean left
+104698,http://www.refinery29.com,refinery29.com,,Refinery29,,online_news,,,,36,,en,national,entertainment,left,left,lean left,lean left,-2,-2,-1,-1,-1.333333333,lean left
+21511,http://www.bostonglobe.com,bostonglobe.com,,Boston Globe,,online_news,USA,US-MA,,1080,,en,state,news,left,lean left,left,lean left,-2,-1,-2,-1,-1.333333333,lean left
+1110,http://theatlantic.com,theatlantic.com,,theatlantic.com,,online_news,USA,,print_native,66,,,national,news,left,lean left,lean left,lean left,-2,-1,-1,-1,-1,lean left
+1707,http://www.thedailybeast.com/,thedailybeast.com,,thedailybeast.com,,online_news,USA,,digital_native,128,,en,national,news,left,left,lean left,lean left,-2,-2,-1,-1,-1.333333333,lean left
+366870,http://theintercept.com/,theintercept.com,,theintercept.com,,online_news,,,,28,,,national,news,left,left,lean left,lean left,-2,-2,-1,-1,-1.333333333,lean left
+21617,http://www.vice.com/,vice.com,,vice.com,,online_news,USA,,digital_native,176,,en,national,news,left,lean left,lean left,lean left,-2,-1,-1,-1,-1,lean left
+300560,http://www.theguardian.com/uk,theguardian.com,,theguardian.com,,online_news,GBR,,print_native,79,,en,global,news,left,,,lean left,-2,,,-1,-1,lean left
+18410,http://www.wired.com/,wired.com,,wired.com,,online_news,,,,41,,,national,technology,left,lean left,lean left,lean left,-2,-1,-1,-1,-1,lean left
+196181,http://openx.ncronline.org/,ncronline.org,,openx.ncronline.org,,online_news,,,,54,,,national,news,,lean left,,lean left,,-1,,-1,-1,lean left
+5880,http://gawker.com,gawker.com,,Gawker,,online_news,USA,,digital_native,12,,en,national,entertainment,,,left,center,,,-2,0,-1,lean left
+20815,http://www.pitchfork.com,pitchfork.com,,pitchfork.com,,online_news,USA,,digital_native,67,,en,national,entertainment,,lean left,left,lean left,,-1,-2,-1,-1.333333333,lean left
+323119,http://www.indiewire.com/feed/,indiewire.com,,IndieWire,,online_news,,,,84,,en,national,entertainment,,lean left,lean left,left,,-1,-1,-2,-1.333333333,lean left
+1793073,http://x.uproxx.com/,uproxx.com,,x.uproxx.com,,online_news,,,,161,,,national,entertainment,,left,center,lean left,,-2,0,-1,-1,lean left
+151583,http://live.polygon.com/,polygon.com,,live.polygon.com,,online_news,,,,154,,,national,entertainment,,lean left,lean left,lean left,,-1,-1,-1,-1,lean left
+386565,http://cdn29.elitedaily.com/,elitedaily.com,,cdn29.elitedaily.com,,online_news,,,,48,,,national,entertainment,,left,center,lean left,,-2,0,-1,-1,lean left
+72605,http://www.ew.com,ew.com,,Entertainment Weekly,,online_news,USA,,print_native,213,,en,national,entertainment,,lean left,lean left,lean left,,-1,-1,-1,-1,lean left
+140,http://politicalwire.com,politicalwire.com,,Taegan Goddard's Political Wire,,online_news,USA,,digital_native,331,,en,national,news,,center,lean left,lean left,,0,-1,-1,-0.6666666667,lean left
+1113,http://www.harpers.org/,harpers.org,,Harper's Magazine,,online_news,USA,,print_native,0,,en,national,news,,,left,lean left,,,-2,-1,-1.5,lean left
+26363,http://www.opednews.com,opednews.com,,opednews.com,,online_news,USA,,digital_native,46,,en,national,news,,,lean left,lean left,,,-1,-1,-1,lean left
+48639,http://www.sentinelsource.com/#spider,sentinelsource.com,,sentinelsource.com,,online_news,USA,US-NH,print_native,,,en,state,news,,,,lean left,,,,-1,-1,lean left
+106678,http://inquirer.com/,inquirer.com,,Inquirer,,online_news,,,,504,,,state,news,,lean left,lean left,lean left,,-1,-1,-1,-1,lean left
+109076,http://mic.com/,mic.com,,Mic,,online_news,USA,,digital_native,15,,en,national,news,,left,lean left,lean left,,-2,-1,-1,-1.333333333,lean left
+244743,http://indiancountrytoday.com/,indiancountrytoday.com,,Indian Country Today,,online_news,USA,,print_native,58,,en,national,news-native,,,lean left,left,,,-1,-2,-1.5,lean left
+22389,http://deadspin.com,deadspin.com,,Deadspin,,online_news,USA,,digital_native,745,,en,national,sports,,,left,lean left,,,-2,-1,-1.5,lean left
+159383,http://fansided.com/,fansided.com,,fansided.com,,online_news,,,,822,,,national,sports,,,,lean left,,,,-1,-1,lean left
+21270,http://www.stripes.com,stripes.com,,Stars and Stripes,,online_news,USA,,print_native,71,,en,national,military,center,center,lean right,lean right,0,0,1,1,0.6666666667,lean right
+7,https://nypost.com,nypost.com,,nypost.com,,online_news,USA,US-NY,print_native,2287,,,state,news,lean right,lean right,center,right,1,1,0,2,1,lean right
+25,http://www.ocregister.com/,ocregister.com,,Orange County Register,,online_news,USA,US-CA,print_native,642,,en,state,news,lean right,lean right,lean right,lean right,1,1,1,1,1,lean right
+1040,http://realclearpolitics.com/,realclearpolitics.com,,RealClearPolitics,,online_news,USA,,digital_native,441,,en,national,news,lean right,lean right,lean right,right,1,1,1,2,1.333333333,lean right
+21515,http://www.foxbusiness.com,foxbusiness.com,,Fox Business,,online_news,,,,5,,en,national,business,right,lean right,lean right,,2,1,1,,1,lean right
+24747,http://www.radaronline.com,radaronline.com,,radaronline.com,,online_news,USA,,print_native,220,,en,national,entertainment,,,,lean right,,,,1,1,lean right
+4467,http://www.tmz.com,tmz.com,,TMZ.com,,online_news,,,,158,,en,national,entertainment,,lean right,center,lean right,,1,0,1,0.6666666667,lean right
+367446,http://nationalenquirer.com/,nationalenquirer.com,,nationalenquirer.com,,online_news,USA,,print_native,2,,en,national,entertainment,,,,lean right,,,,1,1,lean right
+67771,http://www.airforcetimes.com/#spider,airforcetimes.com,,Airforce Times,,online_news,USA,,print_native,43,,en,national,military,,,,lean right,,,,1,1,lean right
+70420,http://www.armytimes.com/#spider,armytimes.com,,Army Times,,online_news,USA,,print_native,43,,en,national,military,,center,lean right,lean right,,0,1,1,0.6666666667,lean right
+70638,http://www.navytimes.com/#spider,navytimes.com,,Navy Times,,online_news,USA,,print_native,43,,en,national,military,,center,lean right,lean right,,0,1,1,0.6666666667,lean right
+25180,http://www.creators.com,creators.com,,creators.com,,online_news,USA,,other,,,en,national,service,,,,lean right,,,,1,1,lean right
+19466,http://www.maxpreps.com,maxpreps.com,,maxpreps.com,,online_news,,,,,,en,national,sports,,,,lean right,,,,1,1,lean right
+147903,http://247sports.com/,247sports.com,,247sports.com,,online_news,USA,,digital_native,198,,en,national,sports,,center,lean right,lean right,,0,1,1,0.6666666667,lean right
+55476,http://www.foxsports.com/,foxsports.com,,www.foxsports.com,,online_news,,,,380,,en,national,sports,,,,lean right,,,,1,1,lean right
+20639,http://www.propublica.org/,propublica.org,,propublica.org,,online_news,USA,US-NY,digital_native,16,,en,national,news,lean left,lean left,left,left,-1,-1,-2,-2,-1.666666667,left
+20982,http://www.vanityfair.com,vanityfair.com,,Vanity Fair,,online_news,USA,,print_native,75,,en,national,news,lean left,left,lean left,left,-1,-2,-1,-2,-1.666666667,left
+24661,http://newsone.com,newsone.com,,newsone.com,,online_news,USA,US-NY,digital_native,25,,en,national,news,lean left,left,left,left,-1,-2,-2,-2,-2,left
+314,http://www.huffingtonpost.com/,huffingtonpost.com,,The Huffington Post (old domain name),This is the old domain name for the Huffington Post. Check out the HuffPost.com for another you should include if using this one.,online_news,usa,,digital_native,734,,en,national,news,lean left,left,left,lean left,-1,-2,-2,-1,-1.666666667,left
+25791,http://www.theroot.com,theroot.com,,The Root,,online_news,,,,114,,en,national,news,lean left,left,left,left,-1,-2,-2,-2,-2,left
+6154,http://jezebel.com,jezebel.com,,Jezebel,,online_news,USA,,digital_native,32,,en,national,entertainment,left,left,left,left,-2,-2,-2,-2,-2,left
+115,http://www.dailykos.com,dailykos.com,,Daily Kos,,online_news,USA,,digital_native,123,,,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+401,http://www.tnr.com/,tnr.com,,The New Republic,,online_news,USA,,print_native,142,,en,national,news,left,left,,,-2,-2,,,-2,left
+1101,http://www.newyorker.com/,newyorker.com,,newyorker.com,,online_news,USA,,print_native,118,,en,national,news,left,left,lean left,left,-2,-2,-1,-2,-1.666666667,left
+1112,http://www.motherjones.com/,motherjones.com,,Mother Jones,,online_news,USA,,print_native,47,,en,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+1008,http://www.thenation.com/,thenation.com,,thenation.com,,online_news,,,,80,,en,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+1127,http://rawstory.com,rawstory.com,,Raw Story,,online_news,USA,,digital_native,551,,,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+1757,http://www.salon.com/,salon.com,,salon.com,,online_news,USA,,digital_native,120,,,national,news,left,left,lean left,left,-2,-2,-1,-2,-1.666666667,left
+19643,http://www.slate.com/,slate.com,,slate.com,,online_news,USA,,digital_native,72,,en,national,news,left,left,lean left,left,-2,-2,-1,-2,-1.666666667,left
+22332,http://www.truth-out.org,truth-out.org,,Truthout,,online_news,USA,,digital_native,70,,en,national,news,left,left,left,,-2,-2,-2,,-2,left
+1140,http://www.alternet.org/,alternet.org,,AlterNet,,online_news,,,,241,,en,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+293951,http://www.msnbc.com/,msnbc.com,,msnbc.com,,online_news,,,,122,,en,national,news,left,left,left,left,-2,-2,-2,-2,-2,left
+323222,http://www.popmatters.com/feeds,popmatters.com,,http://www.popmatters.com/feeds/,,online_news,,,,23,,en,national,entertainment,,,,left,,,,-2,-2,left
+88260,http://eater.com/#spider,eater.com,,eater.com,,online_news,,,,27,,en,national,entertainment,,,,left,,,,-2,-2,left
+113,http://www.talkingpointsmemo.com,talkingpointsmemo.com,,Talking Points Memo,,online_news,USA,,digital_native,42,,,national,news,,left,left,left,,-2,-2,-2,-2,left
+24581,http://colorlines.com,colorlines.com,,colorlines.com,,online_news,USA,,digital_native,4,,en,national,news,,,left,left,,,-2,-2,-2,left
+25363,http://www.nationalmemo.com,nationalmemo.com,,National Memo,,online_news,USA,,digital_native,30,,en,national,news,,left,left,left,,-2,-2,-2,-2,left
+31137,http://therealnews.com#spider,therealnews.com,,TheRealNews.com,,online_news,USA,,digital_native,7,,en,national,news,,,left,left,,,-2,-2,-2,left
+113747,http://recorder.com/,recorder.com,,recorder.com,,online_news,USA,US-MA,print_native,124,,en,state,news,,,,left,,,,-2,-2,left
+19317,https://news.mongabay.com/,mongabay.com,,Mongabay,,online_news,USA,,digital_native,40,,en,national,technology,,,,left,,,,-2,-2,left
+1117,http://www.nationalreview.com/,nationalreview.com,,nationalreview.com,,online_news,USA,,print_native,46,,en,national,news,lean right,right,right,right,1,2,2,2,2,right
+128,http://www.redstate.com,redstate.com,,RedState,,online_news,USA,,digital_native,237,,en,national,news,right,right,right,right,2,2,2,2,2,right
+1092,https://foxnews.com,foxnews.com,,foxnews.com,,online_news,USA,US-NY,video_broadcast,980,,,national,news,right,right,lean right,right,2,2,1,2,1.666666667,right
+18775,https://dailycaller.com/,dailycaller.com,,dailycaller.com,,online_news,USA,,digital_native,365,,,national,news,right,right,right,right,2,2,2,2,2,right
+19082,http://pjmedia.com,pjmedia.com,,PJ Media,,online_news,USA,,digital_native,137,,en,national,news,right,right,right,right,2,2,2,2,2,right
+19334,https://breitbart.com,breitbart.com,,breitbart.com,,online_news,USA,,digital_native,733,,,national,news,right,right,right,right,2,2,2,2,2,right
+19763,http://townhall.com,townhall.com,,townhall.com,,online_news,USA,,digital_native,319,,en,national,news,right,right,right,right,2,2,2,2,2,right
+21919,http://spectator.org,spectator.org,,American Spectator,,online_news,USA,,print_native,67,,en,national,news,right,right,right,right,2,2,2,2,2,right
+22088,http://www.theblaze.com/,theblaze.com,,theblaze.com,,online_news,USA,,digital_native,224,,,national,news,right,right,right,right,2,2,2,2,2,right
+23290,http://www.ncregister.com,ncregister.com,,National Catholic Register,,online_news,USA,,print_native,100,,en,national,news,right,right,,right,2,2,,2,2,right
+25349,http://newsmax.com,newsmax.com,,newsmax.com,,online_news,USA,,digital_native,,,,national,news,right,right,right,right,2,2,2,2,2,right
+25626,http://patriotpost.us,patriotpost.us,,patriot post,,online_news,USA,,digital_native,45,,en,national,news,right,right,right,right,2,2,2,2,2,right
+127733,http://oann.com/,oann.com,,Oan,,online_news,USA,US-CA,digital_native,136,,en,national,news,right,right,right,right,2,2,2,2,2,right
+20357,http://cnsnews.com,cnsnews.com,,CNS News,,online_news,USA,,digital_native,0,,en,national,service,right,right,right,right,2,2,2,2,2,right
+1125,http://newsbusters.org,newsbusters.org,,NewsBusters,,online_news,USA,,digital_native,94,,en,national,service,right,right,right,right,2,2,2,2,2,right
+27011,http://www.investors.com,investors.com,,Investors,,online_news,USA,US-CA,print_native,339,,en,national,business,,,right,right,,,2,2,2,right
+117,http://hotair.com,hotair.com,,Hot Air,,online_news,USA,,digital_native,112,,en,national,news,,lean right,right,right,,1,2,2,1.666666667,right
+136666,http://shop.americanfreepress.net/,americanfreepress.net,,shop.americanfreepress.net,,online_news,,,,2,,,national,news,,,,right,,,,2,2,right
+366790,http://dailysignal.com/,dailysignal.com,,dailysignal.com,,online_news,,,,113,,,national,news,,,right,right,,,2,2,2,right
+143374,http://redherring.com/,redherring.com,,Red Herring,,online_news,USA,,print_native,0,,en,global,business,,,,,,,,,unknown,unknown
+86512,http://www.x17online.com/#spider,x17online.com,,x17online.com,,online_news,USA,,digital_native,0,,en,national,entertainment,,,,,,,,,unknown,unknown
+413473,http://hollywoodweeklymagazine.com/,hollywoodweeklymagazine.com,,hollywoodweekly,,online_news,USA,,print_native,1,,,national,entertainment,,,,,,,,,unknown,unknown
+79587,http://www.marinetimes.com/#spider,marinetimes.com,,marinetimes.com,,online_news,USA,,print_native,13,,en,national,military,,,,,,,,,unknown,unknown
+24652,http://www.opposingviews.com,opposingviews.com,,opposingviews.com,,online_news,USA,,digital_native,29,,en,national,news,,,,,,,,,unknown,unknown
+28248,http://pressrepublican.com/,pressrepublican.com,,Press-Republican,,online_news,USA,US-NY,print_native,92,,,state,news,,,,,,,,,unknown,unknown
+226,http://newsblaze.com,newsblaze.com,,News Blaze,,online_news,,,,18,,en,national,news,,,,,,,,,unknown,unknown
+77578,http://www.nhgazette.com/#spider,nhgazette.com,,nhgazette.com,,online_news,USA,US-NH,print_native,10,,en,state,news,,,,,,,,,unknown,unknown
+588414,http://hudsonvalley360.com/,hudsonvalley360.com,,hudsonvalley360.com,,online_news,,,,,,,state,news,,,,,,,,,unknown,unknown
+104377,http://www.contactomagazine.com,contactomagazine.com,,Contacto,,online_news,USA,,print_native,,,es,state,news,,,,,,,,,unknown,unknown
+125751,http://axcessnews.com/,axcessnews.com,,AxcessNews,,online_news,USA,,digital_native,3,,en,national,news,,,,,,,,,unknown,unknown
+300241,http://www.dailysource.org/,dailysource.org,,Daily Source,,online_news,USA,,digital_native,40,,en,global,news,,,,,,,,,unknown,unknown
+300516,http://www.schwartzreport.net/,schwartzreport.net,,Schwartzreport,,online_news,USA,,digital_native,29,,en,national,news,,,,,,,,,unknown,unknown
+255385,http://indiancountrynews.com/,indiancountrynews.com,,indiancountrynews.com,,online_news,,,,,,en,national,news-native,,,,,,,,,unknown,unknown
+19452,http://www.lexisnexis.com,lexisnexis.com,,lexisnexis.com,,online_news,,,,18,,,national,service,,,,,,,,,unknown,unknown
+111877,http://thepostgame.com/,thepostgame.com,,The PostGame,,online_news,USA,,digital_native,2,,en,national,sports,,,,,,,,,unknown,unknown
+278480,http://scout.com/,scout.com,,Scout,,online_news,USA,,digital_native,,,en,national,sports,,,,,,,,,unknown,unknown
+300477,http://www.polamjournal.com/,polamjournal.com,,Polish American Journal,,online_news,USA,,print_native,,,en,,news-polish,,,,,,,,,unknown,unknown
+324726,http://antena305.com/,antena305.com,,antena305.com,,online_news,USA,,digital_native,0,,es,national,news-hispanic,,,,,,,,,unknown,unknown

@@ -2,9 +2,9 @@
 	let { data, filters = $bindable() } = $props();
 
 	const topics = new Set(data.map((d) => d.topic));
-	const publishers = new Set(data.map((d) => d.media_name));
+	const publications = new Set(data.map((d) => d.media_name));
 	const allTopics = ["All", ...topics];
-	const allPublishers = ["All", ...publishers];
+	const allPublications = ["All", ...publications];
 
 	// Create derived values for the date input strings
 	const dateRangeStartString = $derived(
@@ -46,10 +46,10 @@
 
     <div class="filter-control">
         <div class="input-wrapper">
-			<label for="publishers-select">Publisher</label>
-			<select id="publishers-select" class="filter-control__input" bind:value={filters.publisher}>
-				{#each allPublishers as publisher}
-					<option value={publisher}>{publisher}</option>
+			<label for="publications-select">Publication</label>
+			<select id="publications-select" class="filter-control__input" bind:value={filters.publication}>
+				{#each allPublications as publication}
+					<option value={publication}>{publication}</option>
 				{/each}
 			</select>
 		</div>

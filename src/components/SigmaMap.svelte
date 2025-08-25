@@ -196,8 +196,14 @@
 
 		graph.forEachNode((node) => {
 			graph.setNodeAttribute(node, "hidden", !visibleNodeIds.has(node));
-			
-			// Update node colors based on topic filter
+		});
+	});
+
+	// Separate effect for topic-based color changes
+	$effect(() => {
+		if (!graph || !sigmaInstance) return;
+
+		graph.forEachNode((node) => {
 			const nodeData = allData.find(d => d.id === node);
 			if (nodeData) {
 				if (filters.topic === "All") {
@@ -213,8 +219,6 @@
 				}
 			}
 		});
-
-		// sigmaInstance.getCamera().animatedReset({ duration: 600 });
 	});
 
 	function getClusterColor(cluster) {
