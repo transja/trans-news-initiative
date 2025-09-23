@@ -1,4 +1,5 @@
 <script>
+	import { browser } from "$app/environment";
 	import tniLogo from "$svg/logos/TNI_static.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
@@ -9,18 +10,29 @@
 		activePage.page = btn;
 	}
 
+	let headerHeight = 0;
+
+	$effect(() => {
+		if (browser) {
+			document.documentElement.style.setProperty(
+				"--header-height",
+				`${headerHeight}px`
+			);
+		}
+	});
+
 	// $effect(() => {
 	// 	console.log(activePage.page)
 	// });
 </script>
 
-<header>
+<header bind:clientHeight={headerHeight}>
 	<div class="logo">
 		{@html tniLogo}
 	</div>
 	<nav>
 		{#each pages as btn, i}
-			<button 
+			<button
 				class:active={activePage.page == btn}
 				onclick={() => handlePageClick(btn)}
 			>
@@ -40,8 +52,9 @@
 		align-items: center;
 		justify-content: space-between;
 		z-index: 1000;
-		background: rgba(255,255,255,0.95);
+		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
+		top: 0;
 	}
 
 	.logo {
@@ -74,7 +87,8 @@
 		transition: width 0.25s linear;
 	}
 
-	button.active::after, button:hover::after {
+	button.active::after,
+	button:hover::after {
 		width: 100%;
 	}
 

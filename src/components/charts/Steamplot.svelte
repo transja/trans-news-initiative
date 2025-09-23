@@ -1,0 +1,556 @@
+<script>
+	import {
+		stack,
+		area,
+		stackOffsetWiggle,
+		stackOrderInsideOut,
+		curveBasis,
+		stackOffsetNone
+	} from "d3-shape";
+	import { scaleTime, scaleLinear } from "d3-scale";
+	import { extent, max, min, bisector } from "d3-array";
+	import { timeMonth, timeMonths } from "d3-time";
+	import { fade } from "svelte/transition";
+	import { cubicInOut } from "svelte/easing";
+
+	import Brush from "./Brush.svelte";
+
+	let {
+		data = [],
+		themes = [],
+		height = "0px",
+		highlightedContent = $bindable(),
+		activeTheme = $bindable(),
+		inThemeView = $bindable(),
+		transitionDuration = 500,
+		filters = $bindable(),
+		colors = [],
+		dateExtent = [],
+		contentOptions = [],
+		mode = "default",
+		isHoveringOverPlot = $bindable()
+	} = $props();
+
+	let container;
+	let width = $state(0);
+
+	const numericHeight = $derived(parseInt(height, 10) || 0);
+
+	const marginTop = 0;
+	const marginRight = 0;
+	const marginBottom = $derived(inThemeView ? 25 : 0);
+	const marginLeft = 0;
+
+	let startPercent = $state(0);
+	let endPercent = $state(100);
+
+	// State for inter-theme transitions
+	let themeForAreaChart = $state(inThemeView ? activeTheme : null);
+	let isMorphingToFlat = $state(false);
+
+	$effect(() => {
+		if (inThemeView) {
+			// We are in theme view.
+			if (themeForAreaChart === null) {
+				// This is the Main -> Theme transition.
+				themeForAreaChart = activeTheme;
+				isMorphingToFlat = false;
+			} else if (activeTheme !== themeForAreaChart) {
+				// This is Theme A -> Theme B.
+				isMorphingToFlat = true;
+				const timer = setTimeout(() => {
+					themeForAreaChart = activeTheme;
+					isMorphingToFlat = false;
+				}, transitionDuration);
+				return () => clearTimeout(timer);
+			}
+		} else {
+			// We are not in theme view. Reset the area chart theme.
+			themeForAreaChart = null;
+		}
+	});
+
+	// New state to control the timing of the highlight outline
+	let showHighlight = $state(!inThemeView);
+	$effect(() => {
+		let timer;
+		if (inThemeView) {
+			showHighlight = false; // Hide immediately on enter
+		} else {
+			// On exit, wait for the main morph animation to finish before showing the highlight
+			timer = setTimeout(() => {
+				showHighlight = true;
+			}, transitionDuration);
+		}
+		return () => clearTimeout(timer);
+	});
+
+	// State to differentiate view transitions from hover effects
+	let isViewTransitioning = $state(false);
+	let prevInThemeView = $state(inThemeView);
+
+	$effect(() => {
+		if (inThemeView !== prevInThemeView) {
+			isViewTransitioning = true;
+
+			// The flag should remain true for the duration of the exit animation,
+			// which includes the steamplot morphing and the highlight's fade-in.
+			const timer = setTimeout(
+				() => {
+					isViewTransitioning = false;
+					console.log("HERE")
+				},
+				transitionDuration * 2.5 + 50
+			); // Add a small buffer
+
+			prevInThemeView = inThemeView;
+			return () => clearTimeout(timer);
+		}
+
+		if (!inThemeView) {
+			isViewTransitioning = false;
+		}
+	});
+
+	$effect(() => {
+		if (!container) return;
+		const resizeObserver = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				width = entry.contentRect.width;
+				// heightVal = entry.contentRect.height; // This line is removed as per the edit hint
+			}
+		});
+		resizeObserver.observe(container);
+		return () => resizeObserver.disconnect();
+	});
+
+	// --- Reactive Data Pipeline ---
+
+	function getProcessedData(rawData) {
+		const uniqueKeys = new Set();
+		return rawData
+			.flatMap((d) => {
+				const date = new Date(d.publish_date);
+				return d.themes.map((theme) => ({
+					...d,
+					publish_date: date,
+					theme: theme.trim()
+				}));
+			})
+			.filter((d) => {
+				if (
+					!d.theme ||
+					!d.publish_date ||
+					isNaN(d.publish_date.valueOf()) ||
+					!d.title
+				) {
+					return false;
+				}
+				const key = `${d.publish_date.toISOString()}|${d.theme}|${d.title}`;
+				if (uniqueKeys.has(key)) {
+					return false;
+				}
+				uniqueKeys.add(key);
+				return true;
+			});
+	}
+
+	const processedData = $derived(getProcessedData(data));
+
+	const binnedData = $derived.by(() => {
+		if (!dateExtent || !dateExtent[0] || !themes.length) return [];
+
+		const startOfMonth = timeMonth.floor(dateExtent[0]);
+		const endOfMonth = timeMonth.offset(dateExtent[1], 1);
+		const bins = timeMonths(startOfMonth, endOfMonth);
+
+		const binned = bins.map((date) => {
+			const obj = { date };
+			themes.forEach((theme) => {
+				obj[theme] = 0;
+			});
+			return obj;
+		});
+
+		processedData.forEach((d) => {
+			const binIndex = bins.findIndex(
+				(binDate, i) =>
+					d.publish_date >= binDate &&
+					(bins[i + 1] ? d.publish_date < bins[i + 1] : true)
+			);
+			if (binIndex !== -1) {
+				binned[binIndex][d.theme]++;
+			}
+		});
+		return binned;
+	});
+
+	const steamSeries = $derived.by(() => {
+		if (!binnedData.length) return [];
+		const stackGenerator = stack()
+			.keys(themes)
+			.order(stackOrderInsideOut)
+			.offset(stackOffsetWiggle);
+		return stackGenerator(binnedData);
+	});
+
+	const areaSeries = $derived.by(() => {
+		if (!binnedData.length || !themeForAreaChart) return [];
+		const stackGenerator = stack()
+			.keys([themeForAreaChart]) // Use themeForAreaChart for data consistency
+			.order(stackOrderInsideOut)
+			.offset(stackOffsetNone); // Zero baseline
+		return stackGenerator(binnedData);
+	});
+
+	const xScale = $derived(
+		scaleTime()
+			.domain(dateExtent || [new Date(), new Date()])
+			.range([0, width - marginLeft - marginRight])
+	);
+
+	const unifiedYScale = $derived.by(() => {
+		if (
+			(inThemeView && !areaSeries.length) ||
+			(!inThemeView && !steamSeries.length)
+		) {
+			return scaleLinear();
+		}
+
+		let yMin, yMax;
+
+		if (inThemeView) {
+			// In theme view, scale is based on the active theme's data (areaSeries)
+			yMin = 0; // Area chart starts at 0 baseline
+			yMax = max(areaSeries[0], (d) => d[1]);
+		} else {
+			// In steamgraph view, scale is based on all themes
+			yMax = max(steamSeries, (s) => max(s, (d) => d[1]));
+			yMin = min(steamSeries, (s) => min(s, (d) => d[0]));
+		}
+
+		// Ensure yMax is not 0 to avoid a flat scale
+		if (yMax === 0) yMax = 1;
+
+		return scaleLinear()
+			.domain([yMin, yMax])
+			.range([numericHeight - marginTop - marginBottom, 0]);
+	});
+
+	$effect(() => {
+		if (!dateExtent || !filters.dateRange) return;
+
+		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+		if (range === 0) {
+			startPercent = 0;
+			endPercent = 100;
+			return;
+		}
+
+		startPercent =
+			((filters.dateRange.start.getTime() - dateExtent[0].getTime()) / range) *
+			100;
+		endPercent =
+			((filters.dateRange.end.getTime() - dateExtent[0].getTime()) / range) *
+			100;
+	});
+
+	$effect(() => {
+		if (!dateExtent) return;
+
+		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+
+		const startDate = new Date(
+			dateExtent[0].getTime() + (startPercent / 100) * range
+		);
+		const endDate = new Date(
+			dateExtent[0].getTime() + (endPercent / 100) * range
+		);
+
+		// to avoid infinite loops, only update if the dates have changed
+		if (
+			filters.dateRange.start.getTime() !== startDate.getTime() ||
+			filters.dateRange.end.getTime() !== endDate.getTime()
+		) {
+			filters.dateRange = {
+				start: startDate,
+				end: endDate
+			};
+		}
+	});
+
+	const yearLabels = $derived.by(() => {
+		if (!dateExtent || !dateExtent[0] || !binnedData.length) return [];
+
+		const labels = [];
+		const bisectDate = bisector((d) => d.date).left;
+		const startYear = dateExtent[0].getFullYear();
+		const endYear = dateExtent[1].getFullYear();
+
+		const yPosition = inThemeView
+			? numericHeight - marginTop - marginBottom + 15 // Position near bottom for area chart
+			: (numericHeight - marginTop - marginBottom) / 2 + 15; // Centered for steamgraph
+
+		for (let year = startYear; year <= endYear; year++) {
+			const yearStartDate = new Date(year, 0, 1);
+			const yearEndDate = new Date(year + 1, 0, 1);
+			const searchStart =
+				yearStartDate > dateExtent[0] ? yearStartDate : dateExtent[0];
+			const searchEnd =
+				yearEndDate < dateExtent[1] ? yearEndDate : dateExtent[1];
+
+			if (searchStart >= searchEnd) continue;
+
+			const midDate = new Date(
+				(searchStart.getTime() + searchEnd.getTime()) / 2
+			);
+			const dataIndex = bisectDate(binnedData, midDate, 1);
+			const d0 = binnedData[dataIndex - 1];
+			const d1 = binnedData[dataIndex];
+
+			if (!d0 || !d1) continue;
+
+			const dataPoint = midDate - d0.date > d1.date - midDate ? d1 : d0;
+			labels.push({
+				year: year,
+				x: xScale(dataPoint.date),
+				y: yPosition
+			});
+		}
+		return labels;
+	});
+
+	const steamAreaGenerator = $derived(
+		area()
+			.x((d) => xScale(d.data.date))
+			.y0((d) => unifiedYScale(d[0]))
+			.y1((d) => unifiedYScale(d[1]))
+			.curve(curveBasis)
+	);
+
+	const areaAreaGenerator = $derived(
+		area()
+			.x((d) => xScale(d.data.date))
+			.y0((d) => unifiedYScale(d[0]))
+			.y1((d) => unifiedYScale(d[1]))
+			.curve(curveBasis)
+	);
+
+	const flattenedAreaGenerator = $derived(
+		area()
+			.x((d) => xScale(d.data.date))
+			.y0(numericHeight - marginBottom)
+			.y1(numericHeight - marginBottom)
+			.curve(curveBasis)
+	);
+
+	const seriesToHighlight = $derived.by(() => {
+		const themeToHighlight = highlightedContent?.theme;
+		if (!steamSeries.length || !themeToHighlight) return null;
+		return steamSeries.find((s) => s.key === themeToHighlight);
+	});
+
+	function handlePathClick(theme) {
+		if (inThemeView) return;
+		if (contentOptions.length > 0) {
+			highlightedContent = contentOptions[0];
+		}
+		activeTheme = theme;
+		highlightedContent = contentOptions.find((c) => c.theme === theme);
+		isHoveringOverPlot = false;
+		inThemeView = true;
+	}
+
+	function handlePathMousemove(theme) {
+		if (inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
+			return;
+		highlightedContent = contentOptions.find((c) => c.theme === theme);
+		isHoveringOverPlot = true;
+	}
+
+	function handlePathMouseleave(theme) {
+		if (inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
+			return;
+		highlightedContent = contentOptions[0];
+		isHoveringOverPlot = false;
+	}
+
+	function handleOutsideClick() {
+		if (inThemeView) return;
+		highlightedContent = contentOptions[0];
+	}
+
+
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div
+	class="steamplot-container"
+	bind:this={container}
+	style:--height={height}
+	style:--duration="{transitionDuration}ms"
+	class:interactive={mode === "default"}
+	class:in-theme-view={inThemeView}
+	onclick={(event) => {
+		event.stopPropagation();
+		handleOutsideClick();
+	}}
+>
+	{#if inThemeView}
+		<Brush
+			bind:startPercent
+			bind:endPercent
+			startDate={filters.dateRange.start}
+			endDate={filters.dateRange.end}
+		/>
+	{/if}
+
+	{#if width && numericHeight}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<svg {width} height={numericHeight}>
+			<defs>
+				<linearGradient id="steam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+					{#if colors.length > 0}
+						{#each colors as color, i}
+							<stop
+								offset={colors.length === 1
+									? "50%"
+									: `${(i / (colors.length - 1)) * 100}%`}
+								stop-color={color}
+							/>
+						{/each}
+					{:else}
+						<stop offset="0%" stop-color="#a8d8f0" />
+						<stop offset="50%" stop-color="#c8b4e2" />
+						<stop offset="100%" stop-color="#f3c2d7" />
+					{/if}
+				</linearGradient>
+			</defs>
+			<g transform={`translate(${marginLeft}, ${marginTop})`}>
+				{#each steamSeries as s}
+					<g style="transition: transform 0.5s ease-in-out;">
+						<path
+							d={inThemeView && areaSeries.length
+								? isMorphingToFlat
+									? flattenedAreaGenerator(areaSeries[0])
+									: areaAreaGenerator(areaSeries[0])
+								: steamAreaGenerator(s)}
+							fill="url(#steam-gradient)"
+							stroke="white"
+							stroke-width="1.5px"
+							opacity={inThemeView
+								? s.key === themeForAreaChart
+									? 1
+									: 0
+								: highlightedContent?.theme
+									? s.key === highlightedContent.theme
+										? 1
+										: 0.7
+									: 1}
+							style="
+								transition-property: d, opacity;
+								transition-duration: {transitionDuration}ms, {inThemeView || mode === 'intro'
+								? transitionDuration / 2
+								: 0}ms;
+								transition-timing-function: ease-in-out, ease-in-out;
+							"
+							onclick={(event) => {
+								event.stopPropagation();
+								handlePathClick(s.key);
+							}}
+							onmousemove={(event) => {
+								event.stopPropagation();
+								handlePathMousemove(s.key);
+							}}
+							onmouseleave={(event) => {
+								event.stopPropagation();
+								handlePathMouseleave(s.key);
+							}}
+						/>
+					</g>
+				{/each}
+
+				{#if !inThemeView && seriesToHighlight}
+					<path
+						d={steamAreaGenerator(seriesToHighlight)}
+						fill="none"
+						stroke="black"
+						stroke-width="2px"
+						pointer-events="none"
+						out:fade={{
+							duration: mode === "intro" ? transitionDuration / 2 : 0
+						}}
+						in:fade={{
+							duration:
+								mode === "intro" || isViewTransitioning
+									? transitionDuration / 2
+									: 0,
+							delay: isViewTransitioning ? transitionDuration * 2 : 0
+						}}
+					/>
+				{/if}
+
+				{#each yearLabels as label}
+					<g
+						transform={`translate(${label.x}, ${label.y})`}
+						style="transition: transform 0.5s ease-in-out;"
+					>
+						<text
+							fill="black"
+							text-anchor="middle"
+							dominant-baseline="middle"
+							font-size="12px"
+							font-weight="600"
+							font-family="sans-serif"
+							stroke-width="4px"
+							stroke="white"
+							paint-order="stroke"
+						>
+							{label.year}
+						</text>
+					</g>
+				{/each}
+			</g>
+			<!-- <circle cx={xScale(new Date("2025-06-01"))} cy="60%" r="5px" fill="red" /> -->
+		</svg>
+	{/if}
+</div>
+
+<style lang="scss">
+	.steamplot-container {
+		width: 100%;
+		height: var(--height);
+		position: relative;
+		transition:
+			height var(--duration) ease-in-out,
+			background-color 300ms ease-in-out;
+		pointer-events: none;
+		background-color: transparent;
+
+		&.interactive {
+			pointer-events: auto;
+		}
+
+		&.in-theme-view {
+			position: sticky;
+			bottom: 100px;
+			background-color: white;
+		}
+	}
+	svg {
+		font-family: sans-serif;
+		height: 100%;
+		display: block;
+		width: 100%;
+
+		text {
+			pointer-events: none;
+		}
+
+		path {
+			cursor: pointer;
+		}
+	}
+</style>
