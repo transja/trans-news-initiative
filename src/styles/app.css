@@ -76,11 +76,11 @@ h6 {
 	font-size: var(--20px, 20px);
 }
 
-svg {
+/* svg {
 	display: block;
 	width: 100%;
 	height: auto;
-}
+} */
 
 #transGradient {
 	--color-stop-0: #5bcefa;

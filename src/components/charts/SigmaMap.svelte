@@ -1,8 +1,14 @@
 <script>
 	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
+	import { polygonHull } from "d3-polygon";
 
-	const { allData = [], visibleData = [], height = "100vh", filters } = $props();
+	const {
+		allData = [],
+		visibleData = [],
+		height = "100vh",
+		filters
+	} = $props();
 
 	let container;
 	let sigmaInstance;
@@ -42,6 +48,48 @@
 			});
 		});
 
+		const nodesByCluster = new Map();
+		allData.forEach((item) => {
+			if (item.cluster && item.cluster !== "-1") {
+				if (!nodesByCluster.has(item.cluster)) {
+					nodesByCluster.set(item.cluster, []);
+				}
+				nodesByCluster.get(item.cluster).push(item);
+			}
+		});
+
+		let minX = Infinity,
+			maxX = -Infinity,
+			minY = Infinity,
+			maxY = -Infinity;
+		allData.forEach((item) => {
+			minX = Math.min(minX, item.UMAP1);
+			maxX = Math.max(maxX, item.UMAP1);
+			minY = Math.min(minY, item.UMAP2);
+			maxY = Math.max(maxY, item.UMAP2);
+		});
+
+		const range = Math.max(maxX - minX, maxY - minY);
+		const threshold = range * 0.035;
+
+		nodesByCluster.forEach((nodes) => {
+			for (let i = 0; i < nodes.length; i++) {
+				for (let j = i + 1; j < nodes.length; j++) {
+					const a = nodes[i];
+					const b = nodes[j];
+					const dist = Math.sqrt(
+						Math.pow(a.UMAP1 - b.UMAP1, 2) + Math.pow(a.UMAP2 - b.UMAP2, 2)
+					);
+					if (dist < threshold) {
+						graph.addEdge(a.id, b.id, {
+							size: 0.3,
+							color: "#e2e8f0"
+						});
+					}
+				}
+			}
+		});
+
 		sigmaInstance = new Sigma(graph, container, {
 			renderEdgeLabels: false,
 			renderNodeLabels: false,
@@ -75,7 +123,7 @@
 		};
 		sigmaInstance.getContainer().addEventListener("mousemove", moveListener);
 
-		// -- Cluster labels --
+		// -- Cluster calculations --
 		// 1. Create a map to store cluster data
 		const clusters = new Map();
 		allData.forEach((item) => {
@@ -103,7 +151,30 @@
 			data.y = center.y / data.positions.length;
 		});
 
-		// 3. Create the HTML layer for labels
+		// 3. For each cluster, compute the convex hull
+		clusters.forEach((data) => {
+			if (data.positions.length < 3) return;
+			const points = data.positions.map((p) => [p.x, p.y]);
+			data.hull = polygonHull(points);
+		});
+
+		// -- HTML Layers --
+		// Hulls
+		const hullsLayer = document.createElementNS(
+			"http://www.w3.org/2000/svg",
+			"svg"
+		);
+		hullsLayer.setAttribute("class", "hulls-layer");
+		container.insertBefore(hullsLayer, container.firstChild);
+
+		let hullDoms = "";
+		clusters.forEach((data, clusterId) => {
+			if (!data.hull) return;
+			hullDoms += `<path class="cluster-hull" id="cluster-hull-${clusterId}" />`;
+		});
+		hullsLayer.innerHTML = hullDoms;
+
+		// Labels
 		const clustersLayer = document.createElement("div");
 		clustersLayer.className = "clusters-layer";
 
@@ -126,6 +197,19 @@
 		const renderListener = () => {
 			const visibleClusters = new Set(visibleData.map((d) => d.cluster));
 			const shownLabelBBoxes = [];
+
+			// Hide all labels and hulls initially
+			clusters.forEach((_, clusterId) => {
+				const labelEl = document.getElementById(`cluster-label-${clusterId}`);
+				if (labelEl) labelEl.style.display = "none";
+
+				const hullEl = document.getElementById(`cluster-hull-${clusterId}`);
+				if (hullEl) hullEl.style.display = "none";
+			});
+
+			// Update hulls layer
+			hullsLayer.setAttribute("width", `${container.offsetWidth}px`);
+			hullsLayer.setAttribute("height", `${container.offsetHeight}px`);
 
 			// Sort potentially visible clusters by size (descending)
 			const sortedVisibleClusters = Array.from(clusters.entries())
@@ -175,6 +259,19 @@
 				} else {
 					shownLabelBBoxes.push(bbox); // Otherwise, keep it and record its bbox
 				}
+
+				// Update hull paths
+				const hullEl = document.getElementById(`cluster-hull-${clusterId}`);
+				if (hullEl && data.hull) {
+					const points = data.hull.map((p) =>
+						sigmaInstance.graphToViewport({ x: p[0], y: p[1] })
+					);
+					hullEl.setAttribute(
+						"d",
+						`M${points.map((p) => `${p.x},${p.y}`).join("L")}Z`
+					);
+					hullEl.style.display = "block";
+				}
 			});
 		};
 		sigmaInstance.on("afterRender", renderListener);
@@ -186,6 +283,7 @@
 			sigmaInstance.removeListener("afterRender", renderListener);
 			sigmaInstance?.kill();
 			clustersLayer.remove();
+			hullsLayer.remove();
 		};
 	});
 
@@ -204,11 +302,15 @@
 		if (!graph || !sigmaInstance) return;
 
 		graph.forEachNode((node) => {
-			const nodeData = allData.find(d => d.id === node);
+			const nodeData = allData.find((d) => d.id === node);
 			if (nodeData) {
 				if (filters.topic === "All") {
 					// Use original cluster colors
-					graph.setNodeAttribute(node, "color", getClusterColor(nodeData.cluster));
+					graph.setNodeAttribute(
+						node,
+						"color",
+						getClusterColor(nodeData.cluster)
+					);
 				} else {
 					// If topic is selected, make matching nodes orange, others gray
 					if (nodeData.topic === filters.topic) {
@@ -291,6 +393,29 @@
 		top: 0;
 		left: 0;
 		pointer-events: none;
+	}
+
+	:global(.hulls-layer) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1000;
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	:global(.cluster-hull) {
+		fill: rgba(128, 128, 128, 0);
+		/* stroke: rgba(128, 128, 128, 0.2); */
+		/* stroke-width: 35px; */
+		stroke-linejoin: round;
+		stroke-linecap: round;
+	}
+
+	:global(.cluster-hull:hover) {
+		fill: rgba(128, 128, 128, 0.5);
 	}
 
 	:global(.cluster-label) {

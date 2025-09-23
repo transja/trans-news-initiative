@@ -1,31 +1,24 @@
 <script>
-	import useWindowDimensions from "$runes/useWindowDimensions.svelte.js";
-
-	import csvdata from "../../data/articles_with_themes.csv";
+	import { onMount } from "svelte";
+	import { debounce } from "$utils/debounce.js";
 
 	// components
-	import ClusterSection from "../../components/cluster/ClusterSection.svelte";
-	import SummarySection from "../../components/summary/SummarySection.svelte";
+	import Dashboard from "$components/Dashboard.svelte";
+	import Controls from "$components/Controls.svelte";
+	import Header from "$components/Header.svelte";
+	import ThemeSection from "$components/ThemeSection.svelte";
 
-	// Process data and filter for top 15 largest clusters
+	import csvdata from "../../data/old_articles_with_themes.csv";
+	import leanData from "../../data/lean.csv";
+
 	const processedData = csvdata
-		.filter((item) => item.publish_date > "2020-01-01")
-		.map((item, index) => ({
+		.map((item) => ({
 			...item,
-			id: index.toString(),
-			UMAP1: Number(item.UMAP1),
-			UMAP2: Number(item.UMAP2)
+			themes: item.topics.split(",")?.map((t) => t.trim()) || [],
+			lean:
+				leanData.find((d) => d.domain === item.media_name)?.aggLean || "unknown"
 		}))
-		.filter((item) => item.cluster != "-1")
-		.filter((item) => !isNaN(item.UMAP1) && !isNaN(item.UMAP2));
-
-	// Share/download handlers
-	function handleShare() {
-		console.log("Share this chart clicked");
-	}
-	function handleDownload() {
-		console.log("Download the data clicked");
-	}
+		.filter((item) => item.cluster != "-1");
 
 	const allDates = processedData.map((d) => d.publish_date).filter(Boolean);
 
@@ -36,19 +29,234 @@
 	const maxDate = allDates.length
 		? new Date(Math.max(...allDates.map((d) => new Date(d))))
 		: new Date();
+
+	let activeTheme = $state(null);
+	let inThemeView = $state(false);
+	let introFinished = $state(false);
+
+	const transitionDuration = 500;
+
+	const vizColors = ["#7CDEE0", "#E5BDF5"];
+	
+	const leanColors = {
+		left: "#17414C",
+		"lean left": "#378EA5",
+		center: "#efefef",
+		"lean right": "#F598B0",
+		right: "#F41E56",
+		unknown: "#E6E6E6"
+	};
+
+	let filters = $state({
+		topic: "All",
+		publication: "All",
+		publicationLean: "All",
+		dateRange: {
+			start: minDate,
+			end: maxDate
+		}
+	});
+
+	$effect(() => {
+		if (!activeTheme && !inThemeView) {
+			filters = {
+				topic: "All",
+				publication: "All",
+				publicationLean: "All",
+				dateRange: {
+					start: minDate,
+					end: maxDate
+				}
+			};
+		}
+	});
+
+	const themes = [...new Set(processedData.map((d) => d.themes).flat())].sort();
+	const themeMap = {
+		healthcare: "health care and bodily autonomy",
+		freeSpeech: "censorship and free speech",
+		activism: "resilience and resistance",
+		identity: "trans and nonbinary identity",
+		children: "parental rights and trans youth",
+		bigotry: "anti-trans violence and hate",
+		publicSpace: "access to public goods and spaces",
+		sports: "trans people in sports",
+		statePolicy: "state level measures",
+		federalPolicy: "federal level measures",
+		internationalPolicy: "international measures",
+		popCulture: "pop culture and creativity",
+		cultureWars: "culture wars, ideology, and religion"
+	};
+
+	const summaryContent = $derived.by(() => {
+		const allArticles = {
+			title: `trans issues`,
+			count: processedData.length,
+			theme: null
+		};
+
+		const themeArticles = themes.map((theme) => ({
+			title: themeMap[theme] || theme,
+			count: processedData.filter((d) => d.themes.includes(theme)).length,
+			theme: theme
+		}));
+
+		return [allArticles, ...themeArticles];
+	});
+
+	let highlightedContent = $state(summaryContent[0]);
+	let isHoveringOverPlot = $state(false);
+
+	$effect(() => {
+		if (introFinished) return;
+		const interval = setInterval(() => {
+			const currentIndex = summaryContent.findIndex(
+				(d) => d.title === highlightedContent.title
+			);
+			const nextIndex = (currentIndex + 1) % summaryContent.length;
+			highlightedContent = summaryContent[nextIndex];
+		}, 2000);
+
+		return () => {
+			clearInterval(interval);
+		};
+	});
+
+	onMount(() => {
+		const handleFirstInteraction = () => {
+			introFinished = true;
+			highlightedContent = summaryContent[0];
+		};
+
+		// Use a timeout to avoid capturing programmatic focus or events on load.
+		const timer = setTimeout(() => {
+			window.addEventListener("mousedown", handleFirstInteraction, {
+				once: true
+			});
+			window.addEventListener("keydown", handleFirstInteraction, {
+				once: true
+			});
+			window.addEventListener("wheel", handleFirstInteraction, { once: true });
+		}, 1000);
+
+		return () => {
+			clearTimeout(timer);
+			window.removeEventListener("mousedown", handleFirstInteraction);
+			window.removeEventListener("keydown", handleFirstInteraction);
+			window.removeEventListener("wheel", handleFirstInteraction);
+		};
+	});
+
+	let filteredData = $derived(
+		processedData
+			.filter((d) => d.themes.includes(activeTheme))
+			.filter((item) => {
+				if (filters.publication === "All") {
+					return true;
+				}
+				return item.media_name === filters.publication;
+			})
+			.filter((item) => {
+				if (filters.publicationLean === "All") {
+					return true;
+				}
+				return item.lean === filters.publicationLean;
+			})
+	);
+
+	let filteredDataWithDateRange = $derived(
+		filteredData.filter((item) => {
+			const d = new Date(item.publish_date);
+			return d >= debouncedDateRange.start && d <= debouncedDateRange.end;
+		})
+	);
+
+	let debouncedDateRange = $state({
+		start: minDate,
+		end: maxDate
+	});
+
+	const updateDebouncedDateRange = debounce((newDateRange) => {
+		debouncedDateRange = newDateRange;
+	}, 100);
+
+	$effect(() => {
+		updateDebouncedDateRange(filters.dateRange);
+	});
+
+	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
+
+	let controlsHeight = $state(0);
 </script>
 
-<div class="main-content">
-	<ClusterSection data={processedData} {minDate} {maxDate} />
+<svelte:boundary onerror={(e) => console.error(e)}>
+	<Header />
+	<div class="main-content" style="--controls-height: {controlsHeight}px">
+		<section>
+			<Dashboard
+				data={filteredData.length ? filteredData : processedData}
+				{filteredDataWithDateRange}
+				{minDate}
+				{maxDate}
+				bind:activeTheme
+				bind:inThemeView
+				{introFinished}
+				bind:filters
+				{themes}
+				{themeMap}
+				bind:highlightedContent
+				bind:isHoveringOverPlot
+				{transitionDuration}
+				{summaryContent}
+				{controlsHeight}
+				{vizColors}
+			/>
+		</section>
 
-	<!-- <SummarySection data={processedData} {minDate} {maxDate} /> -->
-</div>
+		<Controls
+			bind:highlightedContent
+			bind:inThemeView
+			bind:activeTheme
+			bind:filters
+			bind:controlsHeight
+			data={processedData}
+			{transitionDuration}
+			{summaryContent}
+			mode={introFinished
+				? isHoveringOverPlot
+					? "hovering"
+					: "default"
+				: "intro"}
+			{minDate}
+			{maxDate}
+		/>
+
+		{#if inThemeView}
+			<section class="theme-section">
+				<ThemeSection
+					{activeTheme}
+					data={filteredDataWithDateRange}
+					{leanColors}
+					{xDomain}
+				/>
+			</section>
+		{/if}
+	</div>
+</svelte:boundary>
 
 <style lang="scss">
 	.main-content {
-		// height: 00px;
 		font-family: "Inter", sans-serif;
-		position: relative;
-		overflow: hidden;
+
+		section {
+			padding: 0 3rem;
+		}
+
+		.theme-section {
+			margin-top: 2rem;
+			padding-top: 2rem;
+			border-top: 1px solid #e5e5e5;
+			background: #f8f8f8;
+		}
 	}
 </style>
