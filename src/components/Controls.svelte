@@ -165,11 +165,11 @@
 						<div
 							class="subtitle"
 							in:fade={{
-								duration: mode == "intro" ? transitionDuration : 0,
+								duration: mode == "intro" ? transitionDuration / 4 : 0,
 								easing: cubicInOut
 							}}
 							out:fade={{
-								duration: mode == "intro" ? transitionDuration / 2 : 0,
+								duration: mode == "intro" ? transitionDuration / 4 : 0,
 								easing: cubicInOut
 							}}
 						>
@@ -480,7 +480,8 @@
 				background-color: #fff;
 				border-radius: 0.375rem;
 				border: 1px solid #d1d5db;
-				box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+				box-shadow:
+					0 4px 6px -1px rgb(0 0 0 / 0.1),
 					0 2px 4px -2px rgb(0 0 0 / 0.1);
 				list-style: none;
 				margin: 0;
