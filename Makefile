@@ -1,7 +1,7 @@
 PHONY: github transja
 
 protect:
-	cd build/staging && npx staticrypt --short index.html -p $(shell grep PASSWORD .env | cut -d '=' -f2) -d .
+	cd build/staging && npx staticrypt --short index.html -p $(shell if [ -f .env ]; then grep PASSWORD .env | cut -d '=' -f2; else echo $$PASSWORD; fi) -d .
 
 github:
 	rm -rf docs

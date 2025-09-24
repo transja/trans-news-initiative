@@ -40,6 +40,8 @@ jobs:
       run: npm run build
     - name: Protect docs
       run: make protect
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
