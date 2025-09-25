@@ -37,7 +37,7 @@
 	const transitionDuration = 500;
 
 	const vizColors = ["#7CDEE0", "#E5BDF5"];
-	
+
 	const leanColors = {
 		left: "#17414C",
 		"lean left": "#378EA5",
@@ -192,7 +192,7 @@
 <svelte:boundary onerror={(e) => console.error(e)}>
 	<Header />
 	<div class="main-content" style="--controls-height: {controlsHeight}px">
-		<section>
+		<section class="wide-section">
 			<Dashboard
 				data={filteredData.length ? filteredData : processedData}
 				{filteredDataWithDateRange}
@@ -232,7 +232,7 @@
 		/>
 
 		{#if inThemeView}
-			<section class="theme-section">
+			<section class="container-section">
 				<ThemeSection
 					{activeTheme}
 					data={filteredDataWithDateRange}
@@ -248,11 +248,8 @@
 	.main-content {
 		font-family: "Inter", sans-serif;
 
-		section {
+		.container-section {
 			padding: 0 3rem;
-		}
-
-		.theme-section {
 			margin-top: 2rem;
 			padding-top: 2rem;
 			border-top: 1px solid #e5e5e5;

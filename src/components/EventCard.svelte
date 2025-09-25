@@ -39,7 +39,6 @@
 		});
 	});
 
-	$inspect(chartData);
 </script>
 
 <div class="accordion-item">

@@ -34,6 +34,31 @@
 	let container;
 	let width = $state(0);
 
+	let applyWidthChange = $state(false);
+	$effect(() => {
+		if (inThemeView) {
+			const timer = setTimeout(() => {
+				applyWidthChange = true;
+			}, transitionDuration);
+			return () => clearTimeout(timer);
+		} else {
+			applyWidthChange = false;
+		}
+	});
+
+	let isWidthTransitioning = $state(false);
+	$effect(() => {
+		if (applyWidthChange) {
+			isWidthTransitioning = true;
+			const timer = setTimeout(() => {
+				isWidthTransitioning = false;
+			}, transitionDuration * 2);
+			return () => clearTimeout(timer);
+		} else {
+			isWidthTransitioning = false;
+		}
+	});
+
 	const numericHeight = $derived(parseInt(height, 10) || 0);
 
 	const marginTop = 0;
@@ -392,6 +417,7 @@
 	style:--duration="{transitionDuration}ms"
 	class:interactive={mode === "default"}
 	class:in-theme-view={inThemeView}
+	class:apply-width={applyWidthChange}
 	onclick={(event) => {
 		event.stopPropagation();
 		handleOutsideClick();
@@ -451,7 +477,7 @@
 									: 1}
 							style="
 								transition-property: d, opacity;
-								transition-duration: {transitionDuration}ms, {inThemeView || mode === 'intro'
+								transition-duration: {isWidthTransitioning ? 0 : transitionDuration}ms, {inThemeView || mode === 'intro'
 								? transitionDuration / 2
 								: 0}ms;
 								transition-timing-function: ease-in-out, ease-in-out;
@@ -495,7 +521,7 @@
 				{#each yearLabels as label}
 					<g
 						transform={`translate(${label.x}, ${label.y})`}
-						style="transition: transform 0.5s ease-in-out;"
+						style="transition: transform {isWidthTransitioning ? 0 : transitionDuration}ms ease-in-out;"
 					>
 						<text
 							fill="black"
@@ -525,9 +551,11 @@
 		position: relative;
 		transition:
 			height var(--duration) ease-in-out,
+			width var(--duration) ease-in-out,
 			background-color 300ms ease-in-out;
 		pointer-events: none;
 		background-color: transparent;
+		margin: 0 auto;
 
 		&.interactive {
 			pointer-events: auto;
@@ -537,13 +565,16 @@
 			position: sticky;
 			bottom: 100px;
 			background-color: white;
+
+			&.apply-width {
+				width: calc(100% - 6rem);
+			}
 		}
 	}
 	svg {
 		font-family: sans-serif;
 		height: 100%;
 		display: block;
-		width: 100%;
 
 		text {
 			pointer-events: none;
