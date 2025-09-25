@@ -6,10 +6,7 @@
 	import { select } from "d3-selection";
 	import { axisBottom } from "d3-axis";
 	import { timeYear, timeMonth } from "d3-time";
-
-	import tippy from "tippy.js";
-	import "tippy.js/dist/tippy.css";
-	import "tippy.js/themes/light.css";
+	import { tooltip, createTooltipContent } from "../../actions/tooltip.js";
 
 	// Config
 	const NODE_RADIUS = 4.5;
@@ -27,30 +24,13 @@
 	let width = $state(0);
 	let heightVal = $state(0);
 	let loading = $state(false);
+	let hoveredNode = $state(null);
+	let simulationData = [];
 
 	const marginTop = 50;
 	const marginRight = 50;
 	const marginBottom = 50;
 	const marginLeft = 50;
-
-	function tooltipAction(node, content) {
-		const instance = tippy(node, {
-			content,
-			allowHTML: true,
-			arrow: true,
-			duration: 0,
-			theme: "light"
-		});
-
-		return {
-			update(newContent) {
-				instance.setContent(newContent);
-			},
-			destroy() {
-				instance.destroy();
-			}
-		};
-	}
 
 	$effect(() => {
 		if (!container) return;
@@ -125,7 +105,7 @@
 		}
 
 		const context = canvasEl.getContext("2d");
-		const simulationData = processedData.map((d) => ({ ...d }));
+		simulationData = processedData.map((d) => ({ ...d }));
 
 		const colorScale = scaleLinear()
 			.domain([
@@ -182,9 +162,39 @@
 			}, 0);
 		}
 
+		const canvas = select(canvasEl);
+
+		const mousemove = (event) => {
+			const [mx, my] = [event.offsetX, event.offsetY];
+			let foundNode = null;
+			for (const node of simulationData) {
+				const dx = mx - node.x;
+				const dy = my - node.y;
+				if (dx * dx + dy * dy < NODE_RADIUS * NODE_RADIUS) {
+					foundNode = node;
+					break;
+				}
+			}
+			hoveredNode = foundNode;
+		};
+
+		const mouseleave = () => {
+			hoveredNode = null;
+		};
+
+		canvas.on("mousemove", mousemove);
+		canvas.on("mouseleave", mouseleave);
+
 		return () => {
 			simulation.stop();
+			canvas.on("mousemove", null);
+			canvas.on("mouseleave", null);
 		};
+	});
+
+	const tooltipContent = $derived.by(() => {
+		if (!hoveredNode) return null;
+		return createTooltipContent(hoveredNode);
 	});
 </script>
 
@@ -216,6 +226,12 @@
 			</g>
 		</svg>
 	{/if}
+	<div
+		class="tooltip-anchor"
+		use:tooltip={{ content: tooltipContent, trigger: "manual" }}
+		style:--top={hoveredNode?.y ?? -9999}
+		style:--left={hoveredNode?.x ?? -9999}
+	></div>
 </div>
 
 <style>
@@ -229,6 +245,14 @@
 		position: absolute;
 		top: 0;
 		left: 0;
+		pointer-events: none;
+	}
+	.tooltip-anchor {
+		position: absolute;
+		top: calc(var(--top) * 1px);
+		left: calc(var(--left) * 1px);
+		width: 0;
+		height: 0;
 		pointer-events: none;
 	}
 	canvas {
