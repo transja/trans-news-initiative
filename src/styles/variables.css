@@ -7,6 +7,12 @@
   --tni-yellow: #F9A011;
   --tni-purple: #A584B2;
   --tni-teal: #2F8789;
+  --tni-left: #17414C;
+  --tni-leanleft: #317F94;
+  --tni-center: #DFDFDF;
+  --tni-leanright: #F78686;
+  --tni-right: #E61C51;
+  --tni-gradient: linear-gradient(90deg, #7CDEE0 0%, #E5BDF5 100%);
   --category-blue: #4477AA;
   --category-red: #EE6677;
   --category-green: #228833;
