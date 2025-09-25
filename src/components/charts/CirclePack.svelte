@@ -344,7 +344,6 @@
 								dominant-baseline="central"
 								font-size={18 / transform.k}
 								stroke-width={3 / transform.k}
-								fill="#fff"
 								pointer-events="none"
 								data-radius={node.r}
 								data-text={node.data.name}
@@ -393,14 +392,13 @@
 	}
 	.cluster-label-text {
 		text-align: center;
-		fill: #fff;
-		stroke: #555;
+		font-weight: 700;
+		fill: var(--color-gray-1000);
+		stroke: #fff;
+		stroke-width: 5;
 		paint-order: stroke;
 		stroke-linecap: butt;
 		stroke-linejoin: miter;
-		text-shadow:
-			0 0 4px rgba(0, 0, 0, 0.3),
-			0 0 4px rgba(0, 0, 0, 0.1);
 	}
 
 	.zoom-hint {
