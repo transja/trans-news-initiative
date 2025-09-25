@@ -12,9 +12,8 @@
       }
     </style>
     <linearGradient id="linear-gradient" x1="47.3" y1="15.7" x2="132.6" y2="15.7" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#5bcefa"/>
-      <stop offset=".5" stop-color="#a9bbd9"/>
-      <stop offset="1" stop-color="#f5a9b8"/>
+      <stop offset="0" stop-color="#7CDEE0"/>
+      <stop offset="1" stop-color="#E5BDF5"/>
     </linearGradient>
   </defs>
   <g id="init-group">
