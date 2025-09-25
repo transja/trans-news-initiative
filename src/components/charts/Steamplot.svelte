@@ -123,7 +123,7 @@
 			const timer = setTimeout(
 				() => {
 					isViewTransitioning = false;
-					console.log("HERE")
+					console.log("HERE");
 				},
 				transitionDuration * 2.5 + 50
 			); // Add a small buffer
@@ -377,6 +377,12 @@
 
 	function handlePathClick(theme) {
 		if (inThemeView) return;
+		
+		if (!inThemeView && highlightedContent.theme !== theme) {
+			highlightedContent = contentOptions[0];
+			return;
+		}
+		
 		if (contentOptions.length > 0) {
 			highlightedContent = contentOptions[0];
 		}
@@ -404,8 +410,6 @@
 		if (inThemeView) return;
 		highlightedContent = contentOptions[0];
 	}
-
-
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -477,7 +481,9 @@
 									: 1}
 							style="
 								transition-property: d, opacity;
-								transition-duration: {isWidthTransitioning ? 0 : transitionDuration}ms, {inThemeView || mode === 'intro'
+								transition-duration: {isWidthTransitioning
+								? 0
+								: transitionDuration}ms, {inThemeView || mode === 'intro'
 								? transitionDuration / 2
 								: 0}ms;
 								transition-timing-function: ease-in-out, ease-in-out;
@@ -521,7 +527,9 @@
 				{#each yearLabels as label}
 					<g
 						transform={`translate(${label.x}, ${label.y})`}
-						style="transition: transform {isWidthTransitioning ? 0 : transitionDuration}ms ease-in-out;"
+						style="transition: transform {isWidthTransitioning
+							? 0
+							: transitionDuration}ms ease-in-out;"
 					>
 						<text
 							fill="black"
