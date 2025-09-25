@@ -5,7 +5,9 @@
 		MousePointerClick,
 		Pointer,
 		ChevronDown,
-		ChevronLeft
+		ChevronLeft,
+		MoveLeft,
+		MoveRight
 	} from "@lucide/svelte";
 	import MonthPicker from "./inputs/MonthPicker.svelte";
 	import Select from "./inputs/Select.svelte";
@@ -221,8 +223,8 @@
 					<MousePointerClick size={30} /> Click anywhere to explore them all
 				{:else if highlightedContent.title !== "trans issues" && !inThemeView}
 					<button class="explore-button" on:click={handleExploreButtonClick}
-						><Pointer size={30} /> Click to explore this theme more</button
-					>
+						>Explore this theme more<MoveRight size={30} />
+					</button>
 				{:else if inThemeView}
 					<div
 						class="filter-control"
@@ -292,7 +294,7 @@
 						</div>
 					{/if}
 					<button class="explore-button" on:click={handleThemeExit}
-						><ChevronLeft size={30} /> Back</button
+						><MoveLeft size={30} /> Back</button
 					>
 				{/if}
 			</div>
