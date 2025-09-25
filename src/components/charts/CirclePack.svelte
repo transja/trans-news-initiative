@@ -10,6 +10,7 @@
 	import "tippy.js/dist/tippy.css";
 	import "tippy.js/themes/light.css";
 	import { fade } from "svelte/transition";
+	import { Plus, Minus } from "@lucide/svelte";
 	const {
 		data = [],
 		height = "100vh",
@@ -39,6 +40,7 @@
 	let transform = $state(zoomIdentity);
 	let showZoomHint = $state(false);
 	let hintTimeout;
+	let zoomBehavior;
 
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
@@ -220,7 +222,7 @@
 	$effect(() => {
 		if (!svgEl || !width || !heightVal || !packed) return;
 
-		const zoomBehavior = zoom()
+		zoomBehavior = zoom()
 			.scaleExtent([1, 8])
 			.translateExtent([
 				[-width / 2, -heightVal / 2],
@@ -278,6 +280,18 @@
 			updateLabels();
 		}
 	});
+
+	function zoomIn() {
+		if (!svgEl || !zoomBehavior) return;
+		const selection = select(svgEl);
+		selection.transition().call(zoomBehavior.scaleBy, 1.2);
+	}
+
+	function zoomOut() {
+		if (!svgEl || !zoomBehavior) return;
+		const selection = select(svgEl);
+		selection.transition().call(zoomBehavior.scaleBy, 1 / 1.2);
+	}
 </script>
 
 <div class="circlepack-container" bind:this={container} style:--height={height}>
@@ -343,13 +357,18 @@
 			{/if}
 		</svg>
 	{/if}
+
+	<div class="zoom-controls">
+		<button onclick={zoomIn}><Plus size={20} /></button>
+		<button onclick={zoomOut}><Minus size={20} /></button>
+	</div>
 </div>
 
-<style>
+<style lang="scss">
 	.circlepack-container {
 		width: 100%;
 		height: 100%;
-	
+
 		position: relative;
 	}
 	svg {
@@ -406,13 +425,6 @@
 	}
 
 	kbd {
-		/* background-color: #eee; */
-		/* border-radius: 3px; */
-		/* border: 1px solid #b4b4b4; */
-		/* box-shadow:
-			0 1px 1px rgba(0, 0, 0, 0.2),
-			0 2px 0 0 rgba(255, 255, 255, 0.7) inset; */
-		/* color: #333; */
 		display: inline-block;
 		font-family: monospace;
 		/* font-size: 0.85em; */
@@ -421,5 +433,24 @@
 		padding: 2px 8px;
 		margin-top: 5px;
 		white-space: nowrap;
+	}
+
+	.zoom-controls {
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		display: flex;
+		gap: 5px;
+		flex-direction: column;
+		button {
+			background: var(--color-gray-1000);
+			color: #fff;
+			width: 30px;
+			height: 30px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+		}
 	}
 </style>

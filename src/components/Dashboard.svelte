@@ -128,7 +128,8 @@
 	}
 
 	.circlepack-wrapper {
-		width: 100%;
+		width: calc(100% - 4rem);
+		margin: 0 auto;
 		height: 0;
 		overflow: hidden;
 		transition:
@@ -136,9 +137,10 @@
 			opacity var(--duration) ease-in-out;
 		opacity: 0;
 
-		background: #f8f8f8;
+		background: var(--color-gray-50);
 		border-radius: 10px;
-		box-shadow: inset 0px 2px 8px rgba(0, 0, 0, 0.15);
+		border: 1px solid var(--color-gray-100);
+		// box-shadow: inset 0px 2px 8px rgba(0, 0, 0, 0.15);
 
 		&.in-theme-view {
 			height: calc(100% - var(--controls-height, 0px));
