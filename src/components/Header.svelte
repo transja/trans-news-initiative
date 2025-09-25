@@ -3,8 +3,13 @@
 	import tniLogo from "$svg/logos/TNI_static.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
+	import { dev } from "$app/environment";
 
-	const pages = ["home", "about", "methodology"];
+	let pages = ["home", "about"];
+
+	if (dev) {
+		pages.push("methodology");
+	}
 
 	function handlePageClick(btn) {
 		activePage.page = btn;
@@ -82,7 +87,7 @@
 		bottom: 0;
 		width: 0%;
 		height: 2px;
-		background-image: linear-gradient(to right, #7CDEE0, #E5BDF5);
+		background-image: linear-gradient(to right, #7cdee0, #e5bdf5);
 		pointer-events: none;
 		transition: width 0.25s linear;
 	}
