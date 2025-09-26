@@ -29,6 +29,8 @@
 	const yScale = $derived(scaleLinear().domain([0, 1]).range([innerHeight, 0]));
 
 	const yFmt = format(".0%");
+
+	$inspect(stackedData);
 </script>
 
 <div
@@ -40,6 +42,21 @@
 
 	{#if width && height}
 		<svg {width} {height}>
+			<defs>
+				<pattern
+					id="diagonal-stripe-pattern"
+					patternUnits="userSpaceOnUse"
+					width="8"
+					height="8"
+				>
+					<rect width="8" height="8" style="fill: var(--color-gray-50)"></rect>
+					<path
+						d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4"
+						style="stroke: var(--color-gray-300)"
+						stroke-width="1"
+					></path>
+				</pattern>
+			</defs>
 			<g transform="translate({margin.left}, {margin.top})">
 				<!-- Y axis -->
 				<g class="axis y-axis" style="font-size: 0.8rem; color: #777;">
@@ -83,6 +100,25 @@
 								</rect>
 							{/if}
 						{/each}
+					{/each}
+				</g>
+
+				<!-- Placeholder rects for no data -->
+				<g class="placeholder-group">
+					{#each data as d}
+						{@const yearHasData = seriesKeys.reduce(
+							(sum, key) => sum + (d[key] || 0),
+							0
+						) > 0}
+						{#if !yearHasData}
+							<rect
+								x={xScale(d[xKey])}
+								y={yScale(1)}
+								width={xScale.bandwidth()}
+								height={innerHeight}
+								fill="url(#diagonal-stripe-pattern)"
+							></rect>
+						{/if}
 					{/each}
 				</g>
 			</g>

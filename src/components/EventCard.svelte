@@ -6,7 +6,11 @@
 	import { group } from "d3-array";
 	import ColumnChart from "./charts/ColumnChart.svelte";
 	import ArticleTable from "./ArticleTable.svelte";
-	import { leanOrder, leanColors, leanTextColors } from "../utils/getLeanProperty.js";
+	import {
+		leanOrder,
+		leanColors,
+		leanTextColors
+	} from "../utils/getLeanProperty.js";
 
 	let { event, isOpen, xDomain, onToggle } = $props();
 
@@ -73,6 +77,12 @@
 							{key}
 						</div>
 					{/each}
+					<div
+						class="legend-item no-data"
+						style="color: {leanTextColors.unknown};"
+					>
+						No data
+					</div>
 				</div>
 				<ColumnChart
 					data={chartData}
@@ -174,8 +184,24 @@
 		text-align: center;
 		color: #fff;
 		text-transform: uppercase;
-		white-space: nowrap;	
+		white-space: nowrap;
 		font-size: 0.8rem;
 		font-weight: 700;
+
+		&.no-data {
+			color: var(--color-gray-500);
+			margin-left: 1rem;
+			background-image: linear-gradient(
+				135deg,
+				var(--color-gray-50) 40%,
+				var(--color-gray-300) 40%,
+				var(--color-gray-300) 50%,
+				var(--color-gray-50) 50%,
+				var(--color-gray-50) 90%,
+				var(--color-gray-300) 90%,
+				var(--color-gray-300) 100%
+			);
+			background-size: 7.07px 7.07px;
+		}
 	}
 </style>
