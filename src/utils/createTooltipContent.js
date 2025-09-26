@@ -1,11 +1,13 @@
 import { leanColors, leanTextColors } from "./getLeanProperty.js";
+import { getPublicationName } from "./getPublicationName.js";
 
 export function createTooltipContent(node) {
 	if (!node) return "";
 
 	const title = node.title || node.name;
 	const url = node.url;
-	const publication = node.media_name || node.publication;
+
+	const publication = getPublicationName(node.publication);
 	const publicationDate = node.publish_date || node.publication_date;
 	const lean = node.lean;
 	const themes = node.themes;

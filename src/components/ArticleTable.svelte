@@ -5,6 +5,7 @@
 		leanColors,
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
+	import { getPublicationName } from "../utils/getPublicationName.js";
 
 	let { articles = [] } = $props();
 
@@ -152,7 +153,7 @@
 							</a>
 						</td>
 						<td>{formatDate(article.publish_date)}</td>
-						<td>{article.media_name}</td>
+						<td>{getPublicationName(article.media_name)}</td>
 						<td>
 							<span
 								class="lean-pill"
