@@ -1,5 +1,8 @@
+import { get } from "svelte/store";
 import { leanColors, leanTextColors } from "./getLeanProperty.js";
 import { getPublicationName } from "./getPublicationName.js";
+import { activeTheme } from "../stores/global.js";
+
 
 export function createTooltipContent(node) {
 	if (!node) return "";
@@ -25,7 +28,10 @@ export function createTooltipContent(node) {
 				<strong style="text-transform: uppercase; font-size: 0.7em; color: #555;">Appears in</strong>
 				<ul style="list-style: none; padding: 0; margin: 5px 0 0 0; font-size: 0.9em;">
 					${themes
-				.map((theme) => `<li>${theme} &rarr;</li>`)
+				.map(
+					(theme) =>
+						`<li onclick="window.setActiveTheme && window.setActiveTheme('${theme}')" style="cursor: pointer; text-decoration: underline;">${theme} &rarr;</li>`
+				)
 				.join("")}
 				</ul>
 			</div>
