@@ -7,7 +7,6 @@ import { activeTheme } from "../stores/global.js";
 export function createTooltipContent(node) {
 	if (!node) return "";
 
-	console.log(node);
 	const title = node.title || node.name;
 	const url = node.url;
 

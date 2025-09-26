@@ -255,10 +255,9 @@
 
 	const tooltipContent = $derived.by(() => {
 		if (!tooltipTargetNode) return null;
-		console.log(tooltipTargetNode);
 		return createTooltipContent(tooltipTargetNode);
 	});
-	
+
 	const isSticky = $derived(!!stickyNode);
 
 	function tooltip(node, params) {
