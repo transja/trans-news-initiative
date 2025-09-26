@@ -83,7 +83,7 @@
 
 	const summaryContent = $derived.by(() => {
 		const allArticles = {
-			title: `trans issues`,
+			title: `trans communities`,
 			count: processedData.length,
 			theme: null
 		};

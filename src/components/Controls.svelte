@@ -228,7 +228,7 @@
 			<div class="right-content">
 				{#if mode === "intro"}
 					<MousePointerClick size={30} /> Click anywhere to explore them all
-				{:else if highlightedContent.title !== "trans issues" && !$inThemeView}
+				{:else if highlightedContent.title !== "trans communities" && !$inThemeView}
 					<button class="explore-button" on:click={handleExploreButtonClick}
 						>Explore this theme more<MoveRight size={30} />
 					</button>
