@@ -11,7 +11,6 @@
 	import "tippy.js/themes/light.css";
 	import { fade } from "svelte/transition";
 	import { Plus, Minus } from "@lucide/svelte";
-	import { tooltip, createTooltipContent } from "../../actions/tooltip.js";
 	const {
 		data = [],
 		height = "100vh",
@@ -43,23 +42,6 @@
 	let hintTimeout;
 	let zoomBehavior;
 
-	let stickyNode = $state(null);
-
-	$effect(() => {
-		const handleOutsideClick = () => {
-			stickyNode = null;
-		};
-		document.addEventListener("click", handleOutsideClick);
-		return () => {
-			document.removeEventListener("click", handleOutsideClick);
-		};
-	});
-
-	function handleNodeClick(event, node) {
-		event.stopPropagation();
-		stickyNode = node;
-	}
-
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
 		const root = hierarchy(processData(data)).sum((d) => d.value);
@@ -76,9 +58,9 @@
 				clusters.set(d.label, []);
 			}
 			clusters.get(d.label).push({
-				...d,
 				name: d.title,
 				value: 1,
+				url: d.url,
 				publication: d.media_name,
 				publication_date: d.publish_date
 			});
@@ -192,6 +174,35 @@
 		const labels = svgEl.querySelectorAll(".cluster-label-text");
 		labels.forEach(wrapText);
 		debouncedHandleLabelOverlap();
+	}
+
+	function tooltipAction(node, content) {
+		const instance = tippy(node, {
+			allowHTML: true,
+			arrow: true,
+			duration: 0,
+			theme: "light"
+		});
+
+		function updateContent(newContent) {
+			if (newContent) {
+				instance.setContent(newContent);
+				instance.enable();
+			} else {
+				instance.disable();
+			}
+		}
+
+		updateContent(content);
+
+		return {
+			update(newContent) {
+				updateContent(newContent);
+			},
+			destroy() {
+				instance.destroy();
+			}
+		};
 	}
 
 	function debounce(func, wait) {
@@ -314,11 +325,12 @@
 									stroke={node.children ? linearColor(node.x) : "none"}
 									stroke-width={node.children ? 2 : 0}
 									class:article-circle={!node.children}
-									onclick={(e) => handleNodeClick(e, node)}
-									use:tooltip={{
-										content: createTooltipContent(node.data),
-										isSticky: stickyNode === node
-									}}
+									use:tooltipAction={!node.children &&
+										`<h5>${node.data.name}</h5><strong>${
+											node.data.publication
+										}</strong><br>${new Date(
+											node.data.publication_date
+										).toLocaleDateString()}`}
 								/>
 							</g>
 						{/each}
@@ -424,7 +436,7 @@
 	.zoom-controls {
 		position: absolute;
 		top: 1.5rem;
-		right: 1.5rem;
+		left: 1.5rem;
 		display: flex;
 		gap: 5px;
 		flex-direction: column;
