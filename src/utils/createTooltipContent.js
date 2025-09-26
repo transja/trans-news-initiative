@@ -7,10 +7,11 @@ import { activeTheme } from "../stores/global.js";
 export function createTooltipContent(node) {
 	if (!node) return "";
 
+	console.log(node);
 	const title = node.title || node.name;
 	const url = node.url;
 
-	const publication = getPublicationName(node.publication);
+	const publication = getPublicationName(node.publication || node.media_name);
 	const publicationDate = node.publish_date || node.publication_date;
 	const lean = node.lean;
 	const themes = node.themes;
