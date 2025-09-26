@@ -50,7 +50,8 @@
 			}
 		};
 		document.addEventListener("click", handleClickOutside, true);
-		return () => document.removeEventListener("click", handleClickOutside, true);
+		return () =>
+			document.removeEventListener("click", handleClickOutside, true);
 	});
 
 	$effect(() => {
@@ -326,12 +327,36 @@
 		<div class="loading-spinner"></div>
 	{/if}
 	{#if width && dynamicHeight}
+		{@const axisY = dynamicHeight / 2}
+
+		<svg class="axis-overlay ticks" {width} height={dynamicHeight}>
+			<g>
+				<line
+					x1={marginLeft}
+					x2={width - marginRight}
+					y1={axisY}
+					y2={axisY}
+					style="stroke: var(--color-gray-300); stroke-width: 1;"
+				/>
+				{#each yearLabels as label}
+					<g class="tick" transform="translate({label.x}, 0)">
+						<line
+							y1={axisY}
+							y2={axisY + 7}
+							style="stroke: var(--color-gray-300); stroke-width: 1;"
+						/>
+					</g>
+				{/each}
+			</g>
+		</svg>
+
 		<canvas bind:this={canvasEl} {width} height={dynamicHeight}></canvas>
-		<svg class="axis-overlay" {width} height={dynamicHeight}>
+		<svg class="axis-overlay labels" {width} height={dynamicHeight}>
 			<g>
 				{#each yearLabels as label}
-					<g transform="translate({label.x}, {label.y})">
+					<g transform="translate({label.x}, 0)">
 						<text
+							y={axisY + 17}
 							fill="black"
 							text-anchor="middle"
 							dominant-baseline="middle"
@@ -351,13 +376,17 @@
 	{/if}
 	<div
 		class="tooltip-anchor"
-		use:tooltip={{ content: tooltipContent, trigger: "manual", interactive: isSticky }}
+		use:tooltip={{
+			content: tooltipContent,
+			trigger: "manual",
+			interactive: isSticky
+		}}
 		style:--top={tooltipTargetNode ? tooltipTargetNode.y + yOffset : -9999}
 		style:--left={tooltipTargetNode?.x ?? -9999}
 	></div>
 </div>
 
-<style>
+<style lang="scss">
 	.beeswarm-container {
 		width: 100%;
 		overflow: hidden;
@@ -368,6 +397,13 @@
 		top: 0;
 		left: 0;
 		pointer-events: none;
+
+		.tick {
+			z-index: 1;
+		}
+		&.labels {
+			z-index: 20;
+		}
 	}
 	.tooltip-anchor {
 		position: absolute;
@@ -379,6 +415,8 @@
 	}
 	canvas {
 		font-family: sans-serif;
+		z-index: 10;
+		position: relative;
 	}
 	.loading-spinner {
 		position: absolute;
