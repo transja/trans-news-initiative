@@ -38,15 +38,6 @@
 
 	const vizColors = ["#7CDEE0", "#E5BDF5"];
 
-	const leanColors = {
-		left: "#17414C",
-		"lean left": "#378EA5",
-		center: "#efefef",
-		"lean right": "#F598B0",
-		right: "#F41E56",
-		unknown: "#E6E6E6"
-	};
-
 	let filters = $state({
 		topic: "All",
 		publication: "All",
@@ -104,17 +95,14 @@
 		return [allArticles, ...themeArticles];
 	});
 
-	let highlightedContent = $state(summaryContent[0]);
+	let highlightedIndex = $state(0);
+	const highlightedContent = $derived(summaryContent[highlightedIndex]);
 	let isHoveringOverPlot = $state(false);
 
 	$effect(() => {
 		if (introFinished) return;
 		const interval = setInterval(() => {
-			const currentIndex = summaryContent.findIndex(
-				(d) => d.title === highlightedContent.title
-			);
-			const nextIndex = (currentIndex + 1) % summaryContent.length;
-			highlightedContent = summaryContent[nextIndex];
+			highlightedIndex = (highlightedIndex + 1) % summaryContent.length;
 		}, 2000);
 
 		return () => {
@@ -125,7 +113,7 @@
 	onMount(() => {
 		const handleFirstInteraction = () => {
 			introFinished = true;
-			highlightedContent = summaryContent[0];
+			highlightedIndex = 0;
 		};
 
 		// Use a timeout to avoid capturing programmatic focus or events on load.
@@ -204,7 +192,7 @@
 				bind:filters
 				{themes}
 				{themeMap}
-				bind:highlightedContent
+				{highlightedContent}
 				bind:isHoveringOverPlot
 				{transitionDuration}
 				{summaryContent}
@@ -214,7 +202,7 @@
 		</section>
 
 		<Controls
-			bind:highlightedContent
+			{highlightedContent}
 			bind:inThemeView
 			bind:activeTheme
 			bind:filters
@@ -236,7 +224,6 @@
 				<ThemeSection
 					{activeTheme}
 					data={filteredDataWithDateRange}
-					{leanColors}
 					{xDomain}
 				/>
 			</section>

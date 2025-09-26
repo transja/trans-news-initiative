@@ -3,7 +3,7 @@
 	import Guidance from "./Guidance.svelte";
 	import EventCard from "./EventCard.svelte";
 
-	let { data, leanColors, xDomain } = $props();
+	let { data, xDomain } = $props();
 
 	const groupedByEvent = $derived.by(() => {
 		return Array.from(
@@ -43,7 +43,6 @@
 					{event}
 					{isOpen}
 					{xDomain}
-					{leanColors}
 					onToggle={() => {
 						if (isOpen) {
 							openAccordionItems = openAccordionItems.filter(

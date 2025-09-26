@@ -6,10 +6,9 @@
 	import { group } from "d3-array";
 	import ColumnChart from "./charts/ColumnChart.svelte";
 	import ArticleTable from "./ArticleTable.svelte";
+	import { leanOrder, leanColors, leanTextColors } from "../utils/getLeanProperty.js";
 
-	let { event, isOpen, xDomain, onToggle, leanColors } = $props();
-
-	const leanOrder = ["left", "lean left", "center", "lean right", "right"];
+	let { event, isOpen, xDomain, onToggle } = $props();
 
 	const chartData = $derived.by(() => {
 		const articlesByYear = group(event.articles, (d) =>
@@ -38,7 +37,6 @@
 			return { year: year.toString(), ...counts };
 		});
 	});
-
 </script>
 
 <div class="accordion-item">
@@ -68,9 +66,9 @@
 					{#each leanOrder as key, i}
 						<div
 							class="legend-item"
-							style="background-color: {leanColors[key]}; color: {i > 1
-								? '#000'
-								: '#fff'} "
+							style="background-color: {leanColors[key] ??
+								leanColors.unknown}; color: {leanTextColors[key] ??
+								leanTextColors.unknown} "
 						>
 							{key}
 						</div>
@@ -140,9 +138,9 @@
 	.accordion-content {
 		padding: 0 1.5rem 1.5rem;
 		border-top: 1px solid #eee;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
 	}
 
 	.event-content-block {
@@ -168,13 +166,16 @@
 		gap: 0.5rem;
 		align-items: center;
 		width: fit-content;
-		padding: 1rem 1.5rem;
+		padding: 0.75rem 1rem;
 		text-align: center;
 		justify-content: center;
 		height: 20px;
 		border-radius: 5px;
 		text-align: center;
 		color: #fff;
-		text-transform: capitalize;
+		text-transform: uppercase;
+		white-space: nowrap;	
+		font-size: 0.8rem;
+		font-weight: 700;
 	}
 </style>

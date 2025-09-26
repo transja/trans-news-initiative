@@ -10,7 +10,7 @@
 	import "tippy.js/dist/tippy.css";
 	import "tippy.js/themes/light.css";
 
-	import { createTooltipContent } from "../../actions/tooltip.js";
+	import { createTooltipContent } from "../../utils/createTooltipContent.js";
 
 	// Config
 	const NODE_RADIUS = 4.5;

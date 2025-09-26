@@ -1,7 +1,12 @@
 <script>
 	import { Search, ArrowDown, ArrowUp } from "@lucide/svelte";
+	import {
+		leanOrder,
+		leanColors,
+		leanTextColors
+	} from "../utils/getLeanProperty.js";
 
-	let { articles = [], leanColors = {} } = $props();
+	let { articles = [] } = $props();
 
 	// State
 	let sortKey = $state("publish_date");
@@ -29,8 +34,8 @@
 			}
 
 			if (sortKey === "lean") {
-				const indexA = leanSort.indexOf(valA);
-				const indexB = leanSort.indexOf(valB);
+				const indexA = leanOrder.indexOf(valA);
+				const indexB = leanOrder.indexOf(valB);
 				return sortDirection === "asc" ? indexA - indexB : indexB - indexA;
 			}
 
@@ -83,14 +88,6 @@
 		}
 		return [...new Set(buttons)];
 	}
-
-    const leanSort = [
-        "left",
-        "lean left",
-        "center",
-        "lean right",
-        "right"
-    ];
 </script>
 
 <div class="article-table-container">
@@ -159,10 +156,9 @@
 						<td>
 							<span
 								class="lean-pill"
-								style="background-color: {leanColors[article.lean] ?? '#ccc'};
-									 color: {['left', 'lean left', 'right'].includes(article.lean)
-									? '#fff'
-									: '#000'}"
+								style="background-color: {leanColors[article.lean] ??
+									leanColors.unknown};
+									 color: {leanTextColors[article.lean] ?? leanTextColors.unknown}"
 							>
 								{article.lean}
 							</span>
@@ -207,11 +203,6 @@
 	.article-table-container {
 		color: var(--color-gray-600);
 		font-size: 0.8rem;
-		h4 {
-			font-size: 1.25rem;
-			font-weight: 600;
-			margin-bottom: 1rem;
-		}
 	}
 	.table-wrapper {
 		overflow: hidden;
@@ -285,7 +276,9 @@
 	.lean-pill {
 		padding: 0.25rem 0.75rem;
 		border-radius: 5px;
-		text-transform: capitalize;
+		text-transform: uppercase;
+		white-space: nowrap;
+		font-weight: 700;
 	}
 	.pagination {
 		display: flex;

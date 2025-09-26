@@ -11,7 +11,7 @@
 	import "tippy.js/themes/light.css";
 	import { fade } from "svelte/transition";
 	import { Plus, Minus } from "@lucide/svelte";
-	import { createTooltipContent } from "../../actions/tooltip.js";
+	import { createTooltipContent } from "../../utils/createTooltipContent.js";
 
 	const {
 		data = [],
@@ -83,7 +83,9 @@
 				value: 1,
 				url: d.url,
 				publication: d.media_name,
-				publication_date: d.publish_date
+				publication_date: d.publish_date,
+				themes: d.themes,
+				lean: d.lean
 			});
 		});
 
