@@ -15,13 +15,15 @@
 
 	import Brush from "./Brush.svelte";
 
+
+	// stores
+	import { activeTheme, inThemeView } from "../../stores/global.js";
+
 	let {
 		data = [],
 		themes = [],
 		height = "0px",
 		highlightedContent = $bindable(),
-		activeTheme = $bindable(),
-		inThemeView = $bindable(),
 		transitionDuration = 500,
 		filters = $bindable(),
 		colors = [],
@@ -36,7 +38,7 @@
 
 	let applyWidthChange = $state(false);
 	$effect(() => {
-		if (inThemeView) {
+		if ($inThemeView) {
 			const timer = setTimeout(() => {
 				applyWidthChange = true;
 			}, transitionDuration);
@@ -63,28 +65,28 @@
 
 	const marginTop = 0;
 	const marginRight = 0;
-	const marginBottom = $derived(inThemeView ? 25 : 0);
+	const marginBottom = $derived($inThemeView ? 25 : 0);
 	const marginLeft = 0;
 
 	let startPercent = $state(0);
 	let endPercent = $state(100);
 
 	// State for inter-theme transitions
-	let themeForAreaChart = $state(inThemeView ? activeTheme : null);
+	let themeForAreaChart = $state($inThemeView ? $activeTheme : null);
 	let isMorphingToFlat = $state(false);
 
 	$effect(() => {
-		if (inThemeView) {
+		if ($inThemeView) {
 			// We are in theme view.
 			if (themeForAreaChart === null) {
 				// This is the Main -> Theme transition.
-				themeForAreaChart = activeTheme;
+				themeForAreaChart = $activeTheme;
 				isMorphingToFlat = false;
-			} else if (activeTheme !== themeForAreaChart) {
+			} else if ($activeTheme !== themeForAreaChart) {
 				// This is Theme A -> Theme B.
 				isMorphingToFlat = true;
 				const timer = setTimeout(() => {
-					themeForAreaChart = activeTheme;
+					themeForAreaChart = $activeTheme;
 					isMorphingToFlat = false;
 				}, transitionDuration);
 				return () => clearTimeout(timer);
@@ -96,10 +98,10 @@
 	});
 
 	// New state to control the timing of the highlight outline
-	let showHighlight = $state(!inThemeView);
+	let showHighlight = $state(!$inThemeView);
 	$effect(() => {
 		let timer;
-		if (inThemeView) {
+		if ($inThemeView) {
 			showHighlight = false; // Hide immediately on enter
 		} else {
 			// On exit, wait for the main morph animation to finish before showing the highlight
@@ -112,10 +114,10 @@
 
 	// State to differentiate view transitions from hover effects
 	let isViewTransitioning = $state(false);
-	let prevInThemeView = $state(inThemeView);
+	let prev$inThemeView = $state($inThemeView);
 
 	$effect(() => {
-		if (inThemeView !== prevInThemeView) {
+		if ($inThemeView !== prev$inThemeView) {
 			isViewTransitioning = true;
 
 			// The flag should remain true for the duration of the exit animation,
@@ -128,11 +130,11 @@
 				transitionDuration * 2.5 + 50
 			); // Add a small buffer
 
-			prevInThemeView = inThemeView;
+			prev$inThemeView = $inThemeView;
 			return () => clearTimeout(timer);
 		}
 
-		if (!inThemeView) {
+		if (!$inThemeView) {
 			isViewTransitioning = false;
 		}
 	});
@@ -236,15 +238,15 @@
 
 	const unifiedYScale = $derived.by(() => {
 		if (
-			(inThemeView && !areaSeries.length) ||
-			(!inThemeView && !steamSeries.length)
+			($inThemeView && !areaSeries.length) ||
+			(!$inThemeView && !steamSeries.length)
 		) {
 			return scaleLinear();
 		}
 
 		let yMin, yMax;
 
-		if (inThemeView) {
+		if ($inThemeView) {
 			// In theme view, scale is based on the active theme's data (areaSeries)
 			yMin = 0; // Area chart starts at 0 baseline
 			yMax = max(areaSeries[0], (d) => d[1]);
@@ -312,7 +314,7 @@
 		const startYear = dateExtent[0].getFullYear();
 		const endYear = dateExtent[1].getFullYear();
 
-		const yPosition = inThemeView
+		const yPosition = $inThemeView
 			? numericHeight - marginTop - marginBottom + 15 // Position near bottom for area chart
 			: (numericHeight - marginTop - marginBottom) / 2 + 15; // Centered for steamgraph
 
@@ -376,9 +378,9 @@
 	});
 
 	function handlePathClick(theme) {
-		if (inThemeView) return;
+		if ($inThemeView) return;
 		
-		if (!inThemeView && highlightedContent.theme !== theme) {
+		if (!$inThemeView && highlightedContent.theme !== theme) {
 			highlightedContent = contentOptions[0];
 			return;
 		}
@@ -386,28 +388,28 @@
 		if (contentOptions.length > 0) {
 			highlightedContent = contentOptions[0];
 		}
-		activeTheme = theme;
+		$activeTheme = theme;
 		highlightedContent = contentOptions.find((c) => c.theme === theme);
 		isHoveringOverPlot = false;
-		inThemeView = true;
+		$inThemeView = true;
 	}
 
 	function handlePathMousemove(theme) {
-		if (inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions.find((c) => c.theme === theme);
 		isHoveringOverPlot = true;
 	}
 
 	function handlePathMouseleave(theme) {
-		if (inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($inThemeView || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions[0];
 		isHoveringOverPlot = false;
 	}
 
 	function handleOutsideClick() {
-		if (inThemeView) return;
+		if ($inThemeView) return;
 		highlightedContent = contentOptions[0];
 	}
 </script>
@@ -420,14 +422,14 @@
 	style:--height={height}
 	style:--duration="{transitionDuration}ms"
 	class:interactive={mode === "default"}
-	class:in-theme-view={inThemeView}
+	class:in-theme-view={$inThemeView}
 	class:apply-width={applyWidthChange}
 	onclick={(event) => {
 		event.stopPropagation();
 		handleOutsideClick();
 	}}
 >
-	{#if inThemeView}
+	{#if $inThemeView}
 		<Brush
 			bind:startPercent
 			bind:endPercent
@@ -462,7 +464,7 @@
 				{#each steamSeries as s}
 					<g style="transition: transform 0.5s ease-in-out;">
 						<path
-							d={inThemeView && areaSeries.length
+							d={$inThemeView && areaSeries.length
 								? isMorphingToFlat
 									? flattenedAreaGenerator(areaSeries[0])
 									: areaAreaGenerator(areaSeries[0])
@@ -470,7 +472,7 @@
 							fill="url(#steam-gradient)"
 							stroke="white"
 							stroke-width="1.5px"
-							opacity={inThemeView
+							opacity={$inThemeView
 								? s.key === themeForAreaChart
 									? 1
 									: 0
@@ -483,7 +485,7 @@
 								transition-property: d, opacity;
 								transition-duration: {isWidthTransitioning
 								? 0
-								: transitionDuration}ms, {inThemeView || mode === 'intro'
+								: transitionDuration}ms, {$inThemeView || mode === 'intro'
 								? transitionDuration / 2
 								: 0}ms;
 								transition-timing-function: ease-in-out, ease-in-out;
@@ -504,7 +506,7 @@
 					</g>
 				{/each}
 
-				{#if !inThemeView && seriesToHighlight}
+				{#if !$inThemeView && seriesToHighlight}
 					<path
 						d={steamAreaGenerator(seriesToHighlight)}
 						fill="none"

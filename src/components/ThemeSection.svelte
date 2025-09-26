@@ -3,6 +3,7 @@
 	import Guidance from "./Guidance.svelte";
 	import EventCard from "./EventCard.svelte";
 
+
 	let { data, xDomain } = $props();
 
 	const groupedByEvent = $derived.by(() => {

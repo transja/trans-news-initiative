@@ -12,13 +12,20 @@
 	import MonthPicker from "./inputs/MonthPicker.svelte";
 	import Select from "./inputs/Select.svelte";
 
+	// stores
+	import { inThemeView, activeTheme } from "../stores/global.js";
+
+	$effect(() => {
+		if ($activeTheme) {
+			highlightedContent = summaryContent.find((t) => t.theme === $activeTheme);
+		}
+	});
+
 	let {
 		highlightedContent = $bindable(),
 		transitionDuration,
 		mode,
 		summaryContent = [],
-		inThemeView = $bindable(),
-		activeTheme = $bindable(),
 		filters = $bindable(),
 		data,
 		controlsHeight = $bindable(),
@@ -57,28 +64,28 @@
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
 		showThemeDropdown = false;
-		if (inThemeView) {
+		if ($inThemeView) {
 			if (!theme.theme) {
-				activeTheme = null;
-				inThemeView = false;
+				$activeTheme = null;
+				$inThemeView = false;
 			} else {
-				activeTheme = theme.theme;
+				$activeTheme = theme.theme;
 			}
 		}
 	}
 
 	function handleExploreButtonClick() {
 		if (highlightedContent.theme) {
-			inThemeView = true;
-			activeTheme = highlightedContent.theme;
+			$inThemeView = true;
+			$activeTheme = highlightedContent.theme;
 		}
 		showThemeDropdown = false;
 	}
 
 	function handleThemeExit() {
-		if (!inThemeView) return;
-		inThemeView = false;
-		activeTheme = null;
+		if (!$inThemeView) return;
+		$inThemeView = false;
+		$activeTheme = null;
 	}
 
 	function handleThemeKeydown(event) {
@@ -221,11 +228,11 @@
 			<div class="right-content">
 				{#if mode === "intro"}
 					<MousePointerClick size={30} /> Click anywhere to explore them all
-				{:else if highlightedContent.title !== "trans issues" && !inThemeView}
+				{:else if highlightedContent.title !== "trans issues" && !$inThemeView}
 					<button class="explore-button" on:click={handleExploreButtonClick}
 						>Explore this theme more<MoveRight size={30} />
 					</button>
-				{:else if inThemeView}
+				{:else if $inThemeView}
 					<div
 						class="filter-control"
 						use:clickOutside

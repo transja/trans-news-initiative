@@ -2,6 +2,9 @@
 	import { onMount } from "svelte";
 	import { debounce } from "$utils/debounce.js";
 
+	// stores
+	import { activeTheme, inThemeView } from "../../stores/global.js";
+
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
 	import Controls from "$components/Controls.svelte";
@@ -30,8 +33,7 @@
 		? new Date(Math.max(...allDates.map((d) => new Date(d))))
 		: new Date();
 
-	let activeTheme = $state(null);
-	let inThemeView = $state(false);
+
 	let introFinished = $state(false);
 
 	const transitionDuration = 500;
@@ -49,7 +51,7 @@
 	});
 
 	$effect(() => {
-		if (!activeTheme && !inThemeView) {
+		if (!$activeTheme && !$inThemeView) {
 			filters = {
 				topic: "All",
 				publication: "All",
@@ -96,8 +98,12 @@
 	});
 
 	let highlightedIndex = $state(0);
-	const highlightedContent = $derived(summaryContent[highlightedIndex]);
+	let highlightedContent = $state(summaryContent[highlightedIndex]);
 	let isHoveringOverPlot = $state(false);
+
+	$effect(() => {
+		highlightedContent = summaryContent[highlightedIndex];
+	});
 
 	$effect(() => {
 		if (introFinished) return;
@@ -137,7 +143,7 @@
 
 	let filteredData = $derived(
 		processedData
-			.filter((d) => d.themes.includes(activeTheme))
+			.filter((d) => d.themes.includes($activeTheme))
 			.filter((item) => {
 				if (filters.publication === "All") {
 					return true;
@@ -186,13 +192,11 @@
 				{filteredDataWithDateRange}
 				{minDate}
 				{maxDate}
-				bind:activeTheme
-				bind:inThemeView
 				{introFinished}
 				bind:filters
 				{themes}
 				{themeMap}
-				{highlightedContent}
+				bind:highlightedContent
 				bind:isHoveringOverPlot
 				{transitionDuration}
 				{summaryContent}
@@ -202,9 +206,7 @@
 		</section>
 
 		<Controls
-			{highlightedContent}
-			bind:inThemeView
-			bind:activeTheme
+			bind:highlightedContent
 			bind:filters
 			bind:controlsHeight
 			data={processedData}
@@ -219,10 +221,9 @@
 			{maxDate}
 		/>
 
-		{#if inThemeView}
+		{#if $inThemeView}
 			<section class="container-section">
 				<ThemeSection
-					{activeTheme}
 					data={filteredDataWithDateRange}
 					{xDomain}
 				/>
