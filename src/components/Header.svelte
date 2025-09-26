@@ -26,9 +26,6 @@
 		}
 	});
 
-	// $effect(() => {
-	// 	console.log(activePage.page)
-	// });
 </script>
 
 <header bind:clientHeight={headerHeight}>

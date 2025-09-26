@@ -45,8 +45,6 @@
 	let zoomBehavior;
 	let stickyInstance = $state(null);
 
-	$inspect(stickyInstance);
-
 	onMount(() => {
 		const handleClickOutside = (event) => {
 			if (

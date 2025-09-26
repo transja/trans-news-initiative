@@ -3,8 +3,6 @@
     let tableData = Object.values(data);
     let columns = tableData.length > 0 ? Object.keys(tableData[0][0]) : [];
 
-    console.log(columns)
-
     function formatTitles(string) {
         if (string == "groundNewsLean") {
             return "Ground News Lean"
