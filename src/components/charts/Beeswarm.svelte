@@ -6,10 +6,11 @@
 	import { select } from "d3-selection";
 	import { axisBottom } from "d3-axis";
 	import { timeYear, timeMonth } from "d3-time";
-
 	import tippy from "tippy.js";
 	import "tippy.js/dist/tippy.css";
 	import "tippy.js/themes/light.css";
+
+	import { createTooltipContent } from "../../actions/tooltip.js";
 
 	// Config
 	const NODE_RADIUS = 4.5;
@@ -27,30 +28,29 @@
 	let width = $state(0);
 	let heightVal = $state(0);
 	let loading = $state(false);
+	let hoveredNode = $state(null);
+	let stickyNode = $state(null);
+	let simulationData = [];
 
 	const marginTop = 50;
 	const marginRight = 50;
 	const marginBottom = 50;
 	const marginLeft = 50;
 
-	function tooltipAction(node, content) {
-		const instance = tippy(node, {
-			content,
-			allowHTML: true,
-			arrow: true,
-			duration: 0,
-			theme: "light"
-		});
-
-		return {
-			update(newContent) {
-				instance.setContent(newContent);
-			},
-			destroy() {
-				instance.destroy();
+	onMount(() => {
+		const handleClickOutside = (event) => {
+			if (stickyNode && canvasEl && !canvasEl.contains(event.target)) {
+				// Clicks inside the tooltip popper should not close it
+				const popper = document.querySelector(".tippy-popper");
+				if (popper && popper.contains(event.target)) {
+					return;
+				}
+				stickyNode = null;
 			}
 		};
-	}
+		document.addEventListener("click", handleClickOutside, true);
+		return () => document.removeEventListener("click", handleClickOutside, true);
+	});
 
 	$effect(() => {
 		if (!container) return;
@@ -98,15 +98,17 @@
 		const duration = dateExtent[1].getTime() - dateExtent[0].getTime();
 		const useMonths = duration < oneYear * 2;
 
-		const labels = xScale.ticks(useMonths ? timeMonth : timeYear).map((date) => ({
-			date,
-			label: useMonths
-				? date.toLocaleDateString(undefined, {
-						month: "short",
-						year: "2-digit"
-					})
-				: date.getFullYear()
-		}));
+		const labels = xScale
+			.ticks(useMonths ? timeMonth : timeYear)
+			.map((date) => ({
+				date,
+				label: useMonths
+					? date.toLocaleDateString(undefined, {
+							month: "short",
+							year: "2-digit"
+						})
+					: date.getFullYear()
+			}));
 
 		const yPosition = heightVal / 2;
 
@@ -125,7 +127,7 @@
 		}
 
 		const context = canvasEl.getContext("2d");
-		const simulationData = processedData.map((d) => ({ ...d }));
+		simulationData = processedData.map((d) => ({ ...d }));
 
 		const colorScale = scaleLinear()
 			.domain([
@@ -182,10 +184,120 @@
 			}, 0);
 		}
 
+		const canvas = select(canvasEl);
+
+		const findNodeAt = (mx, my) => {
+			let foundNode = null;
+			// Iterate backwards to find the topmost node
+			for (let i = simulationData.length - 1; i >= 0; i--) {
+				const node = simulationData[i];
+				const dx = mx - node.x;
+				const dy = my - node.y;
+				if (dx * dx + dy * dy < NODE_RADIUS * NODE_RADIUS) {
+					foundNode = node;
+					break;
+				}
+			}
+			return foundNode;
+		};
+
+		const mousemove = (event) => {
+			const [mx, my] = [event.offsetX, event.offsetY];
+			hoveredNode = findNodeAt(mx, my);
+		};
+
+		const mouseleave = () => {
+			hoveredNode = null;
+		};
+
+		const click = (event) => {
+			const [mx, my] = [event.offsetX, event.offsetY];
+			const foundNode = findNodeAt(mx, my);
+			if (foundNode) {
+				if (stickyNode?.url === foundNode.url) {
+					stickyNode = null;
+				} else {
+					stickyNode = foundNode;
+				}
+			} else {
+				stickyNode = null;
+			}
+		};
+
+		canvas.on("mousemove", mousemove);
+		canvas.on("mouseleave", mouseleave);
+		canvas.on("click", click);
+
 		return () => {
 			simulation.stop();
+			canvas.on("mousemove", null);
+			canvas.on("mouseleave", null);
+			canvas.on("click", null);
 		};
 	});
+
+	const tooltipTargetNode = $derived(stickyNode ?? hoveredNode);
+	const tooltipContent = $derived.by(() => {
+		if (!tooltipTargetNode) return null;
+		return createTooltipContent(tooltipTargetNode);
+	});
+	const isSticky = $derived(!!stickyNode);
+
+	function tooltip(node, params) {
+		const getOptions = (p) => {
+			if (typeof p === "string" || !p) {
+				return { content: p, trigger: "mouseenter focus", interactive: false };
+			}
+			return { trigger: "mouseenter focus", interactive: false, ...p };
+		};
+
+		let options = getOptions(params);
+
+		const instance = tippy(node, {
+			allowHTML: true,
+			arrow: true,
+			duration: 0,
+			theme: "light",
+			content: options.content,
+			trigger: options.trigger,
+			interactive: options.interactive,
+			appendTo: () => document.body
+		});
+
+		if (!options.content) {
+			instance.disable();
+		}
+
+		if (options.trigger === "manual" && options.content) {
+			instance.show();
+		}
+
+		return {
+			update(newParams) {
+				const newOptions = getOptions(newParams);
+				instance.setProps({
+					trigger: newOptions.trigger,
+					interactive: newOptions.interactive
+				});
+
+				if (newOptions.content) {
+					instance.setContent(newOptions.content);
+					instance.enable();
+					if (newOptions.trigger === "manual") {
+						instance.show();
+					}
+				} else {
+					instance.disable();
+					if (newOptions.trigger === "manual") {
+						instance.hide();
+					}
+				}
+			},
+			destroy() {
+				instance.destroy();
+			}
+		};
+	}
 </script>
 
 <div class="beeswarm-container" bind:this={container} style:--height={height}>
@@ -216,6 +328,12 @@
 			</g>
 		</svg>
 	{/if}
+	<div
+		class="tooltip-anchor"
+		use:tooltip={{ content: tooltipContent, trigger: "manual", interactive: isSticky }}
+		style:--top={tooltipTargetNode?.y ?? -9999}
+		style:--left={tooltipTargetNode?.x ?? -9999}
+	></div>
 </div>
 
 <style>
@@ -229,6 +347,14 @@
 		position: absolute;
 		top: 0;
 		left: 0;
+		pointer-events: none;
+	}
+	.tooltip-anchor {
+		position: absolute;
+		top: calc(var(--top) * 1px);
+		left: calc(var(--left) * 1px);
+		width: 0;
+		height: 0;
 		pointer-events: none;
 	}
 	canvas {

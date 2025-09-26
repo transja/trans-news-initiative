@@ -11,6 +11,8 @@
 	import "tippy.js/themes/light.css";
 	import { fade } from "svelte/transition";
 	import { Plus, Minus } from "@lucide/svelte";
+	import { createTooltipContent } from "../../actions/tooltip.js";
+
 	const {
 		data = [],
 		height = "100vh",
@@ -41,6 +43,25 @@
 	let showZoomHint = $state(false);
 	let hintTimeout;
 	let zoomBehavior;
+	let stickyInstance = $state(null);
+
+	$inspect(stickyInstance);
+
+	onMount(() => {
+		const handleClickOutside = (event) => {
+			if (
+				stickyInstance
+				// !stickyInstance.popper.contains(event.target) &&
+				// !stickyInstance.reference.contains(event.target)
+			) {
+				stickyInstance.hide();
+				stickyInstance.setProps({ isSticky: false });
+				stickyInstance = null;
+			}
+		};
+		document.addEventListener("click", handleClickOutside, true);
+		return () => document.removeEventListener("click", handleClickOutside, true);
+	});
 
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
@@ -176,13 +197,55 @@
 		debouncedHandleLabelOverlap();
 	}
 
+
+
 	function tooltipAction(node, content) {
+
+		
 		const instance = tippy(node, {
 			allowHTML: true,
 			arrow: true,
 			duration: 0,
-			theme: "light"
+			theme: "light",
+			trigger: "manual",
+			appendTo: () => document.body
 		});
+
+		const showOnHover = () => {
+			if (!stickyInstance) {
+				instance.setProps({ interactive: false });
+				instance.show();
+			}
+		};
+
+		const hideOnHover = () => {
+			if (!instance.props.isSticky) {
+				instance.hide();
+			}
+		};
+
+		const toggleSticky = () => {
+			if (stickyInstance === instance) {
+				instance.hide();
+				instance.setProps({ isSticky: false });
+				stickyInstance = null;
+			} else {
+				if (stickyInstance) {
+					stickyInstance.hide();
+					stickyInstance.setProps({ isSticky: false });
+				}
+				instance.setProps({
+					isSticky: true,
+					interactive: true
+				});
+				instance.show();
+				stickyInstance = instance;
+			}
+		};
+
+		node.addEventListener("mouseenter", showOnHover);
+		node.addEventListener("mouseleave", hideOnHover);
+		node.addEventListener("click", toggleSticky);
 
 		function updateContent(newContent) {
 			if (newContent) {
@@ -200,10 +263,18 @@
 				updateContent(newContent);
 			},
 			destroy() {
+				node.removeEventListener("mouseenter", showOnHover);
+				node.removeEventListener("mouseleave", hideOnHover);
+				node.removeEventListener("click", toggleSticky);
 				instance.destroy();
+				if (stickyInstance === instance) {
+					stickyInstance = null;
+				}
 			}
 		};
 	}
+
+
 
 	function debounce(func, wait) {
 		let timeout;
@@ -325,12 +396,8 @@
 									stroke={node.children ? linearColor(node.x) : "none"}
 									stroke-width={node.children ? 2 : 0}
 									class:article-circle={!node.children}
-									use:tooltipAction={!node.children &&
-										`<h5>${node.data.name}</h5><strong>${
-											node.data.publication
-										}</strong><br>${new Date(
-											node.data.publication_date
-										).toLocaleDateString()}`}
+									class:event-circle={node.children}
+									use:tooltipAction={!node.children && createTooltipContent(node.data)}
 								/>
 							</g>
 						{/each}
@@ -384,6 +451,10 @@
 		fill-opacity: 1;
 	}
 
+
+.event-circle {
+	pointer-events: none;
+}
 	.article-circle:hover {
 		fill-opacity: 1;
 		stroke-width: 2;
