@@ -1,5 +1,5 @@
 <script>
-	import { Search, ArrowDown, ArrowUp } from "@lucide/svelte";
+	import { Search, ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from "@lucide/svelte";
 	import {
 		leanOrder,
 		leanColors,
@@ -98,14 +98,14 @@
 				<tr>
 					<th style="width: 50%;">
 						<div class="header-content search-header">
-							<label for="search-headline">HEADLINE</label>
+							<!-- <label for="search-headline">HEADLINE</label> -->
 							<div class="search-input-wrapper">
 								<Search size={16} />
 								<input
 									id="search-headline"
 									type="text"
 									bind:value={searchTerm}
-									placeholder=""
+									placeholder="HEADLINE"
 								/>
 							</div>
 						</div>
@@ -128,6 +128,13 @@
 					<th>
 						<button class="header-button" onclick={() => setSort("media_name")}>
 							PUBLICATION
+							{#if sortKey === "media_name"}
+								{#if sortDirection === "desc"}
+									<ArrowDown size={14} />
+								{:else}
+									<ArrowUp size={14} />
+								{/if}
+							{/if}
 						</button>
 					</th>
 					<th>
@@ -175,7 +182,7 @@
 			<button
 				class="arrow-button"
 				onclick={() => (currentPage -= 1)}
-				disabled={currentPage === 1}>Previous</button
+				disabled={currentPage === 1}><ArrowLeft size={14} /> Previous</button
 			>
 			<div class="page-buttons">
 				{#each getPaginationButtons() as page}
@@ -194,7 +201,7 @@
 			<button
 				class="arrow-button"
 				onclick={() => (currentPage += 1)}
-				disabled={currentPage === totalPages}>Next</button
+				disabled={currentPage === totalPages}>Next <ArrowRight size={14} /></button
 			>
 		</div>
 	{/if}
@@ -310,8 +317,13 @@
 			border: none;
 			cursor: pointer;
 			font-weight: 600;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			line-height: 0;
+			
 			&:disabled {
-				color: #ccc;
+				color: var(--color-gray-500);
 				cursor: not-allowed;
 			}
 		}
