@@ -60,7 +60,7 @@
 		>
 			<div class="beeswarm-container event-content-block">
 				<h4>News articles by publish date</h4>
-				<Beeswarm data={event.articles} height="200px" {xDomain} />
+				<Beeswarm data={event.articles} {xDomain} />
 			</div>
 			<div class="column-chart-container event-content-block">
 				<h4>Publisher political lean by year</h4>

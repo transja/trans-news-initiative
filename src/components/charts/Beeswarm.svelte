@@ -17,20 +17,21 @@
 	const COLLIDE_RADIUS = NODE_RADIUS;
 	const COLLIDE_STRENGTH = 1;
 	const FORCE_X_STRENGTH = 0.5;
-	const FORCE_Y_STRENGTH = 0.05; // Weaker Y-force to encourage horizontal spread
-	const ANIMATED = true; // Set to false to render statically
+	const FORCE_Y_STRENGTH = 0.05; // Weaker Y-force to encourage horizontal spread/ Set to false to render statically
 	const STATIC_SIMULATION_TICKS = 300; // Used when ANIMATED is false
 
-	const { data = [], height = "1000px", xDomain = null } = $props();
+	const { data = [], xDomain = null } = $props();
 
 	let container;
 	let canvasEl = $state(null);
 	let width = $state(0);
-	let heightVal = $state(0);
-	let loading = $state(false);
+	let dynamicHeight = $state(150);
+	let loading = $state(true);
 	let hoveredNode = $state(null);
 	let stickyNode = $state(null);
-	let simulationData = [];
+	let simulationData = $state([]);
+	let yOffset = $state(0);
+	let simulation = null;
 
 	const marginTop = 50;
 	const marginRight = 50;
@@ -57,7 +58,6 @@
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
 				width = entry.contentRect.width;
-				heightVal = entry.contentRect.height;
 			}
 		});
 
@@ -84,7 +84,7 @@
 	);
 
 	const yearLabels = $derived.by(() => {
-		if (!width || !heightVal) return [];
+		if (!width || !dynamicHeight) return [];
 
 		const dateExtent = xScale.domain();
 		if (
@@ -110,7 +110,7 @@
 					: date.getFullYear()
 			}));
 
-		const yPosition = heightVal / 2;
+		const yPosition = dynamicHeight / 2;
 
 		return labels.map((d) => ({
 			x: xScale(d.date),
@@ -120,14 +120,54 @@
 	});
 
 	$effect(() => {
-		if (!processedData.length || !width || !heightVal || !canvasEl) return;
+		if (!processedData.length || !width) return;
+		loading = true;
 
-		if (!ANIMATED) {
-			loading = true;
-		}
+		const simData = processedData.map((d) => ({ ...d }));
+
+		// Set initial positions for a more stable simulation
+		simData.forEach((d) => {
+			d.x = xScale(d.publish_date);
+			d.y = 0;
+		});
+
+		simulation = forceSimulation(simData)
+			.force(
+				"x",
+				forceX((d) => xScale(d.publish_date)).strength(FORCE_X_STRENGTH)
+			)
+			.force("y", forceY(0).strength(FORCE_Y_STRENGTH))
+			.force(
+				"collide",
+				forceCollide(COLLIDE_RADIUS).strength(COLLIDE_STRENGTH)
+			);
+
+		// Use setTimeout to avoid blocking the main thread during intensive calculation
+		setTimeout(() => {
+			if (!simulation) return; // Component might have been destroyed
+			simulation.tick(STATIC_SIMULATION_TICKS);
+
+			const [minY, maxY] = extent(simData, (d) => d.y);
+			const contentHeight = maxY - minY + NODE_RADIUS * 2;
+			dynamicHeight = Math.max(150, contentHeight + marginTop + marginBottom);
+			yOffset = -minY + NODE_RADIUS + marginTop;
+			simulationData = simData; // Trigger drawing effect
+
+			loading = false;
+		}, 0);
+
+		return () => {
+			if (simulation) {
+				simulation.stop();
+				simulation = null;
+			}
+		};
+	});
+
+	$effect(() => {
+		if (!simulationData.length || !canvasEl) return;
 
 		const context = canvasEl.getContext("2d");
-		simulationData = processedData.map((d) => ({ ...d }));
 
 		const colorScale = scaleLinear()
 			.domain([
@@ -139,27 +179,10 @@
 			])
 			.range(["#a8d8f0", "#c8b4e2", "#f3c2d7"]);
 
-		const verticalCenter = heightVal / 2;
-
-		// Set initial positions for a more stable simulation
-		simulationData.forEach((d) => {
-			d.x = xScale(d.publish_date);
-			d.y = verticalCenter;
-		});
-
-		const simulation = forceSimulation(simulationData)
-			.force(
-				"x",
-				forceX((d) => xScale(d.publish_date)).strength(FORCE_X_STRENGTH)
-			)
-			.force("y", forceY(verticalCenter).strength(FORCE_Y_STRENGTH))
-			.force(
-				"collide",
-				forceCollide(COLLIDE_RADIUS).strength(COLLIDE_STRENGTH)
-			);
-
 		function draw() {
-			context.clearRect(0, 0, width, heightVal);
+			context.clearRect(0, 0, width, dynamicHeight);
+			context.save();
+			context.translate(0, yOffset);
 
 			// Draw nodes
 			simulationData.forEach((node) => {
@@ -171,28 +194,21 @@
 				context.lineWidth = 1;
 				context.stroke();
 			});
+			context.restore();
 		}
 
-		if (ANIMATED) {
-			simulation.on("tick", draw);
-		} else {
-			// Use setTimeout to allow the UI to update with the spinner before blocking the main thread
-			setTimeout(() => {
-				simulation.tick(STATIC_SIMULATION_TICKS);
-				draw();
-				loading = false;
-			}, 0);
-		}
+		draw();
 
 		const canvas = select(canvasEl);
 
 		const findNodeAt = (mx, my) => {
+			const transformedMy = my - yOffset;
 			let foundNode = null;
 			// Iterate backwards to find the topmost node
 			for (let i = simulationData.length - 1; i >= 0; i--) {
 				const node = simulationData[i];
 				const dx = mx - node.x;
-				const dy = my - node.y;
+				const dy = transformedMy - node.y;
 				if (dx * dx + dy * dy < NODE_RADIUS * NODE_RADIUS) {
 					foundNode = node;
 					break;
@@ -229,7 +245,6 @@
 		canvas.on("click", click);
 
 		return () => {
-			simulation.stop();
 			canvas.on("mousemove", null);
 			canvas.on("mouseleave", null);
 			canvas.on("click", null);
@@ -300,13 +315,17 @@
 	}
 </script>
 
-<div class="beeswarm-container" bind:this={container} style:--height={height}>
-	{#if loading && !ANIMATED}
+<div
+	class="beeswarm-container"
+	bind:this={container}
+	style:height="{dynamicHeight}px"
+>
+	{#if loading}
 		<div class="loading-spinner"></div>
 	{/if}
-	{#if width && heightVal}
-		<canvas bind:this={canvasEl} {width} height={heightVal}></canvas>
-		<svg class="axis-overlay" {width} height={heightVal}>
+	{#if width && dynamicHeight}
+		<canvas bind:this={canvasEl} {width} height={dynamicHeight}></canvas>
+		<svg class="axis-overlay" {width} height={dynamicHeight}>
 			<g>
 				{#each yearLabels as label}
 					<g transform="translate({label.x}, {label.y})">
@@ -331,7 +350,7 @@
 	<div
 		class="tooltip-anchor"
 		use:tooltip={{ content: tooltipContent, trigger: "manual", interactive: isSticky }}
-		style:--top={tooltipTargetNode?.y ?? -9999}
+		style:--top={tooltipTargetNode ? tooltipTargetNode.y + yOffset : -9999}
 		style:--left={tooltipTargetNode?.x ?? -9999}
 	></div>
 </div>
@@ -339,7 +358,6 @@
 <style>
 	.beeswarm-container {
 		width: 100%;
-		height: var(--height);
 		overflow: hidden;
 		position: relative;
 	}
