@@ -4,8 +4,10 @@
 	import Beeswarm from "./charts/Beeswarm.svelte";
 	import { ChevronUp } from "@lucide/svelte";
 	import { group } from "d3-array";
+	import { timeMonths, timeMonth } from "d3-time";
 	import ColumnChart from "./charts/ColumnChart.svelte";
 	import ArticleTable from "./ArticleTable.svelte";
+	import Sparkline from "./charts/Sparkline.svelte";
 	import {
 		leanOrder,
 		leanColors,
@@ -41,6 +43,23 @@
 			return { year: year.toString(), ...counts };
 		});
 	});
+
+	const sparklineData = $derived.by(() => {
+		const [start, end] = xDomain;
+		const months = timeMonths(start, end);
+
+		const articlesByMonth = group(event.articles, (d) =>
+			timeMonth.floor(new Date(d.publish_date))
+		);
+
+		return months.map((month) => {
+			const articlesInMonth = articlesByMonth.get(month) || [];
+			return {
+				date: month,
+				value: articlesInMonth.length
+			};
+		});
+	});
 </script>
 
 <div class="accordion-item">
@@ -48,6 +67,10 @@
 		<div class="accordion-header-content">
 			<h3>{event.name}</h3>
 			<span>{event.articles.length} news articles</span>
+		</div>
+
+		<div class="sparkline-wrapper">
+			<Sparkline data={sparklineData} {xDomain} />
 		</div>
 
 		<div class="accordion-icon" class:is-open={isOpen}>
@@ -109,7 +132,7 @@
 
 	.accordion-header {
 		display: grid;
-		grid-template-columns: 1fr auto;
+		grid-template-columns: 1fr auto auto;
 		align-items: center;
 		width: 100%;
 		padding: 1rem 1.5rem;
@@ -120,6 +143,10 @@
 		font-size: 1rem;
 		gap: 1rem;
 		background: var(--color-gray-100);
+
+		.sparkline-wrapper {
+			margin-right: 50px;
+		}
 
 		.accordion-header-content {
 			display: flex;
