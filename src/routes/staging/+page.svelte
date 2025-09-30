@@ -50,7 +50,7 @@
 	});
 
 	const resetFilters = (options) => {
-		for (const option in options) {
+		for (const option of options) {
 			if (option === "dateRange") {
 				filters[option] = {
 					start: minDate,
@@ -193,6 +193,8 @@
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
 	let controlsHeight = $state(0);
+
+
 </script>
 
 <svelte:boundary onerror={(e) => console.error(e)}>
@@ -223,8 +225,7 @@
 			bind:controlsHeight
 			{resetFilters}
 			allData={processedData}
-			filteredData={filteredDataWithDateRange}
-			{transitionDuration}
+
 			{summaryContent}
 			mode={introFinished
 				? isHoveringOverPlot

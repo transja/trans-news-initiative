@@ -35,7 +35,6 @@
 		summaryContent = [],
 		filters = $bindable(),
 		allData,
-		filteredData,
 		controlsHeight = $bindable(),
 		minDate,
 		maxDate,
@@ -229,9 +228,7 @@
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
 						<span
-							>{$inThemeView
-								? filteredData.length.toLocaleString()
-								: highlightedContent.count.toLocaleString()} articles</span
+							>{highlightedContent.count.toLocaleString()} articles</span
 						>
 						about
 						<span style={mode == "default" ? "margin-right: 1rem" : ""}
@@ -251,9 +248,7 @@
 							}}
 						>
 							<span
-								>{$inThemeView
-									? filteredData.length.toLocaleString()
-									: highlightedContent.count.toLocaleString()} articles</span
+								>{highlightedContent.count.toLocaleString()} articles</span
 							>
 							about
 
