@@ -50,7 +50,7 @@
 	});
 
 	const resetFilters = (options) => {
-		for (const option in options) {
+		for (const option of options) {
 			if (option === "dateRange") {
 				filters[option] = {
 					start: minDate,
