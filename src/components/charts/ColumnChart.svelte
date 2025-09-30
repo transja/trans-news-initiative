@@ -29,8 +29,6 @@
 	const yScale = $derived(scaleLinear().domain([0, 1]).range([innerHeight, 0]));
 
 	const yFmt = format(".0%");
-
-	$inspect(stackedData);
 </script>
 
 <div

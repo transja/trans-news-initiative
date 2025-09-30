@@ -209,7 +209,8 @@
 			bind:highlightedContent
 			bind:filters
 			bind:controlsHeight
-			data={processedData}
+			allData={processedData}
+			filteredData={filteredDataWithDateRange}
 			{transitionDuration}
 			{summaryContent}
 			mode={introFinished

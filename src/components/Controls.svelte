@@ -10,7 +10,10 @@
 		MoveRight
 	} from "@lucide/svelte";
 	import MonthPicker from "./inputs/MonthPicker.svelte";
-	import Select from "./inputs/Select.svelte";
+
+	import NestedSelect from "./inputs/NestedSelect.svelte";
+	import { leanOrder } from "../utils/getLeanProperty.js";
+	import { getPublicationName } from "../utils/getPublicationName.js";
 
 	// stores
 	import { inThemeView, activeTheme } from "../stores/global.js";
@@ -27,24 +30,65 @@
 		mode,
 		summaryContent = [],
 		filters = $bindable(),
-		data,
+		allData,
+		filteredData,
 		controlsHeight = $bindable(),
 		minDate,
 		maxDate
 	} = $props();
 
-	const publications = new Set(data.map((d) => d.media_name));
+	const publications = new Set(allData.map((d) => d.media_name));
 	const allPublications = ["All", ...publications];
-	const publicationLean = new Set(data.map((d) => d.lean));
+	const publicationLean = new Set(allData.map((d) => d.lean));
 	const allPublicationLean = ["All", ...publicationLean];
 
-	let selectedPublicationLean = $derived(
-		data.find((d) => d.media_name === filters.publication)?.lean
+	const publicationDomainToName = new Map(
+		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
+	);
+	const publicationNameToDomain = new Map(
+		allData.map((d) => [getPublicationName(d.media_name), d.media_name])
 	);
 
+	const publicationsByLean = $derived(
+		Object.entries(
+			allData.reduce((acc, d) => {
+				if (!d.lean || !d.media_name) return acc;
+				if (!acc[d.lean]) {
+					acc[d.lean] = new Set();
+				}
+				acc[d.lean].add(getPublicationName(d.media_name));
+				return acc;
+			}, {})
+		)
+			.map(([lean, publicationsSet]) => ({
+				lean,
+				publications: [...publicationsSet].sort()
+			}))
+			.sort((a, b) => a.lean.localeCompare(b.lean))
+	);
+
+	let selectedPublicationName = $state(
+		publicationDomainToName.get(filters.publication) || filters.publication
+	);
+
+	$effect(() => {
+		const domain =
+			publicationNameToDomain.get(selectedPublicationName) || selectedPublicationName;
+		if (filters.publication !== domain) {
+			filters.publication = domain;
+		}
+	});
+
+	$effect(() => {
+		const name =
+			publicationDomainToName.get(filters.publication) || filters.publication;
+		if (selectedPublicationName !== name) {
+			selectedPublicationName = name;
+		}
+	});
+
+
 	let showThemeDropdown = $state(false);
-	let showPublicationDropdown = $state(false);
-	let showLeanDropdown = $state(false);
 	let showMonthPicker = $state(false);
 
 	$effect(() => {
@@ -58,8 +102,8 @@
 	);
 
 	let focusedThemeIndex = $state(-1);
-	let focusedPubIndex = $state(-1);
-	let focusedLeanIndex = $state(-1);
+
+
 
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
@@ -71,6 +115,18 @@
 			} else {
 				$activeTheme = theme.theme;
 			}
+		}
+	}
+
+	function handleThemeSelectWithStopPropagation(event, theme) {
+		event.stopPropagation();
+		handleThemeSelect(theme);
+	}
+
+	function handleThemeSelectKeydown(event, theme) {
+		event.stopPropagation();
+		if (event.key === "Enter") {
+			handleThemeSelect(theme);
 		}
 	}
 
@@ -151,10 +207,6 @@
 		}
 	}
 
-	const formatter = new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		year: "2-digit"
-	});
 </script>
 
 <div class="controls-container" bind:clientHeight={controlsHeight}>
@@ -164,7 +216,7 @@
 				<div class="eyebrow">THE TRANS NEWS INITIATIVE IDENTIFIED</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
-						<span>{highlightedContent.count.toLocaleString()} articles</span>
+						<span>{$inThemeView ? filteredData.length : highlightedContent.count.toLocaleString()} articles</span>
 						about
 						<span style={mode == "default" ? "margin-right: 1rem" : ""}
 							>{highlightedContent.title}</span
@@ -182,21 +234,21 @@
 								easing: cubicInOut
 							}}
 						>
-							<span>{highlightedContent.count.toLocaleString()} articles</span>
+							<span>{$inThemeView ? filteredData.length : highlightedContent.count.toLocaleString()} articles</span>
 							about
 
 							{#if mode == "default"}
 								<div
 									class="interactive-title-wrapper"
 									use:clickOutside
-									on:clickoutside={() => {
+									onclickoutside={() => {
 										if (showThemeDropdown) handleExploreButtonClick();
 									}}
 								>
 									<button
 										class="interactive-title"
-										on:click={() => (showThemeDropdown = !showThemeDropdown)}
-										on:keydown={handleThemeKeydown}
+										onclick={() => (showThemeDropdown = !showThemeDropdown)}
+										onkeydown={handleThemeKeydown}
 									>
 										{highlightedContent.title}
 										<ChevronDown size={24} />
@@ -210,9 +262,12 @@
 												<div
 													class="dropdown-option"
 													class:focused={i === focusedThemeIndex}
-													on:mouseenter={() => (focusedThemeIndex = i)}
-													on:click|stopPropagation={() =>
-														handleThemeSelect(theme)}
+													onmouseenter={() => (focusedThemeIndex = i)}
+													onclick={(e) =>
+														handleThemeSelectWithStopPropagation(e, theme)}
+													onkeydown={(e) => handleThemeSelectKeydown(e, theme)}
+													role="button"
+													tabindex="0"
 												>
 													{theme.title}
 												</div>
@@ -229,20 +284,24 @@
 				{#if mode === "intro"}
 					<MousePointerClick size={30} /> Click anywhere to explore them all
 				{:else if highlightedContent.title !== "trans communities" && !$inThemeView}
-					<button class="explore-button" on:click={handleExploreButtonClick}
+					<button class="explore-button" onclick={handleExploreButtonClick}
 						>Explore this theme more<MoveRight size={30} />
 					</button>
 				{:else if $inThemeView}
 					<div
 						class="filter-control"
 						use:clickOutside
-						on:clickoutside={() => (showMonthPicker = false)}
+						onclickoutside={() => (showMonthPicker = false)}
 					>
 						<div class="input-wrapper">
-							<label class="filter-control__label">Date</label>
+							<label class="filter-control__label" for="calendar-button"
+								>Date</label
+							>
 							<button
+								id="calendar-button"
 								class="filter-control__input calendar-button"
-								on:click={() => (showMonthPicker = !showMonthPicker)}
+								onclick={() => (showMonthPicker = !showMonthPicker)}
+								aria-label="Select date range"
 							>
 								<svg
 									width="20"
@@ -270,37 +329,24 @@
 										bind:dateRange={filters.dateRange}
 										{minDate}
 										{maxDate}
-										on:close={() => (showMonthPicker = false)}
+										onclose={() => (showMonthPicker = false)}
 									/>
 								</div>
 							{/if}
 						</div>
 					</div>
 
-					<Select
+					<NestedSelect
 						label="Publication"
-						options={allPublications}
-						bind:value={filters.publication}
+						options={publicationsByLean}
+						bind:itemValue={selectedPublicationName}
+						bind:groupValue={filters.publicationLean}
+						groupKey="lean"
+						itemsKey="publications"
+						sortOrder={leanOrder}
 						class="wide"
 					/>
-					{#if filters.publication === "All"}
-						<Select
-							label="Publication Lean"
-							options={allPublicationLean}
-							bind:value={filters.publicationLean}
-							class="wide"
-						/>
-					{:else}
-						<div class="filter-control">
-							<div class="input-wrapper">
-								<label class="filter-control__label">Publication Lean</label>
-								<div class="static-lean-value">
-									{selectedPublicationLean}
-								</div>
-							</div>
-						</div>
-					{/if}
-					<button class="explore-button" on:click={handleThemeExit}
+					<button class="explore-button" onclick={handleThemeExit}
 						><MoveLeft size={30} /> Back</button
 					>
 				{/if}
@@ -388,10 +434,6 @@
 					display: flex;
 					gap: 0.25rem;
 
-					&.wide {
-						min-width: 180px;
-					}
-
 					.input-wrapper {
 						display: flex;
 						flex-direction: column;
@@ -444,16 +486,6 @@
 						border-color: #3b82f6;
 						box-shadow: 0 0 0 2px rgb(59 130 230 / 40%);
 					}
-				}
-				.static-lean-value {
-					display: flex;
-					align-items: center;
-					height: 38px;
-					padding: 0.5rem 0.75rem;
-					font-size: 0.875rem;
-					color: #4b5563;
-					background-color: #f3f4f6;
-					border-radius: 0.375rem;
 				}
 			}
 
@@ -516,10 +548,6 @@
 				}
 			}
 		}
-	}
-
-	svg.lucide-mouse-pointer-click {
-		width: 30px;
 	}
 
 	.explore-button {

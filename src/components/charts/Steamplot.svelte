@@ -33,6 +33,8 @@
 		isHoveringOverPlot = $bindable()
 	} = $props();
 
+
+
 	let container;
 	let width = $state(0);
 
