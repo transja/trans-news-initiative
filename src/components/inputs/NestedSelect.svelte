@@ -9,6 +9,8 @@
 		groupKey = "group",
 		itemsKey = "items",
 		sortOrder = [],
+		groupColors = {},
+		groupTextColors = {},
 		class: className = ""
 	} = $props();
 
@@ -182,7 +184,7 @@
 				{#each sortedOptions as group}
 					<div class="lean-group">
 						<div
-							class="dropdown-option lean-header"
+							class="dropdown-option group-header"
 							onclick={() => selectGroup(group[groupKey])}
 							onkeydown={(e) =>
 								handleOptionKeydown(e, () => selectGroup(group[groupKey]))}
@@ -190,12 +192,17 @@
 							tabindex="0"
 							aria-expanded={openGroups.has(group[groupKey])}
 						>
-							<span>{group[groupKey]}</span>
+							<span
+								style="background-color: {groupColors[group[groupKey]] ??
+									groupColors.unknown}; color: {groupTextColors[
+									group[groupKey]
+								] ?? groupTextColors.unknown} ">{group[groupKey]}</span
+							>
 							<div
 								class="chevron-wrapper"
 								role="button"
 								tabindex="0"
-								aria-label={`Toggle ${group[groupKey]} publications`}
+								aria-label={`Toggle ${group[groupKey]} options`}
 								onclick={(e) => handleToggleGroupClick(e, group[groupKey])}
 								onkeydown={(e) => handleToggleGroupKeydown(e, group[groupKey])}
 							>
@@ -294,7 +301,7 @@
 		position: absolute;
 		z-index: 10;
 		width: 100%;
-		max-height: 200px;
+		max-height: 300px;
 		overflow-y: auto;
 	}
 
@@ -310,12 +317,27 @@
 		}
 	}
 
-	.lean-header {
+	.group-header {
 		font-weight: 700;
 		background-color: #f9fafb;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		text-transform: uppercase;
+
+		span {
+			padding: 0.25rem 0.5rem;
+			text-align: center;
+			justify-content: center;
+			// height: 20px;
+			border-radius: 5px;
+			text-align: center;
+			color: #fff;
+			text-transform: uppercase;
+			white-space: nowrap;
+			font-size: 0.8rem;
+			font-weight: 700;
+		}
 	}
 
 	.publication-option {
@@ -327,9 +349,10 @@
 		border-radius: 4px;
 		display: flex;
 		align-items: center;
+        background-color: var(--color-gray-200);
 
 		&:hover {
-			background-color: #e5e7eb;
+			background-color: var(--color-gray-300);
 		}
 	}
 

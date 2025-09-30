@@ -3,7 +3,7 @@
 	import { cubicInOut } from "svelte/easing";
 	import {
 		MousePointerClick,
-		Pointer,
+		Calendar,
 		ChevronDown,
 		ChevronLeft,
 		MoveLeft,
@@ -12,7 +12,11 @@
 	import MonthPicker from "./inputs/MonthPicker.svelte";
 
 	import NestedSelect from "./inputs/NestedSelect.svelte";
-	import { leanOrder } from "../utils/getLeanProperty.js";
+	import {
+		leanOrder,
+		leanColors,
+		leanTextColors
+	} from "../utils/getLeanProperty.js";
 	import { getPublicationName } from "../utils/getPublicationName.js";
 
 	// stores
@@ -34,7 +38,8 @@
 		filteredData,
 		controlsHeight = $bindable(),
 		minDate,
-		maxDate
+		maxDate,
+		resetFilters
 	} = $props();
 
 	const publications = new Set(allData.map((d) => d.media_name));
@@ -73,7 +78,8 @@
 
 	$effect(() => {
 		const domain =
-			publicationNameToDomain.get(selectedPublicationName) || selectedPublicationName;
+			publicationNameToDomain.get(selectedPublicationName) ||
+			selectedPublicationName;
 		if (filters.publication !== domain) {
 			filters.publication = domain;
 		}
@@ -86,7 +92,6 @@
 			selectedPublicationName = name;
 		}
 	});
-
 
 	let showThemeDropdown = $state(false);
 	let showMonthPicker = $state(false);
@@ -102,8 +107,6 @@
 	);
 
 	let focusedThemeIndex = $state(-1);
-
-
 
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
@@ -142,6 +145,7 @@
 		if (!$inThemeView) return;
 		$inThemeView = false;
 		$activeTheme = null;
+		resetFilters(["publicationLean", "publication", "dateRange"]);
 	}
 
 	function handleThemeKeydown(event) {
@@ -207,6 +211,10 @@
 		}
 	}
 
+	const formatter = new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		year: "numeric"
+	});
 </script>
 
 <div
@@ -220,7 +228,11 @@
 				<div class="eyebrow">THE TRANS NEWS INITIATIVE IDENTIFIED</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
-						<span>{$inThemeView ? filteredData.length.toLocaleString() : highlightedContent.count.toLocaleString()} articles</span>
+						<span
+							>{$inThemeView
+								? filteredData.length.toLocaleString()
+								: highlightedContent.count.toLocaleString()} articles</span
+						>
 						about
 						<span style={mode == "default" ? "margin-right: 1rem" : ""}
 							>{highlightedContent.title}</span
@@ -238,7 +250,11 @@
 								easing: cubicInOut
 							}}
 						>
-							<span>{$inThemeView ? filteredData.length.toLocaleString() : highlightedContent.count.toLocaleString()} articles</span>
+							<span
+								>{$inThemeView
+									? filteredData.length.toLocaleString()
+									: highlightedContent.count.toLocaleString()} articles</span
+							>
 							about
 
 							{#if mode == "default"}
@@ -283,6 +299,9 @@
 						</div>
 					{/key}
 				</div>
+				{#if $inThemeView}
+					<div class="subtext">match your filters</div>
+				{/if}
 			</div>
 			<div class="right-content">
 				{#if mode === "intro"}
@@ -307,21 +326,10 @@
 								onclick={() => (showMonthPicker = !showMonthPicker)}
 								aria-label="Select date range"
 							>
-								<svg
-									width="20"
-									height="22"
-									viewBox="0 0 20 22"
-									fill="none"
-									xmlns="http://www.w3.org/2000/svg"
-								>
-									<path
-										d="M5.99023 1V5M13.9902 1V5M0.990234 9H18.9902M2.99023 3H16.9902C18.0948 3 18.9902 3.89543 18.9902 5V19C18.9902 20.1046 18.0948 21 16.9902 21H2.99023C1.88566 21 0.990234 20.1046 0.990234 19V5C0.990234 3.89543 1.88566 3 2.99023 3Z"
-										stroke="#191919"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-									/>
-								</svg>
+								<Calendar size={18} />
+								{formatter.format(filters.dateRange.start)} - {formatter.format(
+									filters.dateRange.end
+								)}
 							</button>
 
 							{#if showMonthPicker}
@@ -348,6 +356,8 @@
 						groupKey="lean"
 						itemsKey="publications"
 						sortOrder={leanOrder}
+						groupColors={leanColors}
+						groupTextColors={leanTextColors}
 						class="wide"
 					/>
 					<button class="explore-button" onclick={handleThemeExit}
@@ -412,6 +422,14 @@
 				color: var(--color-gray-700);
 			}
 
+			.subtext {
+				font-style: normal;
+				font-weight: 400;
+				font-size: 16px;
+
+				color: var(--color-gray-700);
+			}
+
 			.subtitle,
 			.subtitle-sizer {
 				font-style: normal;
@@ -465,6 +483,7 @@
 
 				.calendar-button {
 					justify-content: center;
+					gap: 0.5rem;
 				}
 
 				.filter-control__label {

@@ -33,7 +33,6 @@
 		? new Date(Math.max(...allDates.map((d) => new Date(d))))
 		: new Date();
 
-
 	let introFinished = $state(false);
 
 	const transitionDuration = 500;
@@ -50,6 +49,19 @@
 		}
 	});
 
+	const resetFilters = (options) => {
+		for (const option in options) {
+			if (option === "dateRange") {
+				filters[option] = {
+					start: minDate,
+					end: maxDate
+				};
+			} else {
+				filters[option] = "All";
+			}
+		}
+	};
+	
 	$effect(() => {
 		if (!$activeTheme && !$inThemeView) {
 			filters = {
@@ -209,6 +221,7 @@
 			bind:highlightedContent
 			bind:filters
 			bind:controlsHeight
+			{resetFilters}
 			allData={processedData}
 			filteredData={filteredDataWithDateRange}
 			{transitionDuration}
@@ -224,10 +237,7 @@
 
 		{#if $inThemeView}
 			<section class="container-section">
-				<ThemeSection
-					data={filteredDataWithDateRange}
-					{xDomain}
-				/>
+				<ThemeSection data={filteredDataWithDateRange} {xDomain} />
 			</section>
 		{/if}
 	</div>
