@@ -209,14 +209,18 @@
 
 </script>
 
-<div class="controls-container" bind:clientHeight={controlsHeight}>
+<div
+	class="controls-container"
+	bind:clientHeight={controlsHeight}
+	class:in-theme-view={$inThemeView}
+>
 	{#if highlightedContent}
 		<div class="controls-content">
 			<div class="left-content">
 				<div class="eyebrow">THE TRANS NEWS INITIATIVE IDENTIFIED</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
-						<span>{$inThemeView ? filteredData.length : highlightedContent.count.toLocaleString()} articles</span>
+						<span>{$inThemeView ? filteredData.length.toLocaleString() : highlightedContent.count.toLocaleString()} articles</span>
 						about
 						<span style={mode == "default" ? "margin-right: 1rem" : ""}
 							>{highlightedContent.title}</span
@@ -234,7 +238,7 @@
 								easing: cubicInOut
 							}}
 						>
-							<span>{$inThemeView ? filteredData.length : highlightedContent.count.toLocaleString()} articles</span>
+							<span>{$inThemeView ? filteredData.length.toLocaleString() : highlightedContent.count.toLocaleString()} articles</span>
 							about
 
 							{#if mode == "default"}
@@ -375,6 +379,14 @@
 		background: white;
 		// border-bottom: 1px solid #e5e5e5;
 
+		--subtitle-font-size: 36px;
+		--subtitle-line-height: 44px;
+
+		&.in-theme-view {
+			--subtitle-font-size: 24px;
+			--subtitle-line-height: 30px;
+		}
+
 		.controls-content {
 			width: 100%;
 			display: flex;
@@ -403,9 +415,12 @@
 			.subtitle,
 			.subtitle-sizer {
 				font-style: normal;
-				font-size: 36px;
-				line-height: 44px;
+				font-size: var(--subtitle-font-size);
+				line-height: var(--subtitle-line-height);
 				color: #000000;
+				transition:
+					font-size 0.3s ease,
+					line-height 0.3s ease;
 				span {
 					font-weight: 700;
 				}
@@ -502,9 +517,12 @@
 				border-bottom: 3px solid #000;
 				background: none;
 				border: none;
-				font-size: 36px;
-				line-height: 44px;
+				font-size: var(--subtitle-font-size);
+				line-height: var(--subtitle-line-height);
 				padding: 0;
+				transition:
+					font-size 0.3s ease,
+					line-height 0.3s ease;
 
 				&:after {
 					content: "";
