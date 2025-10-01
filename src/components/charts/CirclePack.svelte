@@ -507,7 +507,7 @@
 	.zoom-controls {
 		position: absolute;
 		top: 1.5rem;
-		left: 1.5rem;
+		right: 1.5rem;
 		display: flex;
 		gap: 5px;
 		flex-direction: column;
