@@ -216,14 +216,14 @@
 	});
 </script>
 
-<div
-	class="controls-container"
-	class:in-theme-view={$inThemeView}
->
+<div class="controls-container" class:in-theme-view={$inThemeView}>
 	{#if highlightedContent}
 		<div class="controls-content">
 			<div class="left-content">
-				<div class="eyebrow">THE TRANS NEWS INITIATIVE IDENTIFIED</div>
+				<div class="eyebrow">
+					{#if $inThemeView}WITH YOUR CURRENT FILTERS,&nbsp;
+					{/if}THE TRANS NEWS INITIATIVE IDENTIFIED
+				</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
 						<span
@@ -297,7 +297,6 @@
 						</div>
 					{/key}
 				</div>
-			
 			</div>
 			<div class="right-content">
 				{#if mode === "intro"}
@@ -345,7 +344,7 @@
 					</div>
 
 					<NestedSelect
-						label="Publication"
+						label="Publications by lean"
 						options={publicationsByLean}
 						bind:itemValue={selectedPublicationName}
 						bind:groupValue={filters.publicationLean}

@@ -18,6 +18,21 @@
 	let wrapperEl;
 	let openGroups = $state(new Set());
 
+	let isGroupSelected = $derived(
+		groupValue && groupValue !== "All" && itemValue === "All"
+	);
+
+	function getGroupStyle(groupName) {
+		if (!groupName) return "";
+		const backgroundColor = groupColors[groupName] ?? groupColors.unknown;
+		const color = groupTextColors[groupName] ?? groupTextColors.unknown;
+		return `background-color: ${backgroundColor}; color: ${color}`;
+	}
+
+	let selectedGroupStyle = $derived(
+		isGroupSelected ? getGroupStyle(groupValue) : ""
+	);
+
 	function toggleGroup(groupName) {
 		const newSet = new Set(openGroups);
 		if (newSet.has(groupName)) {
@@ -167,7 +182,9 @@
 			onkeydown={handleKeydown}
 			aria-expanded={showDropdown}
 		>
-			<span>{selectedText}</span>
+			<span class:selected-group={isGroupSelected} style={selectedGroupStyle}>
+				{selectedText}
+			</span>
 			<ChevronDown size={16} class="chevron" />
 		</button>
 		{#if showDropdown}
@@ -192,11 +209,8 @@
 							tabindex="0"
 							aria-expanded={openGroups.has(group[groupKey])}
 						>
-							<span
-								style="background-color: {groupColors[group[groupKey]] ??
-									groupColors.unknown}; color: {groupTextColors[
-									group[groupKey]
-								] ?? groupTextColors.unknown} ">{group[groupKey]}</span
+							<span style={getGroupStyle(group[groupKey])}
+								>{group[groupKey]}</span
 							>
 							<div
 								class="chevron-wrapper"
@@ -362,6 +376,15 @@
 
 	.group-chevron.open {
 		transform: rotate(180deg);
+	}
+
+	.selected-group {
+		padding: 0.25rem 0.5rem;
+		border-radius: 5px;
+		text-transform: uppercase;
+		white-space: nowrap;
+		font-size: 0.8rem;
+		font-weight: 700;
 	}
 
 	:global(button[aria-expanded="true"] .chevron) {
