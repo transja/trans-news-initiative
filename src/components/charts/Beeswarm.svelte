@@ -151,7 +151,7 @@
 			const [minY, maxY] = extent(simData, (d) => d.y);
 			const contentHeight = maxY - minY + NODE_RADIUS * 2;
 			dynamicHeight = Math.max(150, contentHeight + marginTop + marginBottom);
-			yOffset = -minY + NODE_RADIUS + marginTop;
+			yOffset = dynamicHeight / 2 - (minY + maxY) / 2;
 			simulationData = simData; // Trigger drawing effect
 
 			loading = false;
