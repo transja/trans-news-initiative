@@ -48,7 +48,7 @@
 	header {
 		width: 100%;
 		position: fixed;
-		padding: 1rem;
+		padding: 1rem 1.75rem;
 		display: flex;
 		flex-direction: row;
 		align-items: center;

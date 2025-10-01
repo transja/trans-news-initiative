@@ -6,8 +6,8 @@
 		Calendar,
 		ChevronDown,
 		ChevronLeft,
-		MoveLeft,
-		MoveRight
+		ArrowLeft,
+		ArrowRight
 	} from "@lucide/svelte";
 	import MonthPicker from "./inputs/MonthPicker.svelte";
 
@@ -221,8 +221,8 @@
 		<div class="controls-content">
 			<div class="left-content">
 				<div class="eyebrow">
-					{#if $inThemeView}WITH YOUR CURRENT FILTERS,&nbsp;
-					{/if}THE TRANS NEWS INITIATIVE IDENTIFIED
+					{#if $inThemeView}With your current filters,&nbsp;
+					{/if}The Trans News Initiative identified
 				</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
@@ -303,7 +303,7 @@
 					<MousePointerClick size={30} /> Click anywhere to explore them all
 				{:else if highlightedContent.title !== "trans communities" && !$inThemeView}
 					<button class="explore-button" onclick={handleExploreButtonClick}
-						>Explore this theme more<MoveRight size={30} />
+						>Explore this theme more<ArrowRight size={24} />
 					</button>
 				{:else if $inThemeView}
 					<div
@@ -356,7 +356,7 @@
 						class="wide"
 					/>
 					<button class="explore-button" onclick={handleThemeExit}
-						><MoveLeft size={30} /> Back</button
+						><ArrowLeft size={24} /> Back</button
 					>
 				{/if}
 			</div>
@@ -366,8 +366,8 @@
 
 <style lang="scss">
 	.controls-container {
-		padding: 1rem 0px;
-		width: calc(100% - 6rem);
+		padding: 1rem 2rem;
+		width: 100%;
 		margin: 0 auto;
 		min-height: 100px;
 		display: flex;
@@ -381,8 +381,10 @@
 		right: 0;
 		z-index: 2000;
 		font-family: var(--sans);
-		background: white;
-		// border-bottom: 1px solid #e5e5e5;
+		background: rgba(255, 255, 255, 0.95);
+		backdrop-filter: blur(6px);
+		border-bottom: 1px solid var(--color-gray-200);
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.025);
 
 		--subtitle-font-size: 36px;
 		--subtitle-line-height: 44px;
@@ -408,11 +410,10 @@
 			}
 
 			.eyebrow {
-				font-style: normal;
+				font-style: italic;
 				font-weight: 400;
-				font-size: 16px;
+				font-size: 14px;
 				line-height: 19px;
-				text-transform: uppercase;
 
 				color: var(--color-gray-700);
 			}
@@ -482,11 +483,10 @@
 				}
 
 				.filter-control__label {
-					font-size: 0.75rem;
+					font-size: 12px;
 					font-weight: 600;
-					color: #4b5563;
+					color: var(--color-gray-1000);
 					text-transform: uppercase;
-					letter-spacing: 0.05em;
 					padding-left: 0.25rem;
 				}
 
@@ -514,6 +514,10 @@
 						outline-offset: 2px;
 						border-color: #3b82f6;
 						box-shadow: 0 0 0 2px rgb(59 130 230 / 40%);
+					}
+
+					&:hover {
+						background: var(--color-gray-50);
 					}
 				}
 			}
@@ -598,10 +602,48 @@
 		justify-content: center;
 		gap: 0.5rem;
 		transition: transform 0.2s ease-in-out;
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		height: 38px;
 
 		&:hover {
-			transform: scale(1.05);
+			transform: translateY(-2px);
+		}
+	}
+
+	@media(max-width: 1000px) {
+		.controls-container {
+			padding: 1rem;
+			--subtitle-font-size: 36px;
+			--subtitle-line-height: 44px;
+
+			&.in-theme-view {
+				--subtitle-font-size: 24px;
+				--subtitle-line-height: 30px;
+			}
+			
+			.controls-content {
+				flex-direction: column;
+				align-items: start;
+				gap: 2rem;
+
+				.left-content, .right-content {
+					width: 100%;
+					justify-content: flex-start;
+				}
+			}
+		}
+	}
+
+	@media(max-width: 600px) {
+		.controls-container {
+			padding: 1rem;
+			--subtitle-font-size: 24px;
+			--subtitle-line-height: 32px;
+
+			&.in-theme-view {
+				--subtitle-font-size: 24px;
+				--subtitle-line-height: 32px;
+			}
 		}
 	}
 </style>

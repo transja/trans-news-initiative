@@ -139,7 +139,7 @@
 					</th>
 					<th>
 						<button class="header-button" onclick={() => setSort("lean")}>
-							PUBLICATION LEAN
+							PUB. LEAN
 							{#if sortKey === "lean"}
 								{#if sortDirection === "desc"}
 									<ArrowDown size={14} />
@@ -209,7 +209,7 @@
 
 <style lang="scss">
 	.article-table-container {
-		color: var(--color-gray-600);
+		color: var(--color-gray-700);
 		font-size: 0.8rem;
 	}
 	.table-wrapper {
@@ -227,8 +227,8 @@
 	}
 	th {
 		background-color: #f9f9f9;
-		font-weight: 600;
-		font-size: 0.8rem;
+		font-weight: 700;
+		font-size: var(--12px);
 		text-transform: uppercase;
 		color: #555;
 	}
@@ -245,11 +245,11 @@
 		background: none;
 		border: none;
 		cursor: pointer;
-		font-weight: 600;
-		font-size: 0.8rem;
+		font-weight: 700;
+		font-size: var(--12px);
 		text-transform: uppercase;
 
-		padding: 0;
+		padding: .5rem 0;
 	}
 	.search-header {
 		flex-direction: row;
@@ -260,33 +260,46 @@
 		.search-input-wrapper {
 			display: flex;
 			align-items: center;
-			gap: 0.5rem;
 			border: none;
 			border-radius: 4px;
 			padding: 0;
 			background-color: transparent;
 			border-bottom: 1px solid #999;
 			border-radius: 0;
+			color: var(--color-gray-1000);
 			input {
 				border: none;
 				outline: none;
 				background: none;
+				font-weight: 700;
+				color: var(--color-gray-1000);
+			}
+			input::placeholder {
+				font-weight: 700;
+				color: var(--color-gray-1000);
+			}
+			input:-internal-autofill-selected {
+				background-color: transparent;
 			}
 		}
 	}
 	td a {
 		text-decoration: none;
-		color: var(--color-gray-600);
+		color: var(--color-gray-700);
 		&:hover {
 			text-decoration: underline;
 		}
 	}
 	.lean-pill {
-		padding: 0.25rem 0.75rem;
+		padding: 0.4rem 0.75rem;
 		border-radius: 5px;
 		text-transform: uppercase;
 		white-space: nowrap;
 		font-weight: 700;
+		font-size: 10px;
+		width: 90px;
+		text-align: center;
+		display: inline-block;
 	}
 	.pagination {
 		display: flex;
@@ -298,14 +311,14 @@
 			gap: 0.25rem;
 			align-items: center;
 			button {
-				border: 1px solid #eee;
+				border: 1px solid var(--color-gray-200);
 				border-radius: 4px;
 				background-color: #fff;
 				padding: 0.5rem 0.75rem;
 				cursor: pointer;
 				&.active {
-					background-color: #f0f0f0;
-					font-weight: 600;
+					background-color: var(--color-gray-100);;
+					font-weight: 700;
 				}
 			}
 			span {

@@ -1,3 +1,7 @@
+<script>
+	import { Info } from "@lucide/svelte";
+</script>
+
 <div class="guidance-container">
 	<div class="sticky-inner">
 		<div class="guidance-header">
@@ -31,13 +35,15 @@
 			</div>
 		</div>
 		<div class="methodology-link">
-			<a href="/methodology">See the methodology <span>i</span></a>
+			<a href="/methodology">See the methodology <Info size={18} /></a>
 		</div>
 	</div>
 </div>
 
 <style lang="scss">
 	.guidance-container {
+		width: 300px;
+
 		.guidance-header {
 			display: flex;
 			align-items: center;
@@ -77,6 +83,10 @@
 			a {
 				color: #555;
 				text-decoration: none;
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				gap: 0.25rem;
 				&:hover {
 					text-decoration: underline;
 				}
@@ -97,6 +107,37 @@
 
 	.sticky-inner {
 		position: sticky;
+		padding-top: 1rem;
 		top: calc(var(--header-height) + var(--controls-height));
+	}
+
+	@media(max-width: 1000px) {
+		.sticky-inner {
+			padding-top: 0;
+		}
+
+		.guidance-container {
+			width: 100%;
+
+			.guidance-content {
+				flex-direction: row;
+
+				.guidance-item {
+					width: 33.33%;
+				}
+			}
+		}
+	}
+
+	@media(max-width: 600px) {
+		.guidance-container {
+			.guidance-content {
+				flex-direction: column;
+
+				.guidance-item {
+					width: 100%;
+				}
+			}
+		}
 	}
 </style>

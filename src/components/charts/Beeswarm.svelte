@@ -170,6 +170,16 @@
 
 		const context = canvasEl.getContext("2d");
 
+		const ratio = window.devicePixelRatio || 1;
+
+		canvasEl.width = width * ratio;
+		canvasEl.height = dynamicHeight * ratio;
+
+		canvasEl.style.width = `${width}px`;
+		canvasEl.style.height = `${dynamicHeight}px`;
+
+		context.setTransform(ratio, 0, 0, ratio, 0, 0);
+
 		const colorScale = scaleLinear()
 			.domain([
 				xScale.domain()[0],
@@ -185,16 +195,30 @@
 			context.save();
 			context.translate(0, yOffset);
 
-			// Draw nodes
 			simulationData.forEach((node) => {
+				if (node === hoveredNode || node === stickyNode) return; // skip highlight ones
+
 				context.beginPath();
 				context.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI);
 				context.fillStyle = colorScale(node.publish_date);
 				context.fill();
-				context.strokeStyle = "#fff";
 				context.lineWidth = 1;
+				context.strokeStyle = "#fff";
 				context.stroke();
 			});
+
+			[hoveredNode, stickyNode].forEach((node) => {
+				if (!node) return;
+
+				context.beginPath();
+				context.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI);
+				context.fillStyle = colorScale(node.publish_date);
+				context.fill();
+				context.lineWidth = 3;
+				context.strokeStyle = "#000"; // highlight stroke
+				context.stroke();
+			});
+
 			context.restore();
 		}
 
@@ -221,6 +245,12 @@
 		const mousemove = (event) => {
 			const [mx, my] = [event.offsetX, event.offsetY];
 			hoveredNode = findNodeAt(mx, my);
+
+			if (hoveredNode) {
+				canvasEl.style.cursor = "pointer";
+			} else {
+				canvasEl.style.cursor = "default";
+			}
 		};
 
 		const mouseleave = () => {
@@ -340,11 +370,11 @@
 				/>
 				{#each yearLabels as label}
 					<g class="tick" transform="translate({label.x}, 0)">
-						<line
+						<!-- <line
 							y1={axisY}
 							y2={axisY + 7}
 							style="stroke: var(--color-gray-300); stroke-width: 1;"
-						/>
+						/> -->
 					</g>
 				{/each}
 			</g>

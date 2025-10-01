@@ -139,7 +139,7 @@
 
 		background: var(--color-gray-50);
 		border-radius: 10px;
-		border: 1px solid var(--color-gray-100);
+		border: 1px solid var(--color-gray-200);
 		// box-shadow: inset 0px 2px 8px rgba(0, 0, 0, 0.15);
 
 		&.in-theme-view {
@@ -163,5 +163,21 @@
 		cursor: pointer;
 		font-size: 1rem;
 		border-radius: 5px;
+	}
+
+	@media(max-width: 1000px) {
+		#dashboard {
+			height: calc(
+				100vh - var(--header-height, 0px) - 210px
+			);
+
+			&.in-theme-view {
+				height: calc(60vh);
+			}
+		}
+
+		.circlepack-wrapper {
+			width: calc(100% - 2rem);
+		}
 	}
 </style>

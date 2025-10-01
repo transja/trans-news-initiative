@@ -247,11 +247,17 @@
 		font-family: "Inter", sans-serif;
 
 		.container-section {
-			padding: 0 3rem;
-			margin-top: 2rem;
-			padding-top: 2rem;
-			border-top: 1px solid #e5e5e5;
-			background: #f8f8f8;
+			padding: 4rem 2rem;
+			background: var(--color-gray-50);
+		}
+	}
+
+	@media(max-width: 600px) {
+		.main-content {
+
+			.container-section {
+				padding: 2rem 1rem;
+			}
 		}
 	}
 </style>
