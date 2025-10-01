@@ -36,7 +36,6 @@
 		filters = $bindable(),
 		allData,
 		filteredData,
-		controlsHeight = $bindable(),
 		minDate,
 		maxDate,
 		resetFilters
@@ -219,7 +218,6 @@
 
 <div
 	class="controls-container"
-	bind:clientHeight={controlsHeight}
 	class:in-theme-view={$inThemeView}
 >
 	{#if highlightedContent}
@@ -299,9 +297,7 @@
 						</div>
 					{/key}
 				</div>
-				{#if $inThemeView}
-					<div class="subtext">match your filters</div>
-				{/if}
+			
 			</div>
 			<div class="right-content">
 				{#if mode === "intro"}

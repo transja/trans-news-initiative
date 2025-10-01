@@ -192,7 +192,7 @@
 
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
-	let controlsHeight = $state(0);
+	let controlsHeight = 100;
 </script>
 
 <svelte:boundary onerror={(e) => console.error(e)}>
@@ -220,7 +220,6 @@
 		<Controls
 			bind:highlightedContent
 			bind:filters
-			bind:controlsHeight
 			{resetFilters}
 			allData={processedData}
 			filteredData={filteredDataWithDateRange}
