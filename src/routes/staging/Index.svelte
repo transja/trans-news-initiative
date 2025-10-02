@@ -15,5 +15,4 @@
 	<Home />
 	<About />
 	<Methodology />
-	<Footer />
 </svelte:boundary>

@@ -366,25 +366,25 @@
 
 <style lang="scss">
 	.controls-container {
-		padding: 1rem 2rem;
+		padding: 1rem 2rem 1rem;
 		width: 100%;
 		margin: 0 auto;
-		min-height: 100px;
+		// min-height: var(--controls-height, 0px);
 		display: flex;
 		justify-content: center;
 		align-items: flex-start;
 		flex-direction: column;
 		gap: 10px;
 		position: sticky;
-		top: var(--header-height);
+		top: calc(var(--header-height) - 1rem);
 		left: 0;
 		right: 0;
 		z-index: 2000;
 		font-family: var(--sans);
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
-		border-bottom: 1px solid var(--color-gray-200);
-		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.025);
+
+
 
 		--subtitle-font-size: 36px;
 		--subtitle-line-height: 44px;
@@ -392,6 +392,8 @@
 		&.in-theme-view {
 			--subtitle-font-size: 24px;
 			--subtitle-line-height: 30px;
+			border-bottom: 1px solid var(--color-gray-200);
+			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.025);
 		}
 
 		.controls-content {

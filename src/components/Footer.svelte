@@ -79,14 +79,6 @@
 		opacity: 0.4;
 	}
 
-	:global(.org-wrapper svg) {
-		height: 2rem;
-	}
-
-	:global(.org-wrapper a:last-of-type svg) {
-		height: 1.4rem;
-	}
-
 	@media (max-width: 720px) {
 		footer {
 			justify-content: center;

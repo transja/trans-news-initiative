@@ -96,7 +96,7 @@
 		flex-direction: row;
 		width: 100%;
 		height: calc(
-			100vh - var(--header-height, 0px) - var(--footer-height, 0px) - 100px
+			100vh - var(--header-height, 0px) - var(--footer-height, 0px) - var(--controls-height, 0px)
 		);
 
 		margin-top: var(--header-height, 0px);

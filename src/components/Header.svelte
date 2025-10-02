@@ -1,10 +1,16 @@
 <script>
+	import { onMount, getContext } from "svelte";
 	import { browser } from "$app/environment";
 	import tniLogo from "$svg/logos/TNI_static.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 	import { dev } from "$app/environment";
 
+	import tjaLogo from "$svg/logos/TJA_black.svg";
+	import umLogo from "$svg/logos/UM_black.svg";
+	import polygraphLogo from "$svg/logos/Polygraph_black.svg";
+	const copy = getContext("copy");
+	const logos = [tjaLogo, umLogo, polygraphLogo];
 	let pages = ["home", "about"];
 
 	if (dev) {
@@ -25,29 +31,43 @@
 			);
 		}
 	});
-
 </script>
 
 <header bind:clientHeight={headerHeight}>
 	<div class="logo">
 		{@html tniLogo}
 	</div>
-	<nav>
-		{#each pages as btn, i}
-			<button
-				class:active={activePage.page == btn}
-				onclick={() => handlePageClick(btn)}
-			>
-				{btn}
-			</button>
-		{/each}
-	</nav>
+
+	<div class="right-side">
+		<div class="logo-lockup">
+			<p>A collaboration between</p>
+			<div class="org-wrapper">
+				{#each copy.orgBios as org, i}
+					<a href={org.website} aria-label="Learn more about {org.name}">
+						{@html logos[i]}
+					</a>
+				{/each}
+			</div>
+		</div>
+		<div class="divider"></div>
+		<nav>
+			{#each pages as btn, i}
+				<button
+					class:active={activePage.page == btn}
+					onclick={() => handlePageClick(btn)}
+				>
+					{btn}
+				</button>
+			{/each}
+		</nav>
+	</div>
 </header>
 
-<style>
+<style lang="scss">
 	header {
 		width: 100%;
 		position: fixed;
+		height: 90px;
 		padding: 1rem 1.75rem;
 		display: flex;
 		flex-direction: row;
@@ -67,6 +87,21 @@
 		display: flex;
 		flex-direction: row;
 		gap: 1rem;
+		padding-bottom: 0.5rem;
+	}
+
+	.right-side {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 1rem;
+
+		.divider {
+			width: 1px;
+			height: 40px;
+			background: var(--color-gray-200);
+		}
 	}
 
 	button {
@@ -97,5 +132,55 @@
 	button.active {
 		font-weight: 700;
 		pointer-events: none;
+	}
+
+	.logo-lockup {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: flex-end;
+		font-family: var(--sans);
+		padding: 1rem;
+		color: var(--color-gray-600);
+		font-size: var(--14px);
+
+		.org-wrapper {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: 2rem;
+		}
+
+		p {
+			margin-right: 1rem;
+		}
+	}
+
+	.org-wrapper a {
+		opacity: 0.3;
+		transition: transform 0.25s linear;
+	}
+
+	.org-wrapper a:hover {
+		transform: translateY(-2px);
+		opacity: 0.4;
+	}
+
+	:global(.org-wrapper svg) {
+		height: 2rem;
+	}
+
+	:global(.org-wrapper a:last-of-type svg) {
+		height: 1.4rem;
+	}
+
+	@media (max-width: 720px) {
+		footer {
+			justify-content: center;
+		}
+
+		p {
+			font-size: var(--12px);
+		}
 	}
 </style>
