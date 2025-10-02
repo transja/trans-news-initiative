@@ -2,7 +2,6 @@
 	import { debounce } from "$utils/debounce.js";
 	import { fade } from "svelte/transition";
 
-
 	// stores
 	import { inThemeView } from "../stores/global.js";
 
@@ -23,7 +22,7 @@
 		transitionDuration,
 		summaryContent,
 		controlsHeight,
-		vizColors,
+		vizColors
 	} = $props();
 
 	let dashboardHeight = $state();
@@ -45,10 +44,7 @@
 		};
 	});
 
-	
-
 	const brushHeight = $derived($inThemeView ? 150 : 0);
-	
 </script>
 
 <div
@@ -67,10 +63,7 @@
 		{#if contentHeight}
 			<div class="circlepack-wrapper" class:in-theme-view={$inThemeView}>
 				{#if renderCirclePack}
-					<div
-						class="circlepack-fade-in"
-						transition:fade={{ duration: 300 }}
-					>
+					<div class="circlepack-fade-in" transition:fade={{ duration: 300 }}>
 						<CirclePack
 							data={filteredDataWithDateRange}
 							height="{contentHeight - brushHeight}px"
@@ -103,7 +96,7 @@
 		flex-direction: row;
 		width: 100%;
 		height: calc(
-			100vh - var(--header-height, 0px) - 100px
+			100vh - var(--header-height, 0px) - var(--footer-height, 0px) - 100px
 		);
 
 		margin-top: var(--header-height, 0px);
@@ -111,10 +104,13 @@
 		// margin: 1rem 2rem;
 		transition: height 0.5s ease-in-out;
 
-		&.in-theme-view {
-			transition: height 0.5s ease-in-out;
-			height: calc(80vh);
-		}
+		// &.in-theme-view {
+		// 	transition: height 0.5s ease-in-out;
+		// 	// height: calc(80vh);
+		// 	height: calc(
+		// 	100vh - var(--header-height, 0px) - var(--footer-height, 0px) - 200px
+		// );
+		// }
 	}
 
 	#content-container {
@@ -165,11 +161,9 @@
 		border-radius: 5px;
 	}
 
-	@media(max-width: 1000px) {
+	@media (max-width: 1000px) {
 		#dashboard {
-			height: calc(
-				100vh - var(--header-height, 0px) - 210px
-			);
+			height: calc(100vh - var(--header-height, 0px) - 210px);
 
 			&.in-theme-view {
 				height: calc(60vh);
