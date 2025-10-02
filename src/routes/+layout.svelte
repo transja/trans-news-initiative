@@ -2,7 +2,7 @@
 	import "$styles/app.css";
 	import { onMount } from "svelte";
 	import { browser } from "$app/environment";
-	import { activeTheme } from "../stores/global.js";
+	import { activeTheme } from "$runes/misc.svelte.js";
 
 	let { children } = $props();
 

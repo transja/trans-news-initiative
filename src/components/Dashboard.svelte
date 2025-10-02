@@ -3,7 +3,7 @@
 	import { fade } from "svelte/transition";
 
 	// stores
-	import { inThemeView } from "../stores/global.js";
+	import { inThemeView } from "$runes/misc.svelte.js";
 
 	// components
 	import Steamplot from "./charts/Steamplot.svelte";
@@ -31,7 +31,7 @@
 
 	$effect(() => {
 		let timer;
-		if ($inThemeView) {
+		if (inThemeView.state) {
 			timer = setTimeout(() => {
 				renderCirclePack = true;
 			}, transitionDuration);
@@ -44,7 +44,7 @@
 		};
 	});
 
-	const brushHeight = $derived($inThemeView ? 150 : 0);
+	const brushHeight = $derived(inThemeView.state ? 150 : 0);
 </script>
 
 <div
@@ -52,16 +52,16 @@
 	bind:clientHeight={dashboardHeight}
 	style:--brush-height="{brushHeight}px"
 	style:--controls-height="{controlsHeight}px"
-	class:in-theme-view={$inThemeView}
+	class:in-theme-view={inThemeView.state}
 >
 	<div
 		id="content-container"
 		bind:clientHeight={contentHeight}
 		style="--duration: {transitionDuration}ms"
-		class:in-theme-view={$inThemeView}
+		class:in-theme-view={inThemeView.state}
 	>
 		{#if contentHeight}
-			<div class="circlepack-wrapper" class:in-theme-view={$inThemeView}>
+			<div class="circlepack-wrapper" class:in-theme-view={inThemeView.state}>
 				{#if renderCirclePack}
 					<div class="circlepack-fade-in" transition:fade={{ duration: 300 }}>
 						<CirclePack
@@ -76,7 +76,7 @@
 			<Steamplot
 				{data}
 				{themes}
-				height="{$inThemeView ? controlsHeight : contentHeight}px"
+				height="{inThemeView.state ? controlsHeight : contentHeight}px"
 				{transitionDuration}
 				bind:filters
 				colors={vizColors}

@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 import { leanColors, leanTextColors } from "./getLeanProperty.js";
 import { getPublicationName } from "./getPublicationName.js";
-import { activeTheme } from "../stores/global.js";
+import { activeTheme } from "$runes/misc.svelte.js";
 
 
 export function createTooltipContent(node) {

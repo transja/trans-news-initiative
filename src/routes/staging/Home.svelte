@@ -4,7 +4,7 @@
 	import { debounce } from "$utils/debounce.js";
 
 	// stores
-	import { activeTheme, inThemeView } from "../../stores/global.js";
+	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
@@ -64,7 +64,7 @@
 	};
 
 	$effect(() => {
-		if (!$activeTheme && !$inThemeView) {
+		if (!activeTheme.theme && !inThemeView.state) {
 			filters = {
 				topic: "All",
 				publication: "All",
@@ -154,7 +154,7 @@
 
 	let filteredData = $derived(
 		processedData
-			.filter((d) => d.themes.includes($activeTheme))
+			.filter((d) => d.themes.includes(activeTheme.theme))
 			.filter((item) => {
 				if (filters.publication === "All") {
 					return true;
@@ -232,7 +232,7 @@
 			{maxDate}
 		/>
 
-		{#if $inThemeView}
+		{#if inThemeView.state}
 			<section class="container-section">
 				<ThemeSection data={filteredDataWithDateRange} {xDomain} />
 			</section>

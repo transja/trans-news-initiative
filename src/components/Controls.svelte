@@ -20,11 +20,11 @@
 	import { getPublicationName } from "../utils/getPublicationName.js";
 
 	// stores
-	import { inThemeView, activeTheme } from "../stores/global.js";
+	import { inThemeView, activeTheme } from "$runes/misc.svelte.js";
 
 	$effect(() => {
-		if ($activeTheme) {
-			highlightedContent = summaryContent.find((t) => t.theme === $activeTheme);
+		if (activeTheme.theme) {
+			highlightedContent = summaryContent.find((t) => t.theme === activeTheme.theme);
 		}
 	});
 
@@ -110,12 +110,12 @@
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
 		showThemeDropdown = false;
-		if ($inThemeView) {
+		if (inThemeView.state) {
 			if (!theme.theme) {
-				$activeTheme = null;
-				$inThemeView = false;
+				activeTheme.theme = null;
+				inThemeView.state = false;
 			} else {
-				$activeTheme = theme.theme;
+				activeTheme.theme = theme.theme;
 			}
 		}
 	}
@@ -134,16 +134,16 @@
 
 	function handleExploreButtonClick() {
 		if (highlightedContent.theme) {
-			$inThemeView = true;
-			$activeTheme = highlightedContent.theme;
+			inThemeView.state = true;
+			activeTheme.theme = highlightedContent.theme;
 		}
 		showThemeDropdown = false;
 	}
 
 	function handleThemeExit() {
-		if (!$inThemeView) return;
-		$inThemeView = false;
-		$activeTheme = null;
+		if (!inThemeView.state) return;
+		inThemeView.state = false;
+		activeTheme.theme = null;
 		resetFilters(["publicationLean", "publication", "dateRange"]);
 	}
 
@@ -216,18 +216,18 @@
 	});
 </script>
 
-<div class="controls-container" class:in-theme-view={$inThemeView}>
+<div class="controls-container" class:in-theme-view={inThemeView.state}>
 	{#if highlightedContent}
 		<div class="controls-content">
 			<div class="left-content">
 				<div class="eyebrow">
-					{#if $inThemeView}With your current filters,&nbsp;
+					{#if inThemeView.state}With your current filters,&nbsp;
 					{/if}The Trans News Initiative identified
 				</div>
 				<div class="subtitle-container">
 					<div class="subtitle-sizer" aria-hidden="true">
 						<span
-							>{$inThemeView
+							>{inThemeView.state
 								? filteredData.length.toLocaleString()
 								: highlightedContent.count.toLocaleString()} articles</span
 						>
@@ -249,7 +249,7 @@
 							}}
 						>
 							<span
-								>{$inThemeView
+								>{inThemeView.state
 									? filteredData.length.toLocaleString()
 									: highlightedContent.count.toLocaleString()} articles</span
 							>
@@ -301,11 +301,11 @@
 			<div class="right-content">
 				{#if mode === "intro"}
 					<MousePointerClick size={30} /> Click anywhere to explore them all
-				{:else if highlightedContent.title !== "trans communities" && !$inThemeView}
+				{:else if highlightedContent.title !== "trans communities" && !inThemeView.state}
 					<button class="explore-button" onclick={handleExploreButtonClick}
 						>Explore this theme more<ArrowRight size={24} />
 					</button>
-				{:else if $inThemeView}
+				{:else if inThemeView.state}
 					<div
 						class="filter-control"
 						use:clickOutside

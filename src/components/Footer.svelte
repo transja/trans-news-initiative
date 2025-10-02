@@ -5,7 +5,7 @@
 	import umLogo from "$svg/logos/UM_black.svg";
 	import polygraphLogo from "$svg/logos/Polygraph_black.svg";
 	import { activePage } from "$runes/misc.svelte.js";
-  import {inThemeView} from "../stores/global.js";
+  import {inThemeView} from "$runes/misc.svelte.js";
 
   
 	const copy = getContext("copy");
@@ -24,7 +24,7 @@
 </script>
 
 {#if activePage.page == "home"}
-	<footer bind:clientHeight={footerHeight} class:in-theme-view={$inThemeView}>
+	<footer bind:clientHeight={footerHeight} class:in-theme-view={inThemeView.state}>
 		<p>A collaboration between</p>
 		<div class="org-wrapper">
 			{#each copy.orgBios as org, i}
