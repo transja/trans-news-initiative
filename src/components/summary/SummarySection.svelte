@@ -41,7 +41,6 @@
 		font-weight: bold;
 		text-transform: uppercase;
 		font-size: 0.8rem;
-		letter-spacing: 0.05em;
 	}
 	.header-cell:not(:first-child) {
 		text-align: right;

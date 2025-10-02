@@ -35,8 +35,14 @@
 <div class="sparkline-container" bind:clientWidth={width} bind:clientHeight={height}>
 	{#if width && height && data.length > 0 && max(data, (d) => d.value) > 0}
 		<svg {width} {height}>
+			<defs>
+				<linearGradient id="transGradient" x1="0" y1="16" x2="100" y2="16" gradientUnits="userSpaceOnUse">
+					<stop offset="0" stop-color="var(--color-stop-0)"/>
+					<stop offset="1" stop-color="var(--color-stop-1)"/>
+				</linearGradient>
+			</defs>
 			<g transform="translate({margin.left}, {margin.top})">
-				<path d={pathData} fill="none" stroke="var(--color-gray-400)" stroke-width="2" />
+				<path d={pathData} fill="none" stroke-width="2" />
 			</g>
 		</svg>
 	{/if}
@@ -47,4 +53,13 @@
 		width: 100px;
 		height: 30px;
 	}
+
+	:global(.sparkline-container svg path) {
+		stroke: url(#transGradient);
+	}
+
+	#transGradient {
+        --color-stop-0: #4BC1C4;
+        --color-stop-1: #CB9DDD;
+      }
 </style>

@@ -61,14 +61,18 @@
 
 <style lang="scss">
 	.theme-section-container {
-		display: grid;
-		grid-template-columns: 300px 1fr;
+		display:flex;
+		flex-direction: row;
 		gap: 2rem;
 
 		// border-radius: 8px;
 	}
 
 	.events-container {
+		padding-top: 1.5rem;
+		width: calc(100% - 300px - 2rem);
+
+
 		h2 {
 			font-size: 2rem;
 			margin-bottom: 1.5rem;
@@ -82,5 +86,16 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
+	}
+
+	@media(max-width: 1000px) {
+		.theme-section-container {
+			display: flex;
+			flex-direction: column;
+
+			.events-container {
+				width: 100%;
+			}
+		}
 	}
 </style>

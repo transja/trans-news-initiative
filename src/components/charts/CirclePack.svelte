@@ -409,7 +409,7 @@
 								y={node.y - heightVal / 2}
 								text-anchor="middle"
 								dominant-baseline="central"
-								font-size={18 / transform.k}
+								font-size={16 / transform.k}
 								stroke-width={3 / transform.k}
 								pointer-events="none"
 								data-radius={node.r}

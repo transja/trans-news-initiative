@@ -62,7 +62,7 @@
 	});
 </script>
 
-<div class="accordion-item">
+<div class="accordion-item" class:is-open={isOpen}>
 	<button class="accordion-header" onclick={onToggle}>
 		<div class="accordion-header-content">
 			<h3>{event.name}</h3>
@@ -88,7 +88,7 @@
 				<Beeswarm data={event.articles} {xDomain} />
 			</div>
 			<div class="column-chart-container event-content-block">
-				<h4>Publisher political lean by year</h4>
+				<h4>Publication political lean by year</h4>
 				<div class="div-legend">
 					{#each leanOrder as key, i}
 						<div
@@ -126,8 +126,21 @@
 <style lang="scss">
 	.accordion-item {
 		border-radius: 8px;
-		border: 1px solid var(--color-gray-100);
+		border: 1px solid var(--color-gray-200);
 		background: #fff;
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.025);
+		transition: transform 0.125s ease-out;
+		overflow: hidden;
+
+		&.is-open {
+				&:hover {
+					transform: translateY(0);
+				}	
+			}
+
+		&:hover {
+			transform: translateY(-4px);	
+		}
 	}
 
 	.accordion-header {
@@ -139,13 +152,14 @@
 		text-align: left;
 		background: none;
 		border: none;
+		border-radius: 8px 8px 0 0;
 		cursor: pointer;
 		font-size: 1rem;
 		gap: 1rem;
 		background: var(--color-gray-100);
 
 		.sparkline-wrapper {
-			margin-right: 50px;
+			margin-right: 1rem;
 		}
 
 		.accordion-header-content {
@@ -167,6 +181,14 @@
 
 	.accordion-icon {
 		transition: transform 0.3s ease;
+		width: 2rem;
+		height: 2rem;
+		background-color: black;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 4px;
+		color: var(--color-white);
 		&.is-open {
 			transform: rotate(180deg);
 		}
@@ -194,7 +216,7 @@
 
 	.div-legend {
 		display: flex;
-		gap: 1rem;
+		gap: 0.25rem;
 		margin-bottom: 1rem;
 	}
 
@@ -202,7 +224,7 @@
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
-		width: fit-content;
+		width: 90px;
 		padding: 0.75rem 1rem;
 		text-align: center;
 		justify-content: center;
@@ -212,23 +234,37 @@
 		color: #fff;
 		text-transform: uppercase;
 		white-space: nowrap;
-		font-size: 0.8rem;
+		font-size: 10px;
 		font-weight: 700;
 
 		&.no-data {
 			color: var(--color-gray-500);
-			margin-left: 1rem;
+			margin-left: 2rem;
 			background-image: linear-gradient(
 				135deg,
 				var(--color-gray-50) 40%,
-				var(--color-gray-300) 40%,
-				var(--color-gray-300) 50%,
+				var(--color-gray-200) 40%,
+				var(--color-gray-200) 50%,
 				var(--color-gray-50) 50%,
 				var(--color-gray-50) 90%,
-				var(--color-gray-300) 90%,
-				var(--color-gray-300) 100%
+				var(--color-gray-200) 90%,
+				var(--color-gray-200) 100%
 			);
 			background-size: 7.07px 7.07px;
+		}
+	}
+
+	@media(max-width: 600px) {
+		.accordion-header {
+			.accordion-header-content {
+				flex-direction: column;
+				align-items: start;
+				gap: 0;
+
+				h3 {
+					margin: 0.5rem 0;
+				}
+			}
 		}
 	}
 </style>

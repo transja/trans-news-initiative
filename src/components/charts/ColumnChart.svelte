@@ -50,7 +50,7 @@
 					<rect width="8" height="8" style="fill: var(--color-gray-50)"></rect>
 					<path
 						d="M-2,2 l4,-4 M0,8 l8,-8 M6,10 l4,-4"
-						style="stroke: var(--color-gray-300)"
+						style="stroke: var(--color-gray-200)"
 						stroke-width="1"
 					></path>
 				</pattern>

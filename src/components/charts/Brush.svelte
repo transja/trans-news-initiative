@@ -85,7 +85,7 @@
 			position: absolute;
 			top: 0;
 			height: 100%;
-			background: hsla(0, 0%, 100%, 0.6);
+			background: hsla(0, 0%, 100%, 0.8);
 			backdrop-filter: brightness(100%);
 			pointer-events: none;
 
@@ -103,7 +103,6 @@
 			height: 100%;
 			top: 0;
 			bottom: 0;
-			border-radius: 4px;
 			cursor: grab;
 		}
 

@@ -137,11 +137,10 @@
 	}
 
 	.filter-control__label {
-		font-size: 0.75rem;
+		font-size: var(--12px);
 		font-weight: 600;
-		color: #4b5563;
+		color: var(--color-gray-1000);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
 		padding-left: 0.25rem;
 	}
 
