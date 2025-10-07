@@ -478,6 +478,7 @@
 				gap: 10px;
 				justify-content: flex-end;
 				flex-shrink: 0;
+				z-index: 10;
 
 				.instructions-content {
 					display: flex;

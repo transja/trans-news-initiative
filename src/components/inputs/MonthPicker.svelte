@@ -312,6 +312,8 @@
 		display: flex;
 		gap: 1rem;
 		padding: 1rem;
+		background: white;
+
 
 		@media (max-width: 600px) {
 			flex-direction: column;
