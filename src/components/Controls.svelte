@@ -3,6 +3,7 @@
 	import { cubicInOut } from "svelte/easing";
 	import {
 		MousePointerClick,
+		Pointer,
 		Calendar,
 		ChevronDown,
 		ChevronLeft,
@@ -12,19 +13,24 @@
 	import MonthPicker from "./inputs/MonthPicker.svelte";
 
 	import NestedSelect from "./inputs/NestedSelect.svelte";
+	import LogoLockup from "./LogoLockup.svelte";
+	// utils
 	import {
 		leanOrder,
 		leanColors,
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
 	import { getPublicationName } from "../utils/getPublicationName.js";
+	import { isDesktop, isMobile } from "$utils/breakpoints";
 
 	// stores
 	import { inThemeView, activeTheme } from "$runes/misc.svelte.js";
 
 	$effect(() => {
 		if (activeTheme.theme) {
-			highlightedContent = summaryContent.find((t) => t.theme === activeTheme.theme);
+			highlightedContent = summaryContent.find(
+				(t) => t.theme === activeTheme.theme
+			);
 		}
 	});
 
@@ -38,13 +44,9 @@
 		filteredData,
 		minDate,
 		maxDate,
-		resetFilters
+		resetFilters,
+		controlsHeight = $bindable()
 	} = $props();
-
-	const publications = new Set(allData.map((d) => d.media_name));
-	const allPublications = ["All", ...publications];
-	const publicationLean = new Set(allData.map((d) => d.lean));
-	const allPublicationLean = ["All", ...publicationLean];
 
 	const publicationDomainToName = new Map(
 		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
@@ -216,7 +218,11 @@
 	});
 </script>
 
-<div class="controls-container" class:in-theme-view={inThemeView.state}>
+<div
+	class="controls-container"
+	class:in-theme-view={inThemeView.state}
+	bind:clientHeight={controlsHeight}
+>
 	{#if highlightedContent}
 		<div class="controls-content">
 			<div class="left-content">
@@ -225,20 +231,23 @@
 					{/if}The Trans News Initiative identified
 				</div>
 				<div class="subtitle-container">
-					<div class="subtitle-sizer" aria-hidden="true">
-						<span
-							>{inThemeView.state
-								? filteredData.length.toLocaleString()
-								: highlightedContent.count.toLocaleString()} articles</span
-						>
-						about
-						<span style={mode == "default" ? "margin-right: 1rem" : ""}
-							>{highlightedContent.title}</span
-						>
-					</div>
+					{#if mode == "intro"}
+						<div class="subtitle-sizer" aria-hidden="true">
+							<span
+								>{inThemeView.state
+									? filteredData.length.toLocaleString()
+									: highlightedContent.count.toLocaleString()} articles</span
+							>
+							about
+							<span style={mode == "default" ? "margin-right: 2rem" : ""}
+								>{highlightedContent.title}</span
+							>
+						</div>
+					{/if}
 					{#key highlightedContent.title}
 						<div
 							class="subtitle"
+							class:intro={mode == "intro"}
 							in:fade={{
 								duration: mode == "intro" ? transitionDuration / 4 : 0,
 								easing: cubicInOut
@@ -298,12 +307,22 @@
 					{/key}
 				</div>
 			</div>
-			<div class="right-content">
+			<div class="right-content" class:in-theme-view={inThemeView.state}>
+				{#if !$isDesktop && !inThemeView.state}
+					<LogoLockup type="icon" />
+				{/if}
+
 				{#if mode === "intro"}
-					<MousePointerClick size={30} /> Click anywhere to explore them all
+					<div class="instructions-content">
+						{#if $isDesktop}
+							<MousePointerClick size={30} /> Click anywhere to explore them all
+						{:else}
+							<Pointer size={30} /> Tap anywhere to explore them all
+						{/if}
+					</div>
 				{:else if highlightedContent.title !== "trans communities" && !inThemeView.state}
 					<button class="explore-button" onclick={handleExploreButtonClick}
-						>Explore this theme more<ArrowRight size={24} />
+						>Explore more<ArrowRight size={24} />
 					</button>
 				{:else if inThemeView.state}
 					<div
@@ -322,9 +341,11 @@
 								aria-label="Select date range"
 							>
 								<Calendar size={18} />
-								{formatter.format(filters.dateRange.start)} - {formatter.format(
-									filters.dateRange.end
-								)}
+								{#if $isDesktop}
+									{formatter.format(filters.dateRange.start)} - {formatter.format(
+										filters.dateRange.end
+									)}
+								{/if}
 							</button>
 
 							{#if showMonthPicker}
@@ -336,7 +357,7 @@
 										bind:dateRange={filters.dateRange}
 										{minDate}
 										{maxDate}
-										onclose={() => (showMonthPicker = false)}
+										closeMonthPicker={() => (showMonthPicker = false)}
 									/>
 								</div>
 							{/if}
@@ -384,8 +405,6 @@
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
 
-
-
 		--subtitle-font-size: 36px;
 		--subtitle-line-height: 44px;
 
@@ -402,7 +421,6 @@
 			justify-content: space-between;
 			align-items: end;
 			gap: 1rem;
-
 			.subtitle-container {
 				position: relative;
 			}
@@ -442,7 +460,7 @@
 				}
 			}
 
-			.subtitle {
+			.subtitle.intro {
 				position: absolute;
 				width: 100%;
 				left: 0;
@@ -461,6 +479,12 @@
 				justify-content: flex-end;
 				flex-shrink: 0;
 
+				.instructions-content {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+				}
+
 				.filter-control {
 					display: flex;
 					gap: 0.25rem;
@@ -477,11 +501,16 @@
 				.date-picker-dropdown {
 					min-width: fit-content !important;
 					left: calc(540px / -2 + 50%);
+					@media (max-width: 600px) {
+						left: 0;
+						z-index: -1;
+					}
 				}
 
 				.calendar-button {
 					justify-content: center;
 					gap: 0.5rem;
+					white-space: nowrap;
 				}
 
 				.filter-control__label {
@@ -526,32 +555,40 @@
 
 			.interactive-title-wrapper {
 				display: inline;
-			}
-			.interactive-title {
-				position: relative;
-				cursor: pointer;
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-				display: inline;
-				border-bottom: 3px solid #000;
-				background: none;
-				border: none;
-				font-size: var(--subtitle-font-size);
-				line-height: var(--subtitle-line-height);
-				padding: 0;
-				transition:
-					font-size 0.3s ease,
-					line-height 0.3s ease;
 
-				&:after {
-					content: "";
-					position: absolute;
-					bottom: -2px;
-					left: 0;
-					right: 0;
-					height: 2px;
-					background: #000;
+				.interactive-title {
+					position: relative;
+					cursor: pointer;
+					display: inline-flex;
+					align-items: center;
+					gap: 0.5rem;
+					display: inline;
+					border-bottom: 3px solid #000;
+					background: none;
+					border: none;
+					font-size: var(--subtitle-font-size);
+					line-height: var(--subtitle-line-height);
+					padding: 0;
+					transition:
+						font-size 0.3s ease,
+						line-height 0.3s ease;
+					text-align: left;
+
+					&:after {
+						content: "";
+						position: absolute;
+						bottom: -2px;
+						left: 0;
+						right: 0;
+						height: 2px;
+						background: #000;
+					}
+
+					@media (max-width: 600px) {
+						width: 100%;
+						display: flex;
+						justify-content: space-between;
+					}
 				}
 			}
 
@@ -565,9 +602,15 @@
 				list-style: none;
 				margin: 0;
 				margin-top: 0.25rem;
-				padding: 0.25rem;
 				position: absolute;
 				z-index: 10;
+				overflow-x: hidden;
+
+				@media (max-width: 600px) {
+					width: 100%;
+					font-size: 1rem;
+					line-height: 0.8rem;
+				}
 			}
 
 			.theme-dropdown {
@@ -612,7 +655,7 @@
 		}
 	}
 
-	@media(max-width: 1000px) {
+	@media (max-width: 1000px) {
 		.controls-container {
 			padding: 1rem;
 			--subtitle-font-size: 36px;
@@ -622,13 +665,14 @@
 				--subtitle-font-size: 24px;
 				--subtitle-line-height: 30px;
 			}
-			
+
 			.controls-content {
 				flex-direction: column;
 				align-items: start;
 				gap: 2rem;
 
-				.left-content, .right-content {
+				.left-content,
+				.right-content {
 					width: 100%;
 					justify-content: flex-start;
 				}
@@ -636,7 +680,7 @@
 		}
 	}
 
-	@media(max-width: 600px) {
+	@media (max-width: 600px) {
 		.controls-container {
 			padding: 1rem;
 			--subtitle-font-size: 24px;
@@ -645,6 +689,16 @@
 			&.in-theme-view {
 				--subtitle-font-size: 24px;
 				--subtitle-line-height: 32px;
+			}
+
+			.controls-content {
+				.right-content {
+					align-items: anchor-center;
+					justify-content: space-between;
+					&.in-theme-view {
+						align-items: flex-end;
+					}
+				}
 			}
 		}
 	}

@@ -15,15 +15,12 @@
 
 	import Brush from "./Brush.svelte";
 
-
 	// runes
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 	// utils
-	import { isMobile, isDesktop } from '$utils/breakpoints';
+	import { isMobile, isDesktop } from "$utils/breakpoints";
 
-
-	
 	let {
 		data = [],
 		themes = [],
@@ -37,8 +34,6 @@
 		mode = "default",
 		isHoveringOverPlot = $bindable()
 	} = $props();
-
-
 
 	let container;
 	let width = $state(0);
@@ -365,12 +360,12 @@
 
 	function handlePathClick(theme) {
 		if (inThemeView.state) return;
-		
+
 		if (!inThemeView.state && highlightedContent.theme !== theme) {
 			highlightedContent = contentOptions[0];
 			return;
 		}
-		
+
 		if (contentOptions.length > 0) {
 			highlightedContent = contentOptions[0];
 		}
@@ -468,7 +463,7 @@
 								: steamAreaGenerator(s)}
 							fill="url(#steam-gradient)"
 							stroke="white"
-							stroke-width="{$isMobile ? '0.5px' : '1px'}"
+							stroke-width={$isMobile ? "0.5px" : "1px"}
 							opacity={getPathOpacity(s.key)}
 							style="
 								transition-property: d, opacity;
@@ -567,6 +562,15 @@
 
 			&.apply-width {
 				width: calc(100% - 6rem);
+				@media (max-width: 600px) {
+					width: calc(100% - 4rem);
+				}
+			}
+
+			@media (max-width: 600px) {
+				position: relative;
+				bottom: 0;
+				background-color: transparent;
 			}
 		}
 	}

@@ -45,13 +45,16 @@
 	});
 
 	const brushHeight = $derived(inThemeView.state ? 150 : 0);
+	const steamplotHeight = $derived(
+		inThemeView.state ? brushHeight : contentHeight
+	);
 </script>
 
 <div
 	id="dashboard"
 	bind:clientHeight={dashboardHeight}
 	style:--brush-height="{brushHeight}px"
-	style:--controls-height="{controlsHeight}px"
+	style:--controls-height="{inThemeView.state ? 200 : controlsHeight}px"
 	class:in-theme-view={inThemeView.state}
 >
 	<div
@@ -76,7 +79,7 @@
 			<Steamplot
 				{data}
 				{themes}
-				height="{inThemeView.state ? controlsHeight : contentHeight}px"
+				height="{steamplotHeight}px"
 				{transitionDuration}
 				bind:filters
 				colors={vizColors}
@@ -96,7 +99,10 @@
 		flex-direction: row;
 		width: 100%;
 		height: calc(
-			100vh - var(--header-height, 0px) - var(--footer-height, 0px) - var(--controls-height, 0px)
+			100svh - var(--header-height, 0px) - var(--footer-height, 0px) - var(
+					--controls-height,
+					0px
+				)
 		);
 
 		margin-top: var(--header-height, 0px);
@@ -104,6 +110,13 @@
 		// margin: 1rem 2rem;
 		transition: height 0.5s ease-in-out;
 
+		&.in-theme-view {
+			@media (max-width: 600px) {
+				height: calc(
+					100svh - var(--header-height, 0px) - var(--footer-height, 0px)
+				);
+			}
+		}
 		// &.in-theme-view {
 		// 	transition: height 0.5s ease-in-out;
 		// 	// height: calc(80vh);
@@ -139,8 +152,9 @@
 		// box-shadow: inset 0px 2px 8px rgba(0, 0, 0, 0.15);
 
 		&.in-theme-view {
-			height: calc(100% - var(--controls-height, 0px));
+			height: calc(100% - var(--brush-height) - 1rem);
 			opacity: 1;
+			margin-bottom: 1rem;
 		}
 	}
 
@@ -163,15 +177,16 @@
 
 	@media (max-width: 1000px) {
 		#dashboard {
-			height: calc(100vh - var(--header-height, 0px) - 210px);
+			// height: calc(100svh - var(--header-height, 0px) - 210px);
 
 			&.in-theme-view {
-				height: calc(60vh);
+				// height: calc(60vh);
 			}
 		}
 
 		.circlepack-wrapper {
 			width: calc(100% - 2rem);
+			margin-bottom: 1rem;
 		}
 	}
 </style>

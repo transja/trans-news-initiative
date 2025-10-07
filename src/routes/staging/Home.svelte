@@ -6,6 +6,11 @@
 	// stores
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
+
+
+	// utils
+	import { isMobile } from "$utils/breakpoints";
+
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
 	import Controls from "$components/Controls.svelte";
@@ -191,7 +196,7 @@
 
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
-	let controlsHeight = 100;
+	let controlsHeight = $state();
 </script>
 
 {#if activePage.page == "home"}
@@ -221,6 +226,7 @@
 			{resetFilters}
 			allData={processedData}
 			filteredData={filteredDataWithDateRange}
+			bind:controlsHeight
 			{transitionDuration}
 			{summaryContent}
 			mode={introFinished
