@@ -103,10 +103,6 @@
 		}
 	});
 
-	const filteredSummaryContent = $derived(
-		summaryContent.filter((t) => t.title !== highlightedContent.title)
-	);
-
 	let focusedThemeIndex = $state(-1);
 
 	function handleThemeSelect(theme) {
@@ -155,18 +151,18 @@
 			case "ArrowDown":
 				event.preventDefault();
 				focusedThemeIndex =
-					(focusedThemeIndex + 1) % filteredSummaryContent.length;
+					(focusedThemeIndex + 1) % summaryContent.length;
 				break;
 			case "ArrowUp":
 				event.preventDefault();
 				focusedThemeIndex =
-					(focusedThemeIndex - 1 + filteredSummaryContent.length) %
-					filteredSummaryContent.length;
+					(focusedThemeIndex - 1 + summaryContent.length) %
+					summaryContent.length;
 				break;
 			case "Enter":
 				event.preventDefault();
 				if (focusedThemeIndex > -1) {
-					handleThemeSelect(filteredSummaryContent[focusedThemeIndex]);
+					handleThemeSelect(summaryContent[focusedThemeIndex]);
 				}
 				break;
 			case "Escape":
@@ -285,7 +281,7 @@
 											class="dropdown-options theme-dropdown"
 											use:positionDropdown
 										>
-											{#each filteredSummaryContent as theme, i}
+											{#each summaryContent as theme, i}
 												<div
 													class="dropdown-option"
 													class:focused={i === focusedThemeIndex}
@@ -295,6 +291,7 @@
 													onkeydown={(e) => handleThemeSelectKeydown(e, theme)}
 													role="button"
 													tabindex="0"
+													class:top-theme={theme.title.toLowerCase() === "trans communities"}
 												>
 													{theme.title}
 												</div>
@@ -593,6 +590,8 @@
 			}
 
 			.dropdown-options {
+			
+				
 				background-color: #fff;
 				border-radius: 0.375rem;
 				border: 1px solid #d1d5db;
@@ -623,6 +622,12 @@
 				cursor: pointer;
 				white-space: nowrap;
 				border-radius: 2px;
+				margin-left: 1rem;
+
+				&.top-theme {
+					font-weight: bold;
+					margin-left: 0;
+				}
 
 				&:hover,
 				&.focused {
