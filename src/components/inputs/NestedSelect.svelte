@@ -262,7 +262,6 @@
 		gap: 0.25rem;
 		flex-grow: 1;
 		position: relative;
-		min-width: 200px;
 	}
 
 	.filter-control__label {
@@ -280,7 +279,7 @@
 		text-align: left;
 		width: 100%;
 		height: 38px;
-		padding: 0.5rem 0.75rem;
+		padding: 0.5rem;
 		border: 1px solid var(--color-gray-200);
 		border-radius: 0.375rem;
 		background-color: #ffffff;
@@ -366,7 +365,7 @@
 		border-radius: 4px;
 		display: flex;
 		align-items: center;
-        background-color: var(--color-gray-1000);
+		background-color: var(--color-gray-1000);
 		color: var(--color-white);
 
 		&:hover {
@@ -393,5 +392,10 @@
 
 	:global(button[aria-expanded="true"] .chevron) {
 		transform: rotate(180deg);
+	}
+
+	.wide {
+		min-width: 0;
+		flex-shrink: 1;
 	}
 </style>
