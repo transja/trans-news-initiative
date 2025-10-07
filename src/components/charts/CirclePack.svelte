@@ -12,6 +12,7 @@
 	import { fade } from "svelte/transition";
 	import { Plus, Minus } from "@lucide/svelte";
 	import { createTooltipContent } from "../../utils/createTooltipContent.js";
+	import { isMobile } from "../../utils/breakpoints.js";
 
 	const {
 		data = [],
@@ -327,7 +328,7 @@
 
 		const minRadius = min(packed.leaves(), (d) => d.r);
 		if (minRadius) {
-			const minTargetRadius = 5; // 20px diameter
+			const minTargetRadius = $isMobile ? 2 : 5; // 20px diameter
 			let k = Math.max(1, minTargetRadius / minRadius);
 			k = Math.min(k, 8); // clamp to max zoom from scaleExtent
 
@@ -394,7 +395,7 @@
 									fill={node.children ? "#fff" : linearColor(node.x)}
 									fill-opacity={node.children ? 1 : 0.8}
 									stroke={node.children ? linearColor(node.x) : "none"}
-									stroke-width={node.children ? 2 : 0}
+									stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
 									class:article-circle={!node.children}
 									class:event-circle={node.children}
 									use:tooltipAction={!node.children && createTooltipContent(node.data)}
@@ -410,7 +411,7 @@
 								text-anchor="middle"
 								dominant-baseline="central"
 								font-size={16 / transform.k}
-								stroke-width={3 / transform.k}
+								stroke-width={5 / transform.k}
 								pointer-events="none"
 								data-radius={node.r}
 								data-text={node.data.name}
@@ -466,7 +467,6 @@
 		font-weight: 700;
 		fill: var(--color-gray-1000);
 		stroke: #fff;
-		stroke-width: 5;
 		paint-order: stroke;
 		stroke-linecap: butt;
 		stroke-linejoin: miter;
