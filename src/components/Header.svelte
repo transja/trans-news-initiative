@@ -77,10 +77,14 @@
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
 		top: 0;
+
+		@media (max-width: 1000px) {
+			padding: 0.5rem 1rem;
+		}
 	}
 
 	.logo {
-		width: 80px;
+		min-width: 80px;
 	}
 
 	nav {
@@ -153,6 +157,10 @@
 
 		p {
 			margin-right: 1rem;
+		}
+
+		@media (max-width: 1000px) {
+			display: none;
 		}
 	}
 
