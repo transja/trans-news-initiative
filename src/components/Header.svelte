@@ -72,6 +72,10 @@
 		@media (max-width: 1000px) {
 			padding: 0.5rem 1rem;
 		}
+
+		@media (max-width: 600px) {
+			height: auto;
+		}
 	}
 
 	.logo {

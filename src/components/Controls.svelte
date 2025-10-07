@@ -400,10 +400,11 @@
 		top: calc(var(--header-height) - 1rem);
 		left: 0;
 		right: 0;
-		z-index: 2000;
+
 		font-family: var(--sans);
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
+		z-index: 500;
 
 		--subtitle-font-size: 36px;
 		--subtitle-line-height: 44px;
@@ -478,7 +479,6 @@
 				gap: 10px;
 				justify-content: flex-end;
 				flex-shrink: 0;
-				z-index: 10;
 
 				.instructions-content {
 					display: flex;
@@ -504,7 +504,6 @@
 					left: calc(540px / -2 + 50%);
 					@media (max-width: 600px) {
 						left: 0;
-						z-index: -1;
 					}
 				}
 
@@ -604,7 +603,8 @@
 				margin: 0;
 				margin-top: 0.25rem;
 				position: absolute;
-				z-index: 10;
+				z-index: 1000;
+
 				overflow-x: hidden;
 
 				@media (max-width: 600px) {
@@ -683,9 +683,10 @@
 
 	@media (max-width: 600px) {
 		.controls-container {
-			padding: 1rem;
 			--subtitle-font-size: 24px;
 			--subtitle-line-height: 32px;
+
+			top: calc(var(--header-height) - 1.1rem);
 
 			&.in-theme-view {
 				--subtitle-font-size: 24px;
@@ -693,6 +694,7 @@
 			}
 
 			.controls-content {
+				gap: 1rem;
 				.right-content {
 					align-items: anchor-center;
 					justify-content: space-between;
