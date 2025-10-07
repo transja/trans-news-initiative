@@ -150,8 +150,7 @@
 		switch (event.key) {
 			case "ArrowDown":
 				event.preventDefault();
-				focusedThemeIndex =
-					(focusedThemeIndex + 1) % summaryContent.length;
+				focusedThemeIndex = (focusedThemeIndex + 1) % summaryContent.length;
 				break;
 			case "ArrowUp":
 				event.preventDefault();
@@ -172,6 +171,7 @@
 	}
 
 	function clickOutside(node) {
+		
 		const handleClick = (event) => {
 			if (node && !node.contains(event.target)) {
 				node.dispatchEvent(new CustomEvent("clickoutside"));
@@ -291,7 +291,8 @@
 													onkeydown={(e) => handleThemeSelectKeydown(e, theme)}
 													role="button"
 													tabindex="0"
-													class:top-theme={theme.title.toLowerCase() === "trans communities"}
+													class:top-theme={theme.title.toLowerCase() ===
+														"trans communities"}
 												>
 													{theme.title}
 												</div>
@@ -590,8 +591,6 @@
 			}
 
 			.dropdown-options {
-			
-				
 				background-color: #fff;
 				border-radius: 0.375rem;
 				border: 1px solid #d1d5db;

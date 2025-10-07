@@ -19,7 +19,7 @@
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 	// utils
-	import { isMobile, isDesktop } from "$utils/breakpoints";
+	import { isMobile } from "$utils/breakpoints";
 
 	let {
 		data = [],
@@ -361,11 +361,21 @@
 	function handlePathClick(theme) {
 		if (inThemeView.state) return;
 
-		if (!inThemeView.state && highlightedContent.theme !== theme) {
-			highlightedContent = contentOptions[0];
-			return;
+		// If a theme is not highlighted, the behavior depends on the device.
+		if (highlightedContent?.theme !== theme) {
+			if ($isMobile) {
+				// On mobile, the first tap on a theme highlights it.
+				highlightedContent = contentOptions.find((c) => c.theme === theme);
+			} else {
+				// On desktop, clicking a non-hovered theme resets any highlight.
+				highlightedContent = contentOptions[0];
+			}
+			return; // In both cases, we do nothing further on the first click.
 		}
 
+		// If a theme *is* highlighted, a click/tap will enter theme view.
+		// On mobile, this is the second tap.
+		// On desktop, this is a click on a hovered theme.
 		if (contentOptions.length > 0) {
 			highlightedContent = contentOptions[0];
 		}
@@ -376,14 +386,14 @@
 	}
 
 	function handlePathMousemove(theme) {
-		if (inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions.find((c) => c.theme === theme);
 		isHoveringOverPlot = true;
 	}
 
 	function handlePathMouseleave(theme) {
-		if (inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions[0];
 		isHoveringOverPlot = false;
@@ -533,7 +543,7 @@
 					</g>
 				{/each}
 			</g>
-			<!-- <circle cx={xScale(new Date("2025-06-01"))} cy="60%" r="5px" fill="red" /> -->
+	
 		</svg>
 	{/if}
 </div>
