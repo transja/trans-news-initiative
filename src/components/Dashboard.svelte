@@ -8,9 +8,11 @@
 	// components
 	import Steamplot from "./charts/Steamplot.svelte";
 	import CirclePack from "./charts/CirclePack.svelte";
+	import LoaderCircles from "./helpers/loaders/Loader.Circles.svelte";
 
 	let {
 		data,
+		loadingThemeArticles,
 		filteredDataWithDateRange,
 		minDate,
 		maxDate,
@@ -22,7 +24,8 @@
 		transitionDuration,
 		summaryContent,
 		controlsHeight,
-		vizColors
+		vizColors,
+		monthlyArticleCounts
 	} = $props();
 
 	let dashboardHeight = $state();
@@ -67,17 +70,23 @@
 			<div class="circlepack-wrapper" class:in-theme-view={inThemeView.state}>
 				{#if renderCirclePack}
 					<div class="circlepack-fade-in" transition:fade={{ duration: 300 }}>
-						<CirclePack
-							data={filteredDataWithDateRange}
-							height="{contentHeight - brushHeight}px"
-							colors={vizColors}
-						/>
+						{#if loadingThemeArticles}
+							<div class="loading" transition:fade>
+								<LoaderCircles size={70} />
+							</div>
+						{:else}
+							<CirclePack
+								data={filteredDataWithDateRange}
+								height="{contentHeight - brushHeight}px"
+								colors={vizColors}
+							/>
+						{/if}
 					</div>
 				{/if}
 			</div>
 
 			<Steamplot
-				{data}
+				data={monthlyArticleCounts}
 				{themes}
 				height="{steamplotHeight}px"
 				{transitionDuration}
@@ -188,5 +197,9 @@
 			width: calc(100% - 2rem);
 			margin-bottom: 1rem;
 		}
+	}
+
+	.loading {
+		height: calc(100% - var(--brush-height) - 1rem);
 	}
 </style>

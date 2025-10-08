@@ -5,46 +5,56 @@
     import umLogo from "$svg/logos/UM_color.svg";
     import polygraphLogo from "$svg/logos/Polygraph_color.svg";
     
-    const copy = getContext("copy");
+    const copyPromise = Promise.resolve(getContext("copy"));
     const logos = [tjaLogo, umLogo, polygraphLogo];
 </script>
 
 {#if activePage.page == "about"}
 <section id="about">
-    <div class="inner">
-        <div class="about-wrapper">
-            <h2>About the initiative</h2>
-            {#each copy.longdesc as graf, i}
-                <p>{@html graf.value}</p>
-            {/each}
+    {#await copyPromise}
+        <div class="inner">
+            <p>Loading...</p>
         </div>
-        <div class="org-contributor-wrapper">
-            <div class="orgs">
-                <h3>Organizations</h3>
-                {#each copy.orgBios as org, i}
-                <div class="org">
-                    <a href={org.website}>
-                        <div class="logo">
-                            {@html logos[i]}
-                        </div>
-                    </a>
-                    <p>{@html org.bio}</p>
-                </div>
+    {:then copy}
+        <div class="inner">
+            <div class="about-wrapper">
+                <h2>About the initiative</h2>
+                {#each copy.longdesc as graf, i}
+                    <p>{@html graf.value}</p>
                 {/each}
             </div>
-            <div class="contributors">
-                <h3>Contributors</h3>
-                {#each copy.individualBios as individual, i}
-                    <div class="contributor">
-                        <p class="name">{@html individual.name}</p>
-                        <p class="title">{@html individual.title}</p>
-                        <p class="bio">{@html individual.bio}</p>
+            <div class="org-contributor-wrapper">
+                <div class="orgs">
+                    <h3>Organizations</h3>
+                    {#each copy.orgBios as org, i}
+                    <div class="org">
+                        <a href={org.website}>
+                            <div class="logo">
+                                {@html logos[i]}
+                            </div>
+                        </a>
+                        <p>{@html org.bio}</p>
                     </div>
-                {/each}
+                    {/each}
+                </div>
+                <div class="contributors">
+                    <h3>Contributors</h3>
+                    {#each copy.individualBios as individual, i}
+                        <div class="contributor">
+                            <p class="name">{@html individual.name}</p>
+                            <p class="title">{@html individual.title}</p>
+                            <p class="bio">{@html individual.bio}</p>
+                        </div>
+                    {/each}
+                </div>
             </div>
         </div>
-    </div>
-    <p class="copyright">{@html copy.copyright}</p>
+        <p class="copyright">{@html copy.copyright}</p>
+    {:catch error}
+        <div class="inner">
+            <p>There was an error loading this content. Please try again later.</p>
+        </div>
+    {/await}
 </section>
 {/if}
 

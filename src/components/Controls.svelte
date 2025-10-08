@@ -22,6 +22,7 @@
 	} from "../utils/getLeanProperty.js";
 	import { getPublicationName } from "../utils/getPublicationName.js";
 	import { isDesktop, isMobile } from "$utils/breakpoints";
+	import Spinner from "$components/helpers/loaders/Loader.Spinner.svelte";
 
 	// stores
 	import { inThemeView, activeTheme } from "$runes/misc.svelte.js";
@@ -45,9 +46,12 @@
 		minDate,
 		maxDate,
 		resetFilters,
-		controlsHeight = $bindable()
+		controlsHeight = $bindable(),
+		loadingThemeArticles
 	} = $props();
 
+	// TODO see why default allData and filteredData are different lengths
+	
 	const publicationDomainToName = new Map(
 		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
 	);
@@ -171,7 +175,6 @@
 	}
 
 	function clickOutside(node) {
-		
 		const handleClick = (event) => {
 			if (node && !node.contains(event.target)) {
 				node.dispatchEvent(new CustomEvent("clickoutside"));
@@ -243,6 +246,7 @@
 					{#key highlightedContent.title}
 						<div
 							class="subtitle"
+							class:disabled={loadingThemeArticles}
 							class:intro={mode == "intro"}
 							in:fade={{
 								duration: mode == "intro" ? transitionDuration / 4 : 0,
@@ -254,9 +258,14 @@
 							}}
 						>
 							<span
-								>{inThemeView.state
-									? filteredData.length.toLocaleString()
-									: highlightedContent.count.toLocaleString()} articles</span
+								>{#if loadingThemeArticles}
+									<Spinner />
+								{:else if inThemeView.state}
+									{filteredData.length.toLocaleString()}
+								{:else}
+									{highlightedContent.count.toLocaleString()}
+								{/if}
+								articles</span
 							>
 							about
 
@@ -272,6 +281,7 @@
 										class="interactive-title"
 										onclick={() => (showThemeDropdown = !showThemeDropdown)}
 										onkeydown={handleThemeKeydown}
+										disabled={loadingThemeArticles}
 									>
 										{highlightedContent.title}
 										<ChevronDown size={24} />
@@ -319,7 +329,10 @@
 						{/if}
 					</div>
 				{:else if highlightedContent.title !== "trans communities" && !inThemeView.state}
-					<button class="explore-button" onclick={handleExploreButtonClick}
+					<button
+						class="explore-button"
+						onclick={handleExploreButtonClick}
+						disabled={loadingThemeArticles}
 						>Explore more<ArrowRight size={24} />
 					</button>
 				{:else if inThemeView.state}
@@ -337,6 +350,7 @@
 								class="filter-control__input calendar-button"
 								onclick={() => (showMonthPicker = !showMonthPicker)}
 								aria-label="Select date range"
+								disabled={loadingThemeArticles}
 							>
 								<Calendar size={18} />
 								{#if $isDesktop}
@@ -373,9 +387,12 @@
 						groupColors={leanColors}
 						groupTextColors={leanTextColors}
 						class="wide"
+						disabled={loadingThemeArticles}
 					/>
-					<button class="explore-button" onclick={handleThemeExit}
-						><ArrowLeft size={24} /> Back</button
+					<button
+						class="explore-button"
+						onclick={handleThemeExit}
+						disabled={loadingThemeArticles}><ArrowLeft size={24} /> Back</button
 					>
 				{/if}
 			</div>
@@ -437,26 +454,25 @@
 				color: var(--color-gray-700);
 			}
 
-			.subtext {
-				font-style: normal;
-				font-weight: 400;
-				font-size: 16px;
-
-				color: var(--color-gray-700);
-			}
-
 			.subtitle,
 			.subtitle-sizer {
 				font-style: normal;
 				font-size: var(--subtitle-font-size);
 				line-height: var(--subtitle-line-height);
 				color: #000000;
+				text-transform: lowercase;
+
 				transition:
 					font-size 0.3s ease,
 					line-height 0.3s ease;
 				span {
 					font-weight: 700;
 				}
+			}
+
+			.subtitle.disabled {
+				opacity: 0.5;
+				transition: opacity 0.3s ease;
 			}
 
 			.subtitle.intro {
@@ -555,6 +571,7 @@
 				display: inline;
 
 				.interactive-title {
+					text-transform: lowercase;
 					position: relative;
 					cursor: pointer;
 					display: inline-flex;
@@ -580,6 +597,11 @@
 						right: 0;
 						height: 2px;
 						background: #000;
+					}
+
+					&:disabled {
+						cursor: not-allowed;
+						opacity: 0.5;
 					}
 
 					@media (max-width: 600px) {
@@ -657,6 +679,16 @@
 
 		&:hover {
 			transform: translateY(-2px);
+		}
+
+		&:disabled {
+			background-color: var(--color-gray-200);
+			cursor: not-allowed;
+			transform: none;
+
+			&:hover {
+				transform: none;
+			}
 		}
 	}
 

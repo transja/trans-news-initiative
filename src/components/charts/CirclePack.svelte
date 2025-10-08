@@ -47,6 +47,7 @@
 
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
+
 		const root = hierarchy(processData(data)).sum((d) => d.value);
 		return pack()
 			.size([width - 2, heightVal - 2])
@@ -56,11 +57,11 @@
 	function processData(sourceData) {
 		const clusters = new Map();
 		sourceData.forEach((d) => {
-			if (!d.label) return;
-			if (!clusters.has(d.label)) {
-				clusters.set(d.label, []);
+			if (!d.event) return;
+			if (!clusters.has(d.event)) {
+				clusters.set(d.event, []);
 			}
-			clusters.get(d.label).push({
+			clusters.get(d.event).push({
 				name: d.title,
 				value: 1,
 				url: d.url,
@@ -229,7 +230,7 @@
 
 		const minRadius = min(packed.leaves(), (d) => d.r);
 		if (minRadius) {
-			const minTargetRadius = $isMobile ? 2 : 5;
+			const minTargetRadius = $isMobile ? 2 : 4;
 			let k = Math.max(1, minTargetRadius / minRadius);
 			k = Math.min(k, 8);
 
@@ -258,40 +259,43 @@
 		if (!packed || !svgEl) return;
 		let instances = [];
 		const timer = setTimeout(() => {
-			instances = tippy(svgEl.querySelectorAll(".is-leaf[data-tippy-content]"), {
-				allowHTML: true,
-				interactive: $isMobile,
-				appendTo: () => document.body,
-				theme: "light",
-				trigger: "mouseenter click",
+			instances = tippy(
+				svgEl.querySelectorAll(".is-leaf[data-tippy-content]"),
+				{
+					allowHTML: true,
+					interactive: $isMobile,
+					appendTo: () => document.body,
+					theme: "light",
+					trigger: "mouseenter click",
 
-				onShow(instance) {
-					if (stickyInstance && stickyInstance !== instance) {
-						return false;
-					}
-				},
-
-				onTrigger(instance, event) {
-					if (event.type === "click") {
-						const isCurrentlySticky = stickyInstance === instance;
-						if (stickyInstance && !isCurrentlySticky) {
-							stickyInstance.hide();
+					onShow(instance) {
+						if (stickyInstance && stickyInstance !== instance) {
+							return false;
 						}
-						if (!isCurrentlySticky) {
-							stickyInstance = instance;
-							if (!$isMobile) {
-								instance.setProps({ interactive: true });
+					},
+
+					onTrigger(instance, event) {
+						if (event.type === "click") {
+							const isCurrentlySticky = stickyInstance === instance;
+							if (stickyInstance && !isCurrentlySticky) {
+								stickyInstance.hide();
+							}
+							if (!isCurrentlySticky) {
+								stickyInstance = instance;
+								if (!$isMobile) {
+									instance.setProps({ interactive: true });
+								}
 							}
 						}
-					}
-				},
+					},
 
-				onHide(instance) {
-					if (stickyInstance === instance) {
-						stickyInstance = null;
+					onHide(instance) {
+						if (stickyInstance === instance) {
+							stickyInstance = null;
+						}
 					}
 				}
-			});
+			);
 		}, 100);
 		return () => {
 			clearTimeout(timer);

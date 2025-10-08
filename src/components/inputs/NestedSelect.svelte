@@ -11,7 +11,8 @@
 		sortOrder = [],
 		groupColors = {},
 		groupTextColors = {},
-		class: className = ""
+		class: className = "",
+		disabled = false
 	} = $props();
 
 	let showDropdown = $state(false);
@@ -181,6 +182,7 @@
 			onclick={() => (showDropdown = !showDropdown)}
 			onkeydown={handleKeydown}
 			aria-expanded={showDropdown}
+			{disabled}
 		>
 			<span class:selected-group={isGroupSelected} style={selectedGroupStyle}>
 				{selectedText}
@@ -300,6 +302,12 @@
 
 		&:hover {
 			background: var(--color-gray-50);
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			background-color: var(--color-gray-100);
+			opacity: 0.7;
 		}
 	}
 
