@@ -1,16 +1,14 @@
 <script>
-	import { onMount, getContext } from "svelte";
+
 	import { browser } from "$app/environment";
 	import tniLogo from "$svg/logos/TNI_static.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 	import { dev } from "$app/environment";
+	import { isDesktop } from "$utils/breakpoints";
+	import LogoLockup from "./LogoLockup.svelte";
 
-	import tjaLogo from "$svg/logos/TJA_black.svg";
-	import umLogo from "$svg/logos/UM_black.svg";
-	import polygraphLogo from "$svg/logos/Polygraph_black.svg";
-	const copy = getContext("copy");
-	const logos = [tjaLogo, umLogo, polygraphLogo];
+
 	let pages = ["home", "about"];
 
 	if (dev) {
@@ -39,17 +37,10 @@
 	</div>
 
 	<div class="right-side">
-		<div class="logo-lockup">
-			<p>A collaboration between</p>
-			<div class="org-wrapper">
-				{#each copy.orgBios as org, i}
-					<a href={org.website} aria-label="Learn more about {org.name}">
-						{@html logos[i]}
-					</a>
-				{/each}
-			</div>
-		</div>
-		<div class="divider"></div>
+		{#if $isDesktop}
+			<LogoLockup />
+			<div class="divider"></div>
+		{/if}
 		<nav>
 			{#each pages as btn, i}
 				<button
@@ -77,10 +68,18 @@
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
 		top: 0;
+
+		@media (max-width: 1000px) {
+			padding: 0.5rem 1rem;
+		}
+
+		@media (max-width: 600px) {
+			height: auto;
+		}
 	}
 
 	.logo {
-		width: 80px;
+		min-width: 80px;
 	}
 
 	nav {
@@ -134,45 +133,6 @@
 		pointer-events: none;
 	}
 
-	.logo-lockup {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: flex-end;
-		font-family: var(--sans);
-		padding: 1rem;
-		color: var(--color-gray-600);
-		font-size: var(--14px);
-
-		.org-wrapper {
-			display: flex;
-			flex-direction: row;
-			align-items: center;
-			gap: 2rem;
-		}
-
-		p {
-			margin-right: 1rem;
-		}
-	}
-
-	.org-wrapper a {
-		opacity: 0.3;
-		transition: transform 0.25s linear;
-	}
-
-	.org-wrapper a:hover {
-		transform: translateY(-2px);
-		opacity: 0.4;
-	}
-
-	:global(.org-wrapper svg) {
-		height: 2rem;
-	}
-
-	:global(.org-wrapper a:last-of-type svg) {
-		height: 1.4rem;
-	}
 
 	@media (max-width: 720px) {
 		footer {

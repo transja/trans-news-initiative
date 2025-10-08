@@ -116,7 +116,7 @@
 			</div>
 
 			<div class="article-table-container event-content-block">
-				<h4>Sample articles</h4>
+				<h4>Articles in this event</h4>
 				<ArticleTable articles={event.articles} {leanColors} />
 			</div>
 		</div>
@@ -200,6 +200,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
+
+		@media(max-width: 600px) {
+			padding: 0 .5rem 1.5rem;
+		}
 	}
 
 	.event-content-block {
@@ -218,6 +222,15 @@
 		display: flex;
 		gap: 0.25rem;
 		margin-bottom: 1rem;
+		@media(max-width: 600px) {
+			flex-wrap: wrap;
+
+			.legend-item {
+				&.no-data {
+					margin-left: 0;
+				}
+			}
+		}
 	}
 
 	.legend-item {
@@ -236,6 +249,10 @@
 		white-space: nowrap;
 		font-size: 10px;
 		font-weight: 700;
+
+		@media(max-width: 600px) {
+			padding: 0.75rem .5rem;
+		}
 
 		&.no-data {
 			color: var(--color-gray-500);

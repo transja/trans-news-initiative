@@ -12,19 +12,26 @@
 	let dragType = $state(""); // 'start' or 'end'
 	let brushEl;
 
-	function handleMouseDown(event, type) {
+	function handleDragStart(event, type) {
 		isDragging = true;
 		dragType = type;
-		window.addEventListener("mousemove", handleMouseMove);
-		window.addEventListener("mouseup", handleMouseUp);
+		window.addEventListener("mousemove", handleDragMove);
+		window.addEventListener("mouseup", handleDragEnd);
+		window.addEventListener("touchmove", handleDragMove, { passive: false });
+		window.addEventListener("touchend", handleDragEnd);
 		event.preventDefault();
 	}
 
-	function handleMouseMove(event) {
+	function handleDragMove(event) {
 		if (!isDragging) return;
 
+		if (event.type === "touchmove") {
+			event.preventDefault();
+		}
+
 		const rect = brushEl.getBoundingClientRect();
-		const x = event.clientX - rect.left;
+		const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+		const x = clientX - rect.left;
 		const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
 
 		if (dragType === "start") {
@@ -34,10 +41,12 @@
 		}
 	}
 
-	function handleMouseUp() {
+	function handleDragEnd() {
 		isDragging = false;
-		window.removeEventListener("mousemove", handleMouseMove);
-		window.removeEventListener("mouseup", handleMouseUp);
+		window.removeEventListener("mousemove", handleDragMove);
+		window.removeEventListener("mouseup", handleDragEnd);
+		window.removeEventListener("touchmove", handleDragMove);
+		window.removeEventListener("touchend", handleDragEnd);
 	}
 
 	const formatter = new Intl.DateTimeFormat("en-US", {
@@ -59,7 +68,10 @@
 	></div>
 	<div class="brush-handle start" style="left: {startPercent}%">
 		<div class="handle-date">{formatter.format(startDate)}</div>
-		<button onmousedown={(e) => handleMouseDown(e, "start")}>
+		<button
+			onmousedown={(e) => handleDragStart(e, "start")}
+			ontouchstart={(e) => handleDragStart(e, "start")}
+		>
 			<ChevronLeft color="white" />
 		</button>
 	</div>
@@ -67,7 +79,10 @@
 	<!-- End handle -->
 	<div class="brush-handle end" style="left: {endPercent}%">
 		<div class="handle-date">{formatter.format(endDate)}</div>
-		<button onmousedown={(e) => handleMouseDown(e, "end")}>
+		<button
+			onmousedown={(e) => handleDragStart(e, "end")}
+			ontouchstart={(e) => handleDragStart(e, "end")}
+		>
 			<ChevronRight color="white" />
 		</button>
 	</div>

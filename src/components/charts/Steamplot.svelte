@@ -15,9 +15,11 @@
 
 	import Brush from "./Brush.svelte";
 
-
-	// stores
+	// runes
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
+
+	// utils
+	import { isMobile } from "$utils/breakpoints";
 
 	let {
 		data = [],
@@ -32,8 +34,6 @@
 		mode = "default",
 		isHoveringOverPlot = $bindable()
 	} = $props();
-
-
 
 	let container;
 	let width = $state(0);
@@ -127,7 +127,6 @@
 			const timer = setTimeout(
 				() => {
 					isViewTransitioning = false;
-					console.log("HERE");
 				},
 				transitionDuration * 2.5 + 50
 			); // Add a small buffer
@@ -139,18 +138,6 @@
 		if (!inThemeView.state) {
 			isViewTransitioning = false;
 		}
-	});
-
-	$effect(() => {
-		if (!container) return;
-		const resizeObserver = new ResizeObserver((entries) => {
-			for (let entry of entries) {
-				width = entry.contentRect.width;
-				// heightVal = entry.contentRect.height; // This line is removed as per the edit hint
-			}
-		});
-		resizeObserver.observe(container);
-		return () => resizeObserver.disconnect();
 	});
 
 	// --- Reactive Data Pipeline ---
@@ -357,14 +344,6 @@
 			.curve(curveBasis)
 	);
 
-	const areaAreaGenerator = $derived(
-		area()
-			.x((d) => xScale(d.data.date))
-			.y0((d) => unifiedYScale(d[0]))
-			.y1((d) => unifiedYScale(d[1]))
-			.curve(curveBasis)
-	);
-
 	const flattenedAreaGenerator = $derived(
 		area()
 			.x((d) => xScale(d.data.date))
@@ -381,12 +360,22 @@
 
 	function handlePathClick(theme) {
 		if (inThemeView.state) return;
-		
-		if (!inThemeView.state && highlightedContent.theme !== theme) {
-			highlightedContent = contentOptions[0];
-			return;
+
+		// If a theme is not highlighted, the behavior depends on the device.
+		if (highlightedContent?.theme !== theme) {
+			if ($isMobile) {
+				// On mobile, the first tap on a theme highlights it.
+				highlightedContent = contentOptions.find((c) => c.theme === theme);
+			} else {
+				// On desktop, clicking a non-hovered theme resets any highlight.
+				highlightedContent = contentOptions[0];
+			}
+			return; // In both cases, we do nothing further on the first click.
 		}
-		
+
+		// If a theme *is* highlighted, a click/tap will enter theme view.
+		// On mobile, this is the second tap.
+		// On desktop, this is a click on a hovered theme.
 		if (contentOptions.length > 0) {
 			highlightedContent = contentOptions[0];
 		}
@@ -397,14 +386,14 @@
 	}
 
 	function handlePathMousemove(theme) {
-		if (inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions.find((c) => c.theme === theme);
 		isHoveringOverPlot = true;
 	}
 
 	function handlePathMouseleave(theme) {
-		if (inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
 			return;
 		highlightedContent = contentOptions[0];
 		isHoveringOverPlot = false;
@@ -414,6 +403,16 @@
 		if (inThemeView.state) return;
 		highlightedContent = contentOptions[0];
 	}
+
+	function getPathOpacity(seriesKey) {
+		if (inThemeView.state) {
+			return seriesKey === themeForAreaChart ? 1 : 0;
+		}
+		if (highlightedContent?.theme) {
+			return seriesKey === highlightedContent.theme ? 1 : 0.7;
+		}
+		return 1;
+	}
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -421,6 +420,7 @@
 <div
 	class="steamplot-container"
 	bind:this={container}
+	bind:clientWidth={width}
 	style:--height={height}
 	style:--duration="{transitionDuration}ms"
 	class:interactive={mode === "default"}
@@ -443,7 +443,7 @@
 	{#if width && numericHeight}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<svg {width} height={numericHeight}>
+		<svg width="100%" height={numericHeight}>
 			<defs>
 				<linearGradient id="steam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
 					{#if colors.length > 0}
@@ -469,20 +469,12 @@
 							d={inThemeView.state && areaSeries.length
 								? isMorphingToFlat
 									? flattenedAreaGenerator(areaSeries[0])
-									: areaAreaGenerator(areaSeries[0])
+									: steamAreaGenerator(areaSeries[0])
 								: steamAreaGenerator(s)}
 							fill="url(#steam-gradient)"
 							stroke="white"
-							stroke-width="1.5px"
-							opacity={inThemeView.state
-								? s.key === themeForAreaChart
-									? 1
-									: 0
-								: highlightedContent?.theme
-									? s.key === highlightedContent.theme
-										? 1
-										: 0.7
-									: 1}
+							stroke-width={$isMobile ? "0.5px" : "1px"}
+							opacity={getPathOpacity(s.key)}
 							style="
 								transition-property: d, opacity;
 								transition-duration: {isWidthTransitioning
@@ -551,7 +543,7 @@
 					</g>
 				{/each}
 			</g>
-			<!-- <circle cx={xScale(new Date("2025-06-01"))} cy="60%" r="5px" fill="red" /> -->
+	
 		</svg>
 	{/if}
 </div>
@@ -580,6 +572,15 @@
 
 			&.apply-width {
 				width: calc(100% - 6rem);
+				@media (max-width: 600px) {
+					width: calc(100% - 4rem);
+				}
+			}
+
+			@media (max-width: 600px) {
+				position: relative;
+				bottom: 0;
+				background-color: transparent;
 			}
 		}
 	}
