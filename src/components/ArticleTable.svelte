@@ -19,6 +19,9 @@
 	// utils
 	import { isMobile } from "$utils/breakpoints.js";
 
+	const uniqueArticles = Array.from(
+		new Map(articles.map((item) => [item.url, item])).values()
+	);
 
 	// State
 	let sortKey = $state("publish_date");
@@ -29,7 +32,7 @@
 
 	// Derived state
 	const filteredArticles = $derived(
-		articles.filter((article) =>
+		uniqueArticles.filter((article) =>
 			article.title.toLowerCase().includes(searchTerm.toLowerCase())
 		)
 	);

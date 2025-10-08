@@ -214,11 +214,9 @@
 				);
 
 				// TO DO: Remove this on backend
-				const uniqueArticles = Array.from(
-					new Map(fetchedArticles.map((item) => [item.url, item])).values()
-				);
-
-				themeArticles = uniqueArticles.map((item) => ({
+		
+				
+				themeArticles = fetchedArticles.map((item) => ({
 					...item,
 					lean:
 						leanData.find((d) => d.domain === item.media_name)?.aggLean ||
@@ -252,7 +250,8 @@
 	);
 
 	let filteredDataWithDateRange = $derived(
-		filteredData.filter((item) => {
+		filteredData
+		.filter((item) => {
 			const d = new Date(item.publish_date);
 			const correctedDate = new Date(
 				d.valueOf() + d.getTimezoneOffset() * 60 * 1000

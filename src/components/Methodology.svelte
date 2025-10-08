@@ -5,7 +5,6 @@
     
     const copy = getContext("copy");
 
-    console.log(copy.queryTerms)
 </script>
 
 {#if activePage.page == "methodology"}
