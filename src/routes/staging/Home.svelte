@@ -17,13 +17,14 @@
 	import Header from "$components/Header.svelte";
 	import ThemeSection from "$components/ThemeSection.svelte";
 
-	import csvdata from "../../data/old_articles_with_themes.csv";
+	import csvdata from "../../data/all_data_jd_tags_threshold_0_85.csv";
 	import leanData from "../../data/lean.csv";
 
-	const processedData = csvdata
+	const processedData = csvdata.slice(0, 130000)
+		.filter((d) => d.themes.length)
 		.map((item) => ({
 			...item,
-			themes: item.topics.split(",")?.map((t) => t.trim()) || [],
+			themes: item.themes.split(",")?.map((t) => t.trim()) || [],
 			lean:
 				leanData.find((d) => d.domain === item.media_name)?.aggLean || "unknown"
 		}))

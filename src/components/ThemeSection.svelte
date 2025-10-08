@@ -8,12 +8,12 @@
 
 	const groupedByEvent = $derived.by(() => {
 		return Array.from(
-			new Map(data.map((item) => [item.cluster_name, item])).values()
+			new Map(data.filter((d) => d.event).map((item) => [item.event, item])).values()
 		)
 			.map((item) => {
 				return {
-					name: item.cluster_name,
-					articles: data.filter((d) => d.cluster_name === item.cluster_name)
+					name: item.event,
+					articles: data.filter((d) => d.event === item.event)
 				};
 			})
 			.sort((a, b) => b.articles.length - a.articles.length);
