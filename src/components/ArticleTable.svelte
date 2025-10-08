@@ -1,5 +1,12 @@
 <script>
-	import { Search, ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from "@lucide/svelte";
+	import {
+		Search,
+		ArrowDown,
+		ArrowUp,
+		ArrowLeft,
+		ArrowRight,
+		ArrowLeftRight
+	} from "@lucide/svelte";
 	import {
 		leanOrder,
 		leanColors,
@@ -9,11 +16,15 @@
 
 	let { articles = [] } = $props();
 
+	// utils
+	import { isMobile } from "$utils/breakpoints.js";
+
+
 	// State
 	let sortKey = $state("publish_date");
 	let sortDirection = $state("desc");
 	let currentPage = $state(1);
-	let itemsPerPage = 10;
+	let itemsPerPage = $derived($isMobile ? 5 : 10);
 	let searchTerm = $state("");
 
 	// Derived state
@@ -177,6 +188,10 @@
 		</table>
 	</div>
 
+	<div class="scroll-indicator">
+		Scroll to see more <ArrowLeftRight size={14} />
+	</div>
+
 	{#if totalPages > 1}
 		<div class="pagination">
 			<button
@@ -201,7 +216,8 @@
 			<button
 				class="arrow-button"
 				onclick={() => (currentPage += 1)}
-				disabled={currentPage === totalPages}>Next <ArrowRight size={14} /></button
+				disabled={currentPage === totalPages}
+				>Next <ArrowRight size={14} /></button
 			>
 		</div>
 	{/if}
@@ -249,7 +265,7 @@
 		font-size: var(--12px);
 		text-transform: uppercase;
 
-		padding: .5rem 0;
+		padding: 0.5rem 0;
 	}
 	.search-header {
 		flex-direction: row;
@@ -317,7 +333,7 @@
 				padding: 0.5rem 0.75rem;
 				cursor: pointer;
 				&.active {
-					background-color: var(--color-gray-100);;
+					background-color: var(--color-gray-100);
 					font-weight: 700;
 				}
 			}
@@ -334,11 +350,46 @@
 			align-items: center;
 			gap: 0.5rem;
 			line-height: 0;
-			
+
 			&:disabled {
 				color: var(--color-gray-500);
 				cursor: not-allowed;
 			}
+		}
+	}
+
+	.scroll-indicator {
+		display: none;
+	}
+
+	@media (max-width: 1000px) {
+		.scroll-indicator {
+			display: inline-block;
+			cursor: pointer;
+			color: var(--color-gray-500);
+			font-size: var(--12px);
+			text-transform: uppercase;
+			font-weight: 700;
+			gap: 0.5rem;
+			margin-top: 1rem;
+			margin-bottom: 1rem;
+			margin-left: 1rem;
+			margin-right: 1rem;
+			text-align: center;
+			justify-content: center;
+			align-items: center;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: right;
+			gap: 0.5rem;
+		}
+
+		.table-wrapper {
+			overflow-x: auto;
+		}
+		table {
+			min-width: 800px;
 		}
 	}
 </style>
