@@ -3,7 +3,6 @@
 	import { hierarchy, pack } from "d3-hierarchy";
 	import { scaleLinear } from "d3-scale";
 	import { min } from "d3-array";
-	import { schemeTableau10 } from "d3-scale-chromatic";
 	import { zoom, zoomIdentity } from "d3-zoom";
 	import { select } from "d3-selection";
 	import tippy from "tippy.js";
@@ -12,7 +11,7 @@
 	import { fade } from "svelte/transition";
 	import { Plus, Minus } from "@lucide/svelte";
 	import { createTooltipContent } from "../../utils/createTooltipContent.js";
-	import { isMobile } from "../../utils/breakpoints.js";
+	import { isMobile } from "$utils/breakpoints.js";
 
 	const {
 		data = [],
@@ -44,23 +43,7 @@
 	let showZoomHint = $state(false);
 	let hintTimeout;
 	let zoomBehavior;
-	let stickyInstance = $state(null);
-
-	onMount(() => {
-		const handleClickOutside = (event) => {
-			if (
-				stickyInstance
-				// !stickyInstance.popper.contains(event.target) &&
-				// !stickyInstance.reference.contains(event.target)
-			) {
-				stickyInstance.hide();
-				stickyInstance.setProps({ isSticky: false });
-				stickyInstance = null;
-			}
-		};
-		document.addEventListener("click", handleClickOutside, true);
-		return () => document.removeEventListener("click", handleClickOutside, true);
-	});
+	let stickyInstance = null;
 
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
@@ -73,7 +56,7 @@
 	function processData(sourceData) {
 		const clusters = new Map();
 		sourceData.forEach((d) => {
-			// if (!d.cluster || d.cluster === "-1") return;
+			if (!d.label) return;
 			if (!clusters.has(d.label)) {
 				clusters.set(d.label, []);
 			}
@@ -112,7 +95,7 @@
 	});
 
 	function checkOverlap(boxA, boxB) {
-		const padding = 5; // 5px padding around labels
+		const padding = 5;
 		return (
 			boxA.x < boxB.x + boxB.width + padding &&
 			boxA.x + boxA.width + padding > boxB.x &&
@@ -125,11 +108,8 @@
 		if (!svgEl) return;
 
 		const labels = Array.from(svgEl.querySelectorAll(".cluster-label-text"));
-		// Ensure all labels are visible before checking for overlaps
 		labels.forEach((l) => (l.style.display = "block"));
 
-		// Sort labels by the radius of their corresponding circle, descending
-		// So we prioritize showing labels for larger circles.
 		const sortedLabels = labels.sort(
 			(a, b) => b.dataset.radius - a.dataset.radius
 		);
@@ -157,12 +137,12 @@
 		const text = textEl.dataset.text;
 		if (!text) return;
 		const radius = parseFloat(textEl.dataset.radius);
-		const maxWidth = radius * 2 - 10; // padding
+		const maxWidth = radius * 2 - 10;
 		const words = text.trim().split(/\s+/);
 		textEl.textContent = "";
 
 		const x = textEl.getAttribute("x");
-		const lineHeight = 1.1; // ems
+		const lineHeight = 1.1;
 
 		let tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 		tspan.setAttribute("x", x);
@@ -197,85 +177,6 @@
 		labels.forEach(wrapText);
 		debouncedHandleLabelOverlap();
 	}
-
-
-
-	function tooltipAction(node, content) {
-
-		
-		const instance = tippy(node, {
-			allowHTML: true,
-			arrow: true,
-			duration: 0,
-			theme: "light",
-			trigger: "manual",
-			appendTo: () => document.body
-		});
-
-		const showOnHover = () => {
-			if (!stickyInstance) {
-				instance.setProps({ interactive: false });
-				instance.show();
-			}
-		};
-
-		const hideOnHover = () => {
-			if (!instance.props.isSticky) {
-				instance.hide();
-			}
-		};
-
-		const toggleSticky = () => {
-			if (stickyInstance === instance) {
-				instance.hide();
-				instance.setProps({ isSticky: false });
-				stickyInstance = null;
-			} else {
-				if (stickyInstance) {
-					stickyInstance.hide();
-					stickyInstance.setProps({ isSticky: false });
-				}
-				instance.setProps({
-					isSticky: true,
-					interactive: true
-				});
-				instance.show();
-				stickyInstance = instance;
-			}
-		};
-
-		node.addEventListener("mouseenter", showOnHover);
-		node.addEventListener("mouseleave", hideOnHover);
-		node.addEventListener("click", toggleSticky);
-
-		function updateContent(newContent) {
-			if (newContent) {
-				instance.setContent(newContent);
-				instance.enable();
-			} else {
-				instance.disable();
-			}
-		}
-
-		updateContent(content);
-
-		return {
-			update(newContent) {
-				updateContent(newContent);
-			},
-			destroy() {
-				node.removeEventListener("mouseenter", showOnHover);
-				node.removeEventListener("mouseleave", hideOnHover);
-				node.removeEventListener("click", toggleSticky);
-				instance.destroy();
-				if (stickyInstance === instance) {
-					stickyInstance = null;
-				}
-			}
-		};
-	}
-
-
 
 	function debounce(func, wait) {
 		let timeout;
@@ -328,9 +229,9 @@
 
 		const minRadius = min(packed.leaves(), (d) => d.r);
 		if (minRadius) {
-			const minTargetRadius = $isMobile ? 2 : 5; // 20px diameter
+			const minTargetRadius = $isMobile ? 2 : 5;
 			let k = Math.max(1, minTargetRadius / minRadius);
-			k = Math.min(k, 8); // clamp to max zoom from scaleExtent
+			k = Math.min(k, 8);
 
 			const initialTransform = zoomIdentity
 				.translate(width / 2, heightVal / 2)
@@ -351,6 +252,52 @@
 		if (data) {
 			updateLabels();
 		}
+	});
+
+	$effect(() => {
+		if (!packed || !svgEl) return;
+		let instances = [];
+		const timer = setTimeout(() => {
+			instances = tippy(svgEl.querySelectorAll(".is-leaf[data-tippy-content]"), {
+				allowHTML: true,
+				interactive: $isMobile,
+				appendTo: () => document.body,
+				theme: "light",
+				trigger: "mouseenter click",
+
+				onShow(instance) {
+					if (stickyInstance && stickyInstance !== instance) {
+						return false;
+					}
+				},
+
+				onTrigger(instance, event) {
+					if (event.type === "click") {
+						const isCurrentlySticky = stickyInstance === instance;
+						if (stickyInstance && !isCurrentlySticky) {
+							stickyInstance.hide();
+						}
+						if (!isCurrentlySticky) {
+							stickyInstance = instance;
+							if (!$isMobile) {
+								instance.setProps({ interactive: true });
+							}
+						}
+					}
+				},
+
+				onHide(instance) {
+					if (stickyInstance === instance) {
+						stickyInstance = null;
+					}
+				}
+			});
+		}, 100);
+		return () => {
+			clearTimeout(timer);
+			instances.forEach((instance) => instance.destroy());
+			stickyInstance = null;
+		};
 	});
 
 	function zoomIn() {
@@ -389,6 +336,9 @@
 									heightVal / 2})"
 								class:is-leaf={!node.children}
 								class:is-parent={node.depth === 1}
+								data-tippy-content={!node.children
+									? createTooltipContent(node.data)
+									: undefined}
 							>
 								<circle
 									r={node.r}
@@ -398,7 +348,6 @@
 									stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
 									class:article-circle={!node.children}
 									class:event-circle={node.children}
-									use:tooltipAction={!node.children && createTooltipContent(node.data)}
 								/>
 							</g>
 						{/each}
@@ -448,19 +397,20 @@
 	svg:active {
 		cursor: grabbing;
 	}
+	.is-leaf {
+		cursor: pointer;
+	}
 	.is-leaf circle:hover {
 		fill-opacity: 1;
 	}
 
-
-.event-circle {
-	pointer-events: none;
-}
+	.event-circle {
+		pointer-events: none;
+	}
 	.article-circle:hover {
 		fill-opacity: 1;
 		stroke-width: 2;
 		stroke: #000;
-		cursor: crosshair;
 	}
 	.cluster-label-text {
 		text-align: center;
@@ -496,9 +446,7 @@
 	kbd {
 		display: inline-block;
 		font-family: monospace;
-		/* font-size: 0.85em; */
 		font-weight: 700;
-		/* line-height: 1; */
 		padding: 2px 8px;
 		margin-top: 5px;
 		white-space: nowrap;

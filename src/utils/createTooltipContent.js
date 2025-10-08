@@ -39,7 +39,7 @@ export function createTooltipContent(node) {
 	}
 
 	return `
-		<div style="text-align: left; font-family: sans-serif; padding: 5px; max-width: 300px;">
+		<div style="text-align: left; font-family: sans-serif; padding: 5px; max-width: 300px;" onpointerdown="event.stopPropagation()">
 			<div style="font-size: 0.8em; text-transform: uppercase; color: #555; margin-bottom: 5px; font-weight: bold;">${date.toUpperCase()}</div>
 			<a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size: 1.1em; color: black; text-decoration: underline; line-height: 1.2; font-style: italic;">${title}</a>
 			<div style="margin-top: 8px; display: flex; align-items: center; font-size: 1em;">
