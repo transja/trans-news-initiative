@@ -174,31 +174,50 @@
 	const processedData = $derived(getProcessedData(data));
 
 	const binnedData = $derived.by(() => {
-		if (!dateExtent || !dateExtent[0] || !themes.length) return [];
+		// if (!dateExtent || !dateExtent[0] || !themes.length) return [];
 
-		const startOfMonth = timeMonth.floor(dateExtent[0]);
-		const endOfMonth = timeMonth.offset(dateExtent[1], 1);
-		const bins = timeMonths(startOfMonth, endOfMonth);
+		// const startOfMonth = timeMonth.floor(dateExtent[0]);
+		// const endOfMonth = timeMonth.offset(dateExtent[1], 1);
+		// const bins = timeMonths(startOfMonth, endOfMonth);
 
-		const binned = bins.map((date) => {
-			const obj = { date };
-			themes.forEach((theme) => {
-				obj[theme] = 0;
-			});
-			return obj;
-		});
+		// const binned = bins.map((date) => {
+		// 	const obj = { date };
+		// 	themes.forEach((theme) => {
+		// 		obj[theme] = 0;
+		// 	});
+		// 	return obj;
+		// });
 
-		processedData.forEach((d) => {
-			const binIndex = bins.findIndex(
-				(binDate, i) =>
-					d.publish_date >= binDate &&
-					(bins[i + 1] ? d.publish_date < bins[i + 1] : true)
-			);
-			if (binIndex !== -1) {
-				binned[binIndex][d.theme]++;
+		// processedData.forEach((d) => {
+		// 	const binIndex = bins.findIndex(
+		// 		(binDate, i) =>
+		// 			d.publish_date >= binDate &&
+		// 			(bins[i + 1] ? d.publish_date < bins[i + 1] : true)
+		// 	);
+		// 	if (binIndex !== -1) {
+		// 		binned[binIndex][d.theme]++;
+		// 	}
+		// });
+		// return binned;
+
+		const byMonth = new Map();
+
+		// If monthly data already include zero-filled grid from the DB, this
+		// will just map them; if not, we’ll still create zeros per month.
+		for (const { month, theme, count } of data) {
+			if (!byMonth.has(month)) {
+				const base = { date: new Date(month) };
+				// initialize all displayed themes to 0
+				for (const th of themes) base[th] = 0;
+				byMonth.set(month, base);
 			}
-		});
-		return binned;
+			if (themes.includes(theme)) {
+				byMonth.get(month)[theme] = count ?? 0;
+			}
+		}
+
+		// Ensure months are sorted
+		return Array.from(byMonth.values()).sort((a, b) => a.date - b.date);
 	});
 
 	const steamSeries = $derived.by(() => {
@@ -386,14 +405,22 @@
 	}
 
 	function handlePathMousemove(theme) {
-		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if (
+			$isMobile ||
+			inThemeView.state ||
+			(!isHoveringOverPlot && highlightedContent.theme)
+		)
 			return;
 		highlightedContent = contentOptions.find((c) => c.theme === theme);
 		isHoveringOverPlot = true;
 	}
 
 	function handlePathMouseleave(theme) {
-		if ($isMobile || inThemeView.state || (!isHoveringOverPlot && highlightedContent.theme))
+		if (
+			$isMobile ||
+			inThemeView.state ||
+			(!isHoveringOverPlot && highlightedContent.theme)
+		)
 			return;
 		highlightedContent = contentOptions[0];
 		isHoveringOverPlot = false;
@@ -543,7 +570,6 @@
 					</g>
 				{/each}
 			</g>
-	
 		</svg>
 	{/if}
 </div>

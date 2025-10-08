@@ -42,6 +42,7 @@
 	"browserslist": "> 0.5%, last 4 versions, not ie <= 11, not ie_mob <= 11",
 	"dependencies": {
 		"@internationalized/date": "^3.8.2",
+		"@supabase/supabase-js": "^2.74.0",
 		"clsx": "^2.1.1",
 		"d3-hierarchy": "^3.1.2",
 		"d3-hull": "^0.0.4",
