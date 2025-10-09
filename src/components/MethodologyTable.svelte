@@ -1,7 +1,8 @@
 <script>
     let data = $props();
     let tableData = Object.values(data);
-    let columns = tableData.length > 0 ? Object.keys(tableData[0][0]) : [];
+    const columnsToRemove = ["shortTheme", "longThemeLEN", "descriptionLEN", "notes on inclusions/exclusions"];
+    let columns = tableData.length > 0 ? Object.keys(tableData[0][0]).filter(col => !columnsToRemove.includes(col)) : [];
 
     function formatTitles(string) {
         if (string == "groundNewsLean") {
@@ -10,6 +11,8 @@
             return "Media Cloud Twitter/X Voter Lean, 2018"
         } else if (string == "mediaCloudFollowersLean") {
             return "Media Cloud Twitter/X Follower Lean, 2019"
+        } else if (string == "longTheme") {
+            return "theme"
         } else {
             return string
         }
