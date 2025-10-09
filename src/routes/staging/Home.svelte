@@ -1,6 +1,6 @@
 <script>
 	import { activePage } from "$runes/misc.svelte.js";
-	import { onMount } from "svelte";
+	import { onMount, tick } from "svelte";
 	import { debounce } from "$utils/debounce.js";
 	import { fade } from "svelte/transition";
 
@@ -12,7 +12,7 @@
 		getMonthlyCounts,
 		getTotalArticleCount,
 		getArticlesByTheme
-	} from "$utils/supabase";
+	} from "$utils/aws";
 
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
@@ -158,7 +158,6 @@
 				});
 				minDate = new Date(Math.min(...dates));
 				maxDate = new Date(Math.max(...dates));
-				console.log(minDate, maxDate);
 			}
 			initialDataStatus = "success";
 		} catch (error) {
@@ -214,7 +213,7 @@
 				);
 
 				// TO DO: Remove this on backend
-		
+				console.log(fetchedArticles)
 				
 				themeArticles = fetchedArticles.map((item) => ({
 					...item,
@@ -226,6 +225,7 @@
 				console.error("Failed to fetch theme articles:", error);
 				// Optionally, set an error state to display a message to the user
 			} finally {
+				await tick();
 				loadingThemeArticles = false;
 			}
 		} else {
