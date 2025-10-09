@@ -6,27 +6,32 @@ export const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-;
 export async function getMonthlyCounts() {
+  console.time('supabase.getMonthlyCounts');
   const { data, error } = await supabase.rpc('articles_monthly_counts_by_theme');
   if (error) throw error;
+  console.timeEnd('supabase.getMonthlyCounts');
   return data.filter(d => d.theme != "uncategorized") || [];
 }
 
 export async function getTotalArticleCount() {
+  console.time('supabase.getTotalArticleCount');
   const { count, error } = await supabase
     .from("articles")
     .select("*", { count: "exact", head: true });
   if (error) throw error;
+  console.timeEnd('supabase.getTotalArticleCount');
   return count;
 }
-
-
 
 const CHUNK = 1000; // PostgREST per-request cap
 
 export async function getArticlesByTheme(theme) {
-  if (!theme) return [];
+  console.time(`supabase.getArticlesByTheme (${theme})`);
+  if (!theme) {
+    console.timeEnd(`supabase.getArticlesByTheme (${theme})`);
+    return [];
+  }
   const key = theme.trim();
 
   // 1) get total count
@@ -37,7 +42,10 @@ export async function getArticlesByTheme(theme) {
   if (countErr) throw countErr;
 
   const total = Number(countData || 0);
-  if (!total) return [];
+  if (!total) {
+    console.timeEnd(`supabase.getArticlesByTheme (${theme})`);
+    return [];
+  }
 
   const pages = Math.ceil(total / CHUNK);
 
@@ -58,5 +66,6 @@ export async function getArticlesByTheme(theme) {
     if (r.error) throw r.error;
     if (r.data) out.push(...r.data);
   }
+  console.timeEnd(`supabase.getArticlesByTheme (${theme})`);
   return out;
 }
