@@ -73,9 +73,6 @@
 	const marginBottom = $derived(inThemeView.state ? 25 : 0);
 	const marginLeft = 0;
 
-	let startPercent = $state(0);
-	let endPercent = $state(100);
-
 	// State for inter-theme transitions
 	let themeForAreaChart = $state(inThemeView.state ? activeTheme.theme : null);
 	let isMorphingToFlat = $state(false);
@@ -228,51 +225,6 @@
 			.range([numericHeight - marginTop - marginBottom, 0]);
 	});
 
-	$effect(() => {
-		if (!dateExtent || !filters.dateRange) return;
-
-		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
-		if (range === 0) {
-			startPercent = 0;
-			endPercent = 100;
-			return;
-		}
-
-		startPercent =
-			((filters.dateRange.start.getTime() - dateExtent[0].getTime()) / range) *
-			100;
-		endPercent =
-			((filters.dateRange.end.getTime() - dateExtent[0].getTime()) / range) *
-			100;
-	});
-
-	$effect(() => {
-		if (!dateExtent) return;
-
-		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
-
-		const startDate = new Date(
-			dateExtent[0].getTime() + (startPercent / 100) * range
-		);
-		const endDate = new Date(
-			dateExtent[0].getTime() + (endPercent / 100) * range
-		);
-		const startMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-		const endMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
-
-
-		// to avoid infinite loops, only update if the dates have changed
-		if (
-			filters.dateRange.start.getTime() !== startMonth.getTime() ||
-			filters.dateRange.end.getTime() !== endMonth.getTime()
-		) {
-			filters.dateRange = {
-				start: startMonth,
-				end: endMonth
-			};
-		}
-	});
-
 	const yearLabels = $derived.by(() => {
 		if (!dateExtent || !dateExtent[0] || !binnedData.length) return [];
 
@@ -419,10 +371,8 @@
 >
 	{#if inThemeView.state}
 		<Brush
-			bind:startPercent
-			bind:endPercent
-			startDate={filters.dateRange.start}
-			endDate={filters.dateRange.end}
+			bind:filters
+			{dateExtent}
 		/>
 	{/if}
 

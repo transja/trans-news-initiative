@@ -13,6 +13,7 @@
 		getTotalArticleCount,
 		getArticlesByTheme
 	} from "$utils/aws";
+	import { toMonthStart, toMonthEnd } from "$utils/normalizeDateRange.js";
 	import themeMap  from "$data/themeMap.json";
 
 	// components
@@ -260,10 +261,10 @@
 					);
 				});
 				const minD = new Date(Math.min(...dates));
-				minDate = new Date(minD.getFullYear(), minD.getMonth(), 1);
+				minDate = toMonthStart(minD);
 
 				const maxD = new Date(Math.max(...dates));
-				maxDate = new Date(maxD.getFullYear(), maxD.getMonth() + 1, 0);
+				maxDate = toMonthEnd(maxD);
 			}
 			if (!isHydratingWithTheme) {
 				initialDataStatus = "success";
@@ -399,6 +400,7 @@
 	let controlsHeight = $state();
 
 
+$inspect(filters.dateRange.start, filters.dateRange.end)
 </script>
 
 {#if activePage.page == "home"}
