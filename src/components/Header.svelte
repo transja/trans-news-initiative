@@ -7,6 +7,8 @@
 	import { dev } from "$app/environment";
 	import { isDesktop } from "$utils/breakpoints";
 	import LogoLockup from "./LogoLockup.svelte";
+	import { goto } from "$app/navigation";
+	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 
 	let pages = ["home", "about"];
@@ -32,7 +34,14 @@
 </script>
 
 <header bind:clientHeight={headerHeight}>
-	<div class="logo">
+	<div class="logo" onclick={() => {
+		handlePageClick("home")
+		inThemeView.state = false;
+		activeTheme.theme = null;
+		// TODO: This is a temporary and will need to be updated to the actual path
+		goto("/staging");
+
+	}}>
 		{@html tniLogo}
 	</div>
 
