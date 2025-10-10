@@ -115,6 +115,7 @@
 		}
 	});
 
+	
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
 		showThemeDropdown = false;
@@ -152,6 +153,7 @@
 		if (!inThemeView.state) return;
 		inThemeView.state = false;
 		activeTheme.theme = null;
+		highlightedContent = summaryContent[0];
 		resetFilters(["publicationLean", "publication", "dateRange"]);
 	}
 

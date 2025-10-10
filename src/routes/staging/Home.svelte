@@ -330,7 +330,7 @@
 				const fetchedArticles = await withRetries(() =>
 					getArticlesByTheme(activeTheme.theme)
 				);
-				// TO DO: Remove this on backend
+
 				themeArticles = fetchedArticles.map((item) => ({
 					...item,
 					lean:
