@@ -115,7 +115,6 @@
 		}
 	});
 
-	
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
 		showThemeDropdown = false;
@@ -178,8 +177,7 @@
 						(t) => t.title === highlightedContent.title
 					);
 					hoveredThemeIndex =
-						(selectedIndex - 1 + summaryContent.length) %
-						summaryContent.length;
+						(selectedIndex - 1 + summaryContent.length) % summaryContent.length;
 				} else {
 					hoveredThemeIndex =
 						(hoveredThemeIndex - 1 + summaryContent.length) %
@@ -320,7 +318,8 @@
 											{#each summaryContent as theme, i}
 												<div
 													class="dropdown-option"
-													class:selected={theme.title === highlightedContent.title}
+													class:selected={theme.title ===
+														highlightedContent.title}
 													class:hovered={i === hoveredThemeIndex}
 													onmouseenter={() => (hoveredThemeIndex = i)}
 													onclick={(e) =>
@@ -386,11 +385,10 @@
 								disabled={loadingThemeArticles}
 							>
 								<Calendar size={18} />
-								{#if $isDesktop}
-									{formatter.format(filters.dateRange.start)} - {formatter.format(
-										filters.dateRange.end
-									)}
-								{/if}
+
+								{formatter.format(filters.dateRange.start)} - {formatter.format(
+									filters.dateRange.end
+								)}
 							</button>
 
 							{#if showMonthPicker}
@@ -422,11 +420,14 @@
 						class="wide"
 						disabled={loadingThemeArticles}
 					/>
-					<button
-						class="explore-button"
-						onclick={handleThemeExit}
-						disabled={loadingThemeArticles}><ArrowLeft size={24} /> Back</button
-					>
+					{#if !$isMobile}
+						<button
+							class="explore-button"
+							onclick={handleThemeExit}
+							disabled={loadingThemeArticles}
+							><ArrowLeft size={24} /> Back</button
+						>
+					{/if}
 				{/if}
 			</div>
 		</div>
@@ -493,7 +494,6 @@
 				font-size: var(--subtitle-font-size);
 				line-height: var(--subtitle-line-height);
 				color: #000000;
-			
 
 				transition:
 					font-size 0.3s ease,
@@ -604,7 +604,6 @@
 				display: inline;
 
 				.interactive-title {
-		
 					position: relative;
 					cursor: pointer;
 					display: inline-flex;
