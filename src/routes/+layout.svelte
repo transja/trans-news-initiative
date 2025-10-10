@@ -6,15 +6,6 @@
 
 	let { children } = $props();
 
-	onMount(() => {
-		if (browser) {
-			window.setActiveTheme = (theme) => {
-				activeTheme.set(theme);
-				window.scrollTo(0, 0);
-			};
-			
-		}
-	});
 </script>
 
 <svelte:head>

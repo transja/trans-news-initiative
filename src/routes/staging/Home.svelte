@@ -13,6 +13,7 @@
 		getTotalArticleCount,
 		getArticlesByTheme
 	} from "$utils/aws";
+	import themeMap  from "$data/themeMap.json";
 
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
@@ -195,21 +196,6 @@
 		[...new Set(monthlyArticleCounts.map((d) => d.theme))].sort()
 	);
 
-	const themeMap = {
-		activism: "Resilience and resistance",
-		bigotry: "Anti-trans violence and hate",
-		children: "Trans youth and parental rights",
-		cultureWars: "Ideology and culture wars",
-		federalPolicy: "Federal level measures",
-		freeSpeech: "Censorship and free speech",
-		healthcare: "Health care and bodily autonomy",
-		identity: "Trans and nonbinary identity",
-		internationalPolicy: "Internationality",
-		popCulture: "Pop culture and creativity",
-		publicSpace: "Access to public space",
-		sports: "Trans people in sports",
-		statePolicy: "State level measures"
-	};
 
 	const summaryContent = $derived.by(() => {
 		const themeCounts = monthlyArticleCounts.reduce((acc, { theme, count }) => {
