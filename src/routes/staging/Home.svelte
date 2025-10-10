@@ -260,7 +260,8 @@
 					);
 				});
 				minDate = new Date(Math.min(...dates));
-				maxDate = new Date(Math.max(...dates));
+				const maxD = new Date(Math.max(...dates));
+				maxDate = new Date(maxD.getFullYear(), maxD.getMonth() + 1, 0);
 			}
 			if (!isHydratingWithTheme) {
 				initialDataStatus = "success";
@@ -380,6 +381,8 @@
 		start: minDate,
 		end: maxDate
 	});
+
+	$inspect(minDate, maxDate);
 
 	const updateDebouncedDateRange = debounce((newDateRange) => {
 		debouncedDateRange = newDateRange;
