@@ -1,6 +1,6 @@
 <script>
 	import { activePage } from "$runes/misc.svelte.js";
-	import { onMount, tick } from "svelte";
+	import { onMount } from "svelte";
 	import { debounce } from "$utils/debounce.js";
 	import { fade } from "svelte/transition";
 
@@ -17,11 +17,120 @@
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
 	import Controls from "$components/Controls.svelte";
-	import Header from "$components/Header.svelte";
 	import ThemeSection from "$components/ThemeSection.svelte";
 	import LoaderCircles from "$components/helpers/loaders/Loader.Circles.svelte";
 
 	import leanData from "../../data/lean.csv";
+
+	/* =========================
+	   URL <-> STATE SYNC
+	   ========================= */
+	const THEME_PARAM = "theme"; // only param we use
+	let suppressURLSync = false; // prevents loops on hydration/popstate
+	let lastHistoryKey = $state(""); // dedupe pushes
+	let isHydratingWithTheme = $state(false);
+
+	function deriveThemeFromURL(url = new URL(window.location.href)) {
+		const theme = url.searchParams.get(THEME_PARAM);
+		return theme && theme.trim() ? theme : null;
+	}
+
+	function buildURLFromState() {
+		const url = new URL(window.location.href);
+		const q = url.searchParams;
+		if (inThemeView.state && activeTheme.theme) {
+			q.set(THEME_PARAM, activeTheme.theme);
+		} else {
+			q.delete(THEME_PARAM);
+		}
+		url.search = q.toString();
+		return url;
+	}
+
+	function hydrateFromURL({ replace = true } = {}) {
+		suppressURLSync = true;
+		const theme = deriveThemeFromURL();
+		if (theme) {
+			// Enter theme view on load; loader $effect below will run
+			inThemeView.state = true;
+			activeTheme.theme = theme;
+			introFinished = true;
+			isHydratingWithTheme = true;
+		} else {
+			inThemeView.state = false;
+			activeTheme.theme = null;
+		}
+		const state = {
+			theme: inThemeView.state ? activeTheme.theme : null
+		};
+		const url = buildURLFromState();
+		if (replace) history.replaceState(state, "", url);
+		suppressURLSync = false;
+	}
+
+	function pushURL({ replace = false } = {}) {
+		const state = {
+			theme: inThemeView.state ? activeTheme.theme : null
+		};
+		const url = buildURLFromState();
+		if (replace) history.replaceState(state, "", url);
+		else history.pushState(state, "", url);
+	}
+
+	function onPopState(ev) {
+		suppressURLSync = true;
+		// Trust history state when available, else derive from URL
+		const st = ev.state;
+		const theme = st && "theme" in st ? st.theme : deriveThemeFromURL();
+
+		if (theme === activeTheme.theme) {
+			suppressURLSync = false;
+			return;
+		}
+		
+		if (theme) {
+			inThemeView.state = true;
+			activeTheme.theme = theme;
+		} else {
+			inThemeView.state = false;
+			activeTheme.theme = null;
+		}
+		suppressURLSync = false;
+		// Your existing data-loading $effect reacts to rune changes.
+	}
+
+	onMount(() => {
+		if (typeof window === "undefined") return;
+		hydrateFromURL({ replace: true });
+		window.addEventListener("popstate", onPopState);
+		return () => window.removeEventListener("popstate", onPopState);
+	});
+
+	// Push a shallow history entry whenever view<->theme changes meaningfully
+	$effect(() => {
+		if (suppressURLSync) return;
+		const key = inThemeView.state ? `theme:${activeTheme.theme ?? ""}` : "home";
+		if (key === lastHistoryKey) return;
+		lastHistoryKey = key;
+		pushURL();
+	});
+
+	// Optional helpers if you want to call from buttons/children
+	export function openTheme(theme) {
+		if (!theme) return;
+		suppressURLSync = true;
+		inThemeView.state = true;
+		activeTheme.theme = theme;
+		suppressURLSync = false;
+		pushURL();
+	}
+	export function goHome() {
+		suppressURLSync = true;
+		inThemeView.state = false;
+		activeTheme.theme = null;
+		suppressURLSync = false;
+		pushURL();
+	}
 
 	let monthlyArticleCounts = $state([]);
 	let totalArticleCount = $state(0);
@@ -46,6 +155,13 @@
 			start: minDate,
 			end: maxDate
 		}
+	});
+
+	$effect(() => {
+		filters.dateRange = {
+			start: minDate,
+			end: maxDate
+		};
 	});
 
 	const resetFilters = (options) => {
@@ -116,8 +232,6 @@
 		return [allArticles, ...themeSummary];
 	});
 
-
-
 	let highlightedIndex = $state(0);
 	let highlightedContent = $state(summaryContent[highlightedIndex]);
 	let isHoveringOverPlot = $state(false);
@@ -154,12 +268,16 @@
 			if (counts.length > 0) {
 				const dates = counts.map((d) => {
 					const date = new Date(d.month);
-					return new Date(date.valueOf() + date.getTimezoneOffset() * 60 * 1000);
+					return new Date(
+						date.valueOf() + date.getTimezoneOffset() * 60 * 1000
+					);
 				});
 				minDate = new Date(Math.min(...dates));
 				maxDate = new Date(Math.max(...dates));
 			}
-			initialDataStatus = "success";
+			if (!isHydratingWithTheme) {
+				initialDataStatus = "success";
+			}
 		} catch (error) {
 			console.error("Failed to load initial data:", error);
 			initialDataStatus = "error";
@@ -204,6 +322,7 @@
 		};
 	});
 
+	// DATA LOADER
 	$effect(async () => {
 		if (activeTheme.theme && inThemeView.state) {
 			loadingThemeArticles = true;
@@ -211,22 +330,30 @@
 				const fetchedArticles = await withRetries(() =>
 					getArticlesByTheme(activeTheme.theme)
 				);
-
 				// TO DO: Remove this on backend
-				console.log(fetchedArticles)
-				
 				themeArticles = fetchedArticles.map((item) => ({
 					...item,
 					lean:
 						leanData.find((d) => d.domain === item.media_name)?.aggLean ||
 						"unknown"
 				}));
+				
+
+				if (isHydratingWithTheme) {
+					initialDataStatus = "success";
+					isHydratingWithTheme = false;
+				}
 			} catch (error) {
 				console.error("Failed to fetch theme articles:", error);
 				// Optionally, set an error state to display a message to the user
+				if (isHydratingWithTheme) {
+					initialDataStatus = "error";
+					isHydratingWithTheme = false;
+				}
 			} finally {
-				await tick();
-				loadingThemeArticles = false;
+				setTimeout(() => {
+					loadingThemeArticles = false;
+				}, 500);
 			}
 		} else {
 			themeArticles = [];
@@ -250,8 +377,7 @@
 	);
 
 	let filteredDataWithDateRange = $derived(
-		filteredData
-		.filter((item) => {
+		filteredData.filter((item) => {
 			const d = new Date(item.publish_date);
 			const correctedDate = new Date(
 				d.valueOf() + d.getTimezoneOffset() * 60 * 1000
@@ -279,6 +405,8 @@
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
 	let controlsHeight = $state();
+
+
 </script>
 
 {#if activePage.page == "home"}
@@ -333,11 +461,13 @@
 			/>
 
 			{#if inThemeView.state}
-				{#if !loadingThemeArticles}
-					<section class="container-section" transition:fade>
-						<ThemeSection data={filteredDataWithDateRange} {xDomain} />
-					</section>
-				{/if}
+				{#key activeTheme.theme}
+					{#if !loadingThemeArticles}
+						<section class="container-section" transition:fade>
+							<ThemeSection data={filteredDataWithDateRange} {xDomain} />
+						</section>
+					{/if}
+				{/key}
 			{/if}
 		</div>
 	{:else if initialDataStatus === "error"}
