@@ -32,7 +32,7 @@
 
 	// Derived state
 	const filteredArticles = $derived(
-		uniqueArticles.filter((article) =>
+		articles.filter((article) =>
 			article.title.toLowerCase().includes(searchTerm.toLowerCase())
 		)
 	);
@@ -88,20 +88,66 @@
 		});
 	}
 
-	function getPaginationButtons() {
-		const buttons = [];
-		if (totalPages <= 7) {
-			for (let i = 1; i <= totalPages; i++) buttons.push(i);
-		} else {
-			buttons.push(1, 2, 3);
-			if (currentPage > 4 && currentPage < totalPages - 3) {
-				buttons.push("...");
-				buttons.push(currentPage - 1, currentPage, currentPage + 1);
-			}
-			buttons.push("...");
-			buttons.push(totalPages - 2, totalPages - 1, totalPages);
-		}
-		return [...new Set(buttons)];
+	// Svelte usage example:
+	//  $: buttons = getPaginationButtons(totalPages, currentPage, $isMobile);
+
+	function getPaginationButtons(totalPages, currentPage, isMobile) {
+		// Guard rails
+		totalPages = Math.max(1, Number(totalPages) || 1);
+		currentPage = Math.min(Math.max(1, Number(currentPage) || 1), totalPages);
+
+		// Mobile shows fewer buttons
+		const boundaryCount = 1; // always show first & last groups
+		const siblingCount = isMobile ? 0 : 1; // fewer neighbors on mobile
+
+		const range = (start, end) => {
+			const out = [];
+			for (let i = start; i <= end; i++) out.push(i);
+			return out;
+		};
+
+		// 1) Always-visible boundaries
+		const startPages = range(1, Math.min(boundaryCount, totalPages));
+		const endPages = range(
+			Math.max(totalPages - boundaryCount + 1, boundaryCount + 1),
+			totalPages
+		);
+
+		// 2) Middle window around current page
+		const middleStart = Math.max(
+			Math.min(
+				currentPage - siblingCount,
+				// keep room so window doesn’t push past the end
+				totalPages - boundaryCount - siblingCount
+			),
+			boundaryCount + 1
+		);
+
+		const middleEnd = Math.min(
+			Math.max(
+				currentPage + siblingCount,
+				// keep room so window doesn’t push past the start
+				boundaryCount + 1
+			),
+			endPages.length ? endPages[0] - 1 : totalPages
+		);
+
+		const middlePages =
+			middleStart <= middleEnd ? range(middleStart, middleEnd) : [];
+
+		// 3) Assemble with ellipses as needed
+		const showLeftEllipsis = middleStart > boundaryCount + 1;
+		const showRightEllipsis = middleEnd < (endPages[0] ?? totalPages) - 1;
+
+		const buttons = [
+			...startPages,
+			...(showLeftEllipsis ? ["…"] : []),
+			...middlePages,
+			...(showRightEllipsis ? ["…"] : []),
+			...endPages
+		];
+
+		return buttons;
 	}
 </script>
 
@@ -200,10 +246,12 @@
 			<button
 				class="arrow-button"
 				onclick={() => (currentPage -= 1)}
-				disabled={currentPage === 1}><ArrowLeft size={14} /> Previous</button
+				disabled={currentPage === 1}
+				><ArrowLeft size={14} />
+				Previous</button
 			>
 			<div class="page-buttons">
-				{#each getPaginationButtons() as page}
+				{#each getPaginationButtons(totalPages, currentPage, $isMobile) as page}
 					{#if typeof page === "number"}
 						<button
 							class:active={currentPage === page}
@@ -220,7 +268,8 @@
 				class="arrow-button"
 				onclick={() => (currentPage += 1)}
 				disabled={currentPage === totalPages}
-				>Next <ArrowRight size={14} /></button
+				>Next
+				<ArrowRight size={14} /></button
 			>
 		</div>
 	{/if}
