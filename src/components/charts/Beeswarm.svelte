@@ -15,8 +15,8 @@
 	const NODE_RADIUS = 4.5;
 	const COLLIDE_RADIUS = NODE_RADIUS;
 	const COLLIDE_STRENGTH = 1;
-	const FORCE_X_STRENGTH = 0.5;
-	const FORCE_Y_STRENGTH = 0.05;
+	const FORCE_X_STRENGTH = 0.9;
+	const FORCE_Y_STRENGTH = 0.04;
 	const STATIC_SIMULATION_TICKS = 300;
 
 	const { data = [], xDomain = null } = $props();
@@ -163,7 +163,7 @@
 		const timer = setTimeout(() => {
 			instances = tippy(svgEl.querySelectorAll("[data-tippy-content]"), {
 				allowHTML: true,
-				interactive: $isMobile,
+				interactive: true,
 				appendTo: () => document.body,
 				theme: "light",
 				trigger: "mouseenter click",
