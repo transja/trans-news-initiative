@@ -89,6 +89,7 @@
 
 	.logo {
 		min-width: 80px;
+		cursor: pointer;
 	}
 
 	nav {
