@@ -324,58 +324,63 @@
 		</div>
 	{/if}
 	{#if width && heightVal}
-		<svg bind:this={svgEl} {width} height={heightVal}>
-			{#if packed}
-				{@const descendants = packed.descendants()}
-				{@const xValues = descendants.map((d) => d.x)}
-				{@const xMin = Math.min(...xValues)}
-				{@const xMax = Math.max(...xValues)}
-				{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
+		{#if packed}
+			{@const descendants = packed.descendants()}
+			{@const xValues = descendants.map((d) => d.x)}
+			{@const xMin = Math.min(...xValues)}
+			{@const xMax = Math.max(...xValues)}
+			{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
+			{#if descendants.length > 1}
+				<svg bind:this={svgEl} {width} height={heightVal}>
+					<g {transform}>
+						<g transform="translate({width / 2}, {heightVal / 2})">
+							{#each descendants.filter((d) => d.depth > 0) as node}
+								<g
+									transform="translate({node.x - width / 2},{node.y -
+										heightVal / 2})"
+									class:is-leaf={!node.children}
+									class:is-parent={node.depth === 1}
+									data-tippy-content={!node.children
+										? createTooltipContent(node.data)
+										: undefined}
+								>
+									<circle
+										r={node.r}
+										fill={node.children ? "#fff" : linearColor(node.x)}
+										fill-opacity={node.children ? 1 : 0.8}
+										stroke={node.children ? linearColor(node.x) : "none"}
+										stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
+										class:article-circle={!node.children}
+										class:event-circle={node.children}
+									/>
+								</g>
+							{/each}
 
-				<g {transform}>
-					<g transform="translate({width / 2}, {heightVal / 2})">
-						{#each descendants.filter((d) => d.depth > 0) as node}
-							<g
-								transform="translate({node.x - width / 2},{node.y -
-									heightVal / 2})"
-								class:is-leaf={!node.children}
-								class:is-parent={node.depth === 1}
-								data-tippy-content={!node.children
-									? createTooltipContent(node.data)
-									: undefined}
-							>
-								<circle
-									r={node.r}
-									fill={node.children ? "#fff" : linearColor(node.x)}
-									fill-opacity={node.children ? 1 : 0.8}
-									stroke={node.children ? linearColor(node.x) : "none"}
-									stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
-									class:article-circle={!node.children}
-									class:event-circle={node.children}
-								/>
-							</g>
-						{/each}
-
-						{#each descendants.filter((d) => d.depth === 1) as node}
-							<text
-								class="cluster-label-text"
-								x={node.x - width / 2}
-								y={node.y - heightVal / 2}
-								text-anchor="middle"
-								dominant-baseline="central"
-								font-size={16 / transform.k}
-								stroke-width={5 / transform.k}
-								pointer-events="none"
-								data-radius={node.r}
-								data-text={node.data.name}
-							>
-								{node.data.name}
-							</text>
-						{/each}
+							{#each descendants.filter((d) => d.depth === 1) as node}
+								<text
+									class="cluster-label-text"
+									x={node.x - width / 2}
+									y={node.y - heightVal / 2}
+									text-anchor="middle"
+									dominant-baseline="central"
+									font-size={16 / transform.k}
+									stroke-width={5 / transform.k}
+									pointer-events="none"
+									data-radius={node.r}
+									data-text={node.data.name}
+								>
+									{node.data.name}
+								</text>
+							{/each}
+						</g>
 					</g>
-				</g>
+				</svg>
+			{:else}
+				<div class="circlepack-empty">
+					<b>0 events</b> match your current selections
+				</div>
 			{/if}
-		</svg>
+		{/if}
 	{/if}
 
 	<div class="zoom-controls">
@@ -390,6 +395,9 @@
 		height: 100%;
 
 		position: relative;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 	svg {
 		font-family: sans-serif;
@@ -473,5 +481,11 @@
 			justify-content: center;
 			cursor: pointer;
 		}
+	}
+
+	.circlepack-empty {
+		font-size: 2rem;
+		margin-bottom: 1.5rem;
+		font-weight: 400;
 	}
 </style>
