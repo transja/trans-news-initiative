@@ -51,7 +51,7 @@
 	} = $props();
 
 	// TODO see why default allData and filteredData are different lengths
-	
+
 	const publicationDomainToName = new Map(
 		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
 	);
@@ -304,7 +304,13 @@
 													class:top-theme={theme.title.toLowerCase() ===
 														"trans communities"}
 												>
-													{theme.title}
+													{#if theme.title === "trans communities" && inThemeView.state}
+														<span class="in-dropdown-back-button">
+															<ArrowLeft size={24} /> Back
+														</span>
+													{:else}
+														{theme.title}
+													{/if}
 												</div>
 											{/each}
 										</div>
@@ -653,6 +659,15 @@
 				&:hover,
 				&.focused {
 					background: #f0f0f0;
+				}
+
+				.in-dropdown-back-button {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+
+					text-transform: capitalize;
+					font-weight: 600;
 				}
 			}
 		}
