@@ -51,7 +51,7 @@
 	} = $props();
 
 	// TODO see why default allData and filteredData are different lengths
-	
+
 	const publicationDomainToName = new Map(
 		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
 	);
@@ -107,7 +107,13 @@
 		}
 	});
 
-	let focusedThemeIndex = $state(-1);
+	let hoveredThemeIndex = $state(-1);
+
+	$effect(() => {
+		if (!showThemeDropdown) {
+			hoveredThemeIndex = -1;
+		}
+	});
 
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
@@ -154,18 +160,34 @@
 		switch (event.key) {
 			case "ArrowDown":
 				event.preventDefault();
-				focusedThemeIndex = (focusedThemeIndex + 1) % summaryContent.length;
+				if (hoveredThemeIndex === -1) {
+					const selectedIndex = summaryContent.findIndex(
+						(t) => t.title === highlightedContent.title
+					);
+					hoveredThemeIndex = (selectedIndex + 1) % summaryContent.length;
+				} else {
+					hoveredThemeIndex = (hoveredThemeIndex + 1) % summaryContent.length;
+				}
 				break;
 			case "ArrowUp":
 				event.preventDefault();
-				focusedThemeIndex =
-					(focusedThemeIndex - 1 + summaryContent.length) %
-					summaryContent.length;
+				if (hoveredThemeIndex === -1) {
+					const selectedIndex = summaryContent.findIndex(
+						(t) => t.title === highlightedContent.title
+					);
+					hoveredThemeIndex =
+						(selectedIndex - 1 + summaryContent.length) %
+						summaryContent.length;
+				} else {
+					hoveredThemeIndex =
+						(hoveredThemeIndex - 1 + summaryContent.length) %
+						summaryContent.length;
+				}
 				break;
 			case "Enter":
 				event.preventDefault();
-				if (focusedThemeIndex > -1) {
-					handleThemeSelect(summaryContent[focusedThemeIndex]);
+				if (hoveredThemeIndex > -1) {
+					handleThemeSelect(summaryContent[hoveredThemeIndex]);
 				}
 				break;
 			case "Escape":
@@ -287,15 +309,18 @@
 										<ChevronDown size={24} />
 									</button>
 									{#if showThemeDropdown}
+										<!-- svelte-ignore a11y_no_static_element_interactions -->
 										<div
 											class="dropdown-options theme-dropdown"
 											use:positionDropdown
+											onmouseleave={() => (hoveredThemeIndex = -1)}
 										>
 											{#each summaryContent as theme, i}
 												<div
 													class="dropdown-option"
-													class:focused={i === focusedThemeIndex}
-													onmouseenter={() => (focusedThemeIndex = i)}
+													class:selected={theme.title === highlightedContent.title}
+													class:hovered={i === hoveredThemeIndex}
+													onmouseenter={() => (hoveredThemeIndex = i)}
 													onclick={(e) =>
 														handleThemeSelectWithStopPropagation(e, theme)}
 													onkeydown={(e) => handleThemeSelectKeydown(e, theme)}
@@ -304,7 +329,13 @@
 													class:top-theme={theme.title.toLowerCase() ===
 														"trans communities"}
 												>
-													{theme.title}
+													{#if theme.title === "trans communities" && inThemeView.state}
+														<span class="in-dropdown-back-button">
+															<ArrowLeft size={24} /> Back
+														</span>
+													{:else}
+														{theme.title}
+													{/if}
 												</div>
 											{/each}
 										</div>
@@ -650,9 +681,22 @@
 					margin-left: 0;
 				}
 
+				&.selected {
+					background-color: #e5e7eb;
+				}
+
 				&:hover,
-				&.focused {
+				&.hovered {
 					background: #f0f0f0;
+				}
+
+				.in-dropdown-back-button {
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+
+					text-transform: capitalize;
+					font-weight: 600;
 				}
 			}
 		}
