@@ -7,7 +7,7 @@
 		curveBasis,
 		stackOffsetNone
 	} from "d3-shape";
-	import { scaleTime, scaleLinear } from "d3-scale";
+	import { scaleTime, scaleLinear, scalePoint } from "d3-scale";
 	import { extent, max, min, bisector } from "d3-array";
 	import { timeMonth, timeMonths } from "d3-time";
 	import { fade } from "svelte/transition";
@@ -35,6 +35,8 @@
 		isHoveringOverPlot = $bindable()
 	} = $props();
 
+	$inspect(filters)
+
 	let container;
 	let width = $state(0);
 
@@ -49,6 +51,8 @@
 			applyWidthChange = false;
 		}
 	});
+
+
 
 	let isWidthTransitioning = $state(false);
 	$effect(() => {
@@ -140,65 +144,9 @@
 		}
 	});
 
-	// --- Reactive Data Pipeline ---
 
-	function getProcessedData(rawData) {
-		const uniqueKeys = new Set();
-		return rawData
-			.flatMap((d) => {
-				const date = new Date(d.publish_date);
-				return d.themes.map((theme) => ({
-					...d,
-					publish_date: date,
-					theme: theme.trim()
-				}));
-			})
-			.filter((d) => {
-				if (
-					!d.theme ||
-					!d.publish_date ||
-					isNaN(d.publish_date.valueOf()) ||
-					!d.title
-				) {
-					return false;
-				}
-				const key = `${d.publish_date.toISOString()}|${d.theme}|${d.title}`;
-				if (uniqueKeys.has(key)) {
-					return false;
-				}
-				uniqueKeys.add(key);
-				return true;
-			});
-	}
-
-	const processedData = $derived(getProcessedData(data));
 
 	const binnedData = $derived.by(() => {
-		// if (!dateExtent || !dateExtent[0] || !themes.length) return [];
-
-		// const startOfMonth = timeMonth.floor(dateExtent[0]);
-		// const endOfMonth = timeMonth.offset(dateExtent[1], 1);
-		// const bins = timeMonths(startOfMonth, endOfMonth);
-
-		// const binned = bins.map((date) => {
-		// 	const obj = { date };
-		// 	themes.forEach((theme) => {
-		// 		obj[theme] = 0;
-		// 	});
-		// 	return obj;
-		// });
-
-		// processedData.forEach((d) => {
-		// 	const binIndex = bins.findIndex(
-		// 		(binDate, i) =>
-		// 			d.publish_date >= binDate &&
-		// 			(bins[i + 1] ? d.publish_date < bins[i + 1] : true)
-		// 	);
-		// 	if (binIndex !== -1) {
-		// 		binned[binIndex][d.theme]++;
-		// 	}
-		// });
-		// return binned;
 
 		const byMonth = new Map();
 
@@ -238,7 +186,16 @@
 		return stackGenerator(binnedData);
 	});
 
+	// Use scalePoint for equal spacing of monthly bins
 	const xScale = $derived(
+		scalePoint()
+			.domain(binnedData.map((d) => d.date.getTime()))
+			.range([0, width - marginLeft - marginRight])
+			.padding(0)
+	);
+
+	// Keep a time scale for brush/filter date mapping
+	const xTimeScale = $derived(
 		scaleTime()
 			.domain(dateExtent || [new Date(), new Date()])
 			.range([0, width - marginLeft - marginRight])
@@ -348,7 +305,7 @@
 			const dataPoint = midDate - d0.date > d1.date - midDate ? d1 : d0;
 			labels.push({
 				year: year,
-				x: xScale(dataPoint.date),
+				x: xScale(dataPoint.date.getTime()),
 				y: yPosition
 			});
 		}
@@ -357,7 +314,7 @@
 
 	const steamAreaGenerator = $derived(
 		area()
-			.x((d) => xScale(d.data.date))
+			.x((d) => xScale(d.data.date.getTime()))
 			.y0((d) => unifiedYScale(d[0]))
 			.y1((d) => unifiedYScale(d[1]))
 			.curve(curveBasis)
@@ -365,7 +322,7 @@
 
 	const flattenedAreaGenerator = $derived(
 		area()
-			.x((d) => xScale(d.data.date))
+			.x((d) => xScale(d.data.date.getTime()))
 			.y0(numericHeight - marginBottom)
 			.y1(numericHeight - marginBottom)
 			.curve(curveBasis)
@@ -440,7 +397,6 @@
 		}
 		return 1;
 	}
-	
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
