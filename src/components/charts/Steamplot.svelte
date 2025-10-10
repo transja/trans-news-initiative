@@ -35,7 +35,6 @@
 		isHoveringOverPlot = $bindable()
 	} = $props();
 
-	$inspect(filters)
 
 	let container;
 	let width = $state(0);
@@ -258,15 +257,18 @@
 		const endDate = new Date(
 			dateExtent[0].getTime() + (endPercent / 100) * range
 		);
+		const startMonth = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+		const endMonth = new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0);
+
 
 		// to avoid infinite loops, only update if the dates have changed
 		if (
-			filters.dateRange.start.getTime() !== startDate.getTime() ||
-			filters.dateRange.end.getTime() !== endDate.getTime()
+			filters.dateRange.start.getTime() !== startMonth.getTime() ||
+			filters.dateRange.end.getTime() !== endMonth.getTime()
 		) {
 			filters.dateRange = {
-				start: startDate,
-				end: endDate
+				start: startMonth,
+				end: endMonth
 			};
 		}
 	});

@@ -259,7 +259,9 @@
 						date.valueOf() + date.getTimezoneOffset() * 60 * 1000
 					);
 				});
-				minDate = new Date(Math.min(...dates));
+				const minD = new Date(Math.min(...dates));
+				minDate = new Date(minD.getFullYear(), minD.getMonth(), 1);
+
 				const maxD = new Date(Math.max(...dates));
 				maxDate = new Date(maxD.getFullYear(), maxD.getMonth() + 1, 0);
 			}
@@ -386,7 +388,7 @@
 
 	const updateDebouncedDateRange = debounce((newDateRange) => {
 		debouncedDateRange = newDateRange;
-	}, 100);
+	}, 500);
 
 	$effect(() => {
 		updateDebouncedDateRange(filters.dateRange);
