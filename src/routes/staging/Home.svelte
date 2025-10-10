@@ -20,6 +20,7 @@
 	import Controls from "$components/Controls.svelte";
 	import ThemeSection from "$components/ThemeSection.svelte";
 	import LoaderCircles from "$components/helpers/loaders/Loader.Circles.svelte";
+	import DataError from "$components/DataError.svelte";
 
 	import leanData from "../../data/lean.csv";
 
@@ -458,7 +459,7 @@
 		</div>
 	{:else if initialDataStatus === "error"}
 		<div class="loading">
-			<p>Sorry, we couldn't load the data. Please try again later.</p>
+			<DataError />
 		</div>
 	{/if}
 {/if}

@@ -2,6 +2,7 @@
     import { onMount, getContext } from "svelte";
     import { activePage } from "$runes/misc.svelte.js";
     import MethodologyTable from "$components/MethodologyTable.svelte";
+    import themeData from "$data/themeDefs.csv";
     
     const copy = getContext("copy");
 
@@ -25,7 +26,7 @@
             {:else if i == 1}
                 <MethodologyTable data={copy.articleData} />
             {:else if i == 3}
-                <MethodologyTable data={copy.themes} />
+                <MethodologyTable data={themeData} />
             {:else if i == 4}
                 <MethodologyTable data={copy.leans} />
             {:else if i == 5}

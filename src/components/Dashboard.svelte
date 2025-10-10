@@ -59,7 +59,7 @@
 	style:--brush-height="{brushHeight}px"
 	style:--controls-height="{inThemeView.state ? 200 : controlsHeight}px"
 	class:in-theme-view={inThemeView.state}
->
+>	
 	<div
 		id="content-container"
 		bind:clientHeight={contentHeight}
