@@ -11,7 +11,6 @@
 	import LoaderCircles from "./helpers/loaders/Loader.Circles.svelte";
 
 	let {
-		data,
 		loadingThemeArticles,
 		filteredDataWithDateRange,
 		minDate,

@@ -13,7 +13,8 @@
 		getTotalArticleCount,
 		getArticlesByTheme
 	} from "$utils/aws";
-	import themeMap  from "$data/themeMap.json";
+	import { toMonthStart, toMonthEnd } from "$utils/normalizeDateRange.js";
+	import themeMap from "$data/themeMap.json";
 
 	// components
 	import Dashboard from "$components/Dashboard.svelte";
@@ -89,7 +90,7 @@
 			suppressURLSync = false;
 			return;
 		}
-		
+
 		if (theme) {
 			inThemeView.state = true;
 			activeTheme.theme = theme;
@@ -139,6 +140,9 @@
 	let themeArticles = $state([]);
 	let loadingThemeArticles = $state(false);
 	let initialDataStatus = $state("pending");
+
+	// Theme data cache to prevent duplicate downloads
+	let themeCache = new Map();
 
 	let minDate = $state(new Date());
 	let maxDate = $state(new Date());
@@ -196,7 +200,6 @@
 	const themes = $derived(
 		[...new Set(monthlyArticleCounts.map((d) => d.theme))].sort()
 	);
-
 
 	const summaryContent = $derived.by(() => {
 		const themeCounts = monthlyArticleCounts.reduce((acc, { theme, count }) => {
@@ -259,8 +262,11 @@
 						date.valueOf() + date.getTimezoneOffset() * 60 * 1000
 					);
 				});
-				minDate = new Date(Math.min(...dates));
-				maxDate = new Date(Math.max(...dates));
+				const minD = new Date(Math.min(...dates));
+				minDate = toMonthStart(minD);
+
+				const maxD = new Date(Math.max(...dates));
+				maxDate = toMonthEnd(maxD);
 			}
 			if (!isHydratingWithTheme) {
 				initialDataStatus = "success";
@@ -312,35 +318,56 @@
 	// DATA LOADER
 	$effect(async () => {
 		if (activeTheme.theme && inThemeView.state) {
-			loadingThemeArticles = true;
-			try {
-				const fetchedArticles = await withRetries(() =>
-					getArticlesByTheme(activeTheme.theme)
-				);
+			// Check cache first
+			if (themeCache.has(activeTheme.theme)) {
+				loadingThemeArticles = true;
 
-				themeArticles = fetchedArticles.map((item) => ({
-					...item,
-					lean:
-						leanData.find((d) => d.domain === item.media_name)?.aggLean ||
-						"unknown"
-				}));
-				
+				// Artificial delay for consistent UX
+				await new Promise((resolve) => setTimeout(resolve, 100));
+
+				themeArticles = themeCache.get(activeTheme.theme);
+				loadingThemeArticles = false;
 
 				if (isHydratingWithTheme) {
 					initialDataStatus = "success";
 					isHydratingWithTheme = false;
 				}
-			} catch (error) {
-				console.error("Failed to fetch theme articles:", error);
-				// Optionally, set an error state to display a message to the user
-				if (isHydratingWithTheme) {
-					initialDataStatus = "error";
-					isHydratingWithTheme = false;
+			} else {
+				// Fetch if not in cache
+				loadingThemeArticles = true;
+				try {
+					const fetchedArticles = await withRetries(() =>
+						getArticlesByTheme(activeTheme.theme)
+					);
+
+					const processedArticles = fetchedArticles.map((item) => ({
+						...item,
+						lean:
+							leanData.find((d) => d.domain === item.media_name)?.aggLean ||
+							"unknown"
+					}));
+
+					// Store in cache
+					themeCache.set(activeTheme.theme, processedArticles);
+
+					themeArticles = processedArticles;
+
+					if (isHydratingWithTheme) {
+						initialDataStatus = "success";
+						isHydratingWithTheme = false;
+					}
+				} catch (error) {
+					console.error("Failed to fetch theme articles:", error);
+					// Optionally, set an error state to display a message to the user
+					if (isHydratingWithTheme) {
+						initialDataStatus = "error";
+						isHydratingWithTheme = false;
+					}
+				} finally {
+					setTimeout(() => {
+						loadingThemeArticles = false;
+					}, 500);
 				}
-			} finally {
-				setTimeout(() => {
-					loadingThemeArticles = false;
-				}, 500);
 			}
 		} else {
 			themeArticles = [];
@@ -383,7 +410,7 @@
 
 	const updateDebouncedDateRange = debounce((newDateRange) => {
 		debouncedDateRange = newDateRange;
-	}, 100);
+	}, 500);
 
 	$effect(() => {
 		updateDebouncedDateRange(filters.dateRange);
@@ -392,8 +419,6 @@
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
 	let controlsHeight = $state();
-
-
 </script>
 
 {#if activePage.page == "home"}

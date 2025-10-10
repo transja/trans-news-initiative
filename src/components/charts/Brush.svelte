@@ -1,16 +1,30 @@
 <script>
 	import { ChevronLeft, ChevronRight } from "@lucide/svelte";
+	import { toMonthStart, toMonthEnd } from "$utils/normalizeDateRange.js";
 
 	let {
-		startPercent = $bindable(0),
-		endPercent = $bindable(100),
-		startDate,
-		endDate
+		filters = $bindable(),
+		dateExtent
 	} = $props();
 
 	let isDragging = $state(false);
 	let dragType = $state(""); // 'start' or 'end'
 	let brushEl;
+
+	// Calculate percentages from filters and dateExtent
+	const startPercent = $derived.by(() => {
+		if (!dateExtent || !filters.dateRange) return 0;
+		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+		if (range === 0) return 0;
+		return ((filters.dateRange.start.getTime() - dateExtent[0].getTime()) / range) * 100;
+	});
+
+	const endPercent = $derived.by(() => {
+		if (!dateExtent || !filters.dateRange) return 100;
+		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+		if (range === 0) return 100;
+		return ((filters.dateRange.end.getTime() - dateExtent[0].getTime()) / range) * 100;
+	});
 
 	function handleDragStart(event, type) {
 		isDragging = true;
@@ -23,7 +37,7 @@
 	}
 
 	function handleDragMove(event) {
-		if (!isDragging) return;
+		if (!isDragging || !dateExtent) return;
 
 		if (event.type === "touchmove") {
 			event.preventDefault();
@@ -34,10 +48,25 @@
 		const x = clientX - rect.left;
 		const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
 
+		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+		const newDate = new Date(dateExtent[0].getTime() + (percent / 100) * range);
+
 		if (dragType === "start") {
-			startPercent = Math.min(percent, endPercent);
+			const newStart = toMonthStart(newDate);
+			if (newStart < filters.dateRange.end) {
+				filters.dateRange = {
+					start: newStart,
+					end: filters.dateRange.end
+				};
+			}
 		} else if (dragType === "end") {
-			endPercent = Math.max(percent, startPercent);
+			const newEnd = toMonthEnd(newDate);
+			if (newEnd > filters.dateRange.start) {
+				filters.dateRange = {
+					start: filters.dateRange.start,
+					end: newEnd
+				};
+			}
 		}
 	}
 
@@ -67,7 +96,7 @@
 		style="left: {endPercent}%; width: {100 - endPercent}%"
 	></div>
 	<div class="brush-handle start" style="left: {startPercent}%">
-		<div class="handle-date">{formatter.format(startDate)}</div>
+		<div class="handle-date">{formatter.format(filters.dateRange.start)}</div>
 		<button
 			onmousedown={(e) => handleDragStart(e, "start")}
 			ontouchstart={(e) => handleDragStart(e, "start")}
@@ -78,7 +107,7 @@
 
 	<!-- End handle -->
 	<div class="brush-handle end" style="left: {endPercent}%">
-		<div class="handle-date">{formatter.format(endDate)}</div>
+		<div class="handle-date">{formatter.format(filters.dateRange.end)}</div>
 		<button
 			onmousedown={(e) => handleDragStart(e, "end")}
 			ontouchstart={(e) => handleDragStart(e, "end")}

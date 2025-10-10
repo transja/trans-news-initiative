@@ -2,6 +2,7 @@
 	import { ChevronLeft, ChevronRight, X } from "@lucide/svelte";
 	import { createEventDispatcher } from "svelte";
 	import { isMobile } from "$utils/breakpoints.js";
+	import { toMonthStart, toMonthEnd } from "$utils/normalizeDateRange.js";
 
 	const dispatch = createEventDispatcher();
 	let { dateRange = $bindable(), minDate, maxDate, closeMonthPicker } = $props();
@@ -23,26 +24,18 @@
 	const endMonths = $derived(getMonths(endViewDate));
 
 	function selectStartMonth(monthDate) {
-		const newStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+		const newStart = toMonthStart(monthDate);
 		dateRange.start = newStart;
 		if (newStart > dateRange.end) {
-			dateRange.end = new Date(
-				monthDate.getFullYear(),
-				monthDate.getMonth() + 1,
-				0
-			);
+			dateRange.end = toMonthEnd(monthDate);
 		}
 	}
 
 	function selectEndMonth(monthDate) {
-		const newEnd = new Date(
-			monthDate.getFullYear(),
-			monthDate.getMonth() + 1,
-			0
-		);
+		const newEnd = toMonthEnd(monthDate);
 		dateRange.end = newEnd;
 		if (newEnd < dateRange.start) {
-			dateRange.start = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+			dateRange.start = toMonthStart(monthDate);
 		}
 	}
 
@@ -111,29 +104,17 @@
 			}
 
 			if (part === "start") {
-				const newStart = new Date(newDate.getFullYear(), newDate.getMonth(), 1);
+				const newStart = toMonthStart(newDate);
 				dateRange.start = newStart;
 				if (newStart > dateRange.end) {
-					dateRange.end = new Date(
-						newDate.getFullYear(),
-						newDate.getMonth() + 1,
-						0
-					);
+					dateRange.end = toMonthEnd(newDate);
 				}
 			} else {
 				// end
-				const newEnd = new Date(
-					newDate.getFullYear(),
-					newDate.getMonth() + 1,
-					0
-				);
+				const newEnd = toMonthEnd(newDate);
 				dateRange.end = newEnd;
 				if (newEnd < dateRange.start) {
-					dateRange.start = new Date(
-						newDate.getFullYear(),
-						newDate.getMonth(),
-						1
-					);
+					dateRange.start = toMonthStart(newDate);
 				}
 			}
 		}, 150);
