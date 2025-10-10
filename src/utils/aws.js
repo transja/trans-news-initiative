@@ -39,5 +39,6 @@ export async function getArticlesByTheme(theme, debug = false) {
   }
   const data = await response.json();
   if (debug) console.timeEnd(`aws.getArticlesByTheme (${theme})`);
+
   return data || [];
 }

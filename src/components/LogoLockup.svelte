@@ -23,7 +23,7 @@
 	{/if}
 	<div class="org-wrapper {type === 'icon' ? 'icon' : 'full'}">
 		{#each copy.orgBios as org, i}
-			<a href={org.website} aria-label="Learn more about {org.name}">
+			<a href={org.website} target="_blank" aria-label="Learn more about {org.name}">
 				{@html type === "icon" ? logosIcon[i] : logos[i]}
 			</a>
 		{/each}

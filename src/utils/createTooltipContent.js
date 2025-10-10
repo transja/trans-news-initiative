@@ -2,6 +2,7 @@ import { get } from "svelte/store";
 import { leanColors, leanTextColors } from "./getLeanProperty.js";
 import { getPublicationName } from "./getPublicationName.js";
 import { activeTheme } from "$runes/misc.svelte.js";
+import themeMap from "$data/themeMap.json";
 
 
 export function createTooltipContent(node) {
@@ -13,7 +14,9 @@ export function createTooltipContent(node) {
 	const publication = getPublicationName(node.publication || node.media_name);
 	const publicationDate = node.publish_date || node.publication_date;
 	const lean = node.lean;
-	const themes = node.themes;
+	const themes = node.themes.split(",").map(theme => theme.trim());
+
+
 
 	const date = new Date(publicationDate).toLocaleDateString("en-US", {
 		year: "numeric",
@@ -22,7 +25,7 @@ export function createTooltipContent(node) {
 	});
 
 	let themesHtml = "";
-	if (themes && Array.isArray(themes) && themes.length > 1) {
+	if (themes && Array.isArray(themes)) {
 		themesHtml = `
 			<div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
 				<strong style="text-transform: uppercase; font-size: 0.7em; color: #555;">Appears in</strong>
@@ -30,7 +33,7 @@ export function createTooltipContent(node) {
 					${themes
 				.map(
 					(theme) =>
-						`<li onclick="window.setActiveTheme && window.setActiveTheme('${theme}')" style="cursor: pointer; text-decoration: underline;">${theme} &rarr;</li>`
+						`<li style="text-transform: capitalize;">${themeMap[theme]}</li>`
 				)
 				.join("")}
 				</ul>

@@ -115,6 +115,7 @@
 		}
 	});
 
+	
 	function handleThemeSelect(theme) {
 		highlightedContent = theme;
 		showThemeDropdown = false;
@@ -152,6 +153,7 @@
 		if (!inThemeView.state) return;
 		inThemeView.state = false;
 		activeTheme.theme = null;
+		highlightedContent = summaryContent[0];
 		resetFilters(["publicationLean", "publication", "dateRange"]);
 	}
 
@@ -491,7 +493,7 @@
 				font-size: var(--subtitle-font-size);
 				line-height: var(--subtitle-line-height);
 				color: #000000;
-				text-transform: lowercase;
+			
 
 				transition:
 					font-size 0.3s ease,
@@ -602,7 +604,7 @@
 				display: inline;
 
 				.interactive-title {
-					text-transform: lowercase;
+		
 					position: relative;
 					cursor: pointer;
 					display: inline-flex;
@@ -675,6 +677,7 @@
 				white-space: nowrap;
 				border-radius: 2px;
 				margin-left: 1rem;
+				text-transform: capitalize;
 
 				&.top-theme {
 					font-weight: bold;

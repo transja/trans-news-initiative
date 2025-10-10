@@ -440,6 +440,7 @@
 		}
 		return 1;
 	}
+	
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -504,7 +505,7 @@
 							opacity={getPathOpacity(s.key)}
 							style="
 								transition-property: d, opacity;
-								transition-duration: {isWidthTransitioning
+								transition-duration: {isWidthTransitioning  || mode === 'intro'
 								? 0
 								: transitionDuration}ms, {inThemeView.state || mode === 'intro'
 								? transitionDuration / 2
@@ -530,10 +531,20 @@
 				{#if !inThemeView.state && seriesToHighlight}
 					<path
 						d={steamAreaGenerator(seriesToHighlight)}
+						class="highlight-outline"
 						fill="none"
 						stroke="black"
 						stroke-width="2px"
 						pointer-events="none"
+						style="
+								transition-property: d, opacity;
+								transition-duration: {isWidthTransitioning || mode === 'intro'
+								? 0
+								: transitionDuration}ms, {inThemeView.state || mode === 'intro'
+								? transitionDuration / 2
+								: 0}ms;
+								transition-timing-function: ease-in-out, ease-in-out;
+							"
 						out:fade={{
 							duration: mode === "intro" ? transitionDuration / 2 : 0
 						}}
@@ -550,7 +561,7 @@
 				{#each yearLabels as label}
 					<g
 						transform={`translate(${label.x}, ${label.y})`}
-						style="transition: transform {isWidthTransitioning
+						style="transition: transform {isWidthTransitioning || mode === 'intro'
 							? 0
 							: transitionDuration}ms ease-in-out;"
 					>
