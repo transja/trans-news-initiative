@@ -17,7 +17,7 @@
 	const logosIcon = [tjaLogoIcon, umLogoIcon, polygraphLogoIcon];
 </script>
 
-<div class="logo-lockup">
+<div class="logo-lockup" style="padding: { $isDesktop ? '1rem' : '0.5rem 0' }">
 	{#if $isDesktop}
 		<p>A collaboration between</p>
 	{/if}
@@ -37,7 +37,6 @@
 		align-items: center;
 		justify-content: flex-end;
 		font-family: var(--sans);
-		padding: 1rem;
 		color: var(--color-gray-600);
 		font-size: var(--14px);
 

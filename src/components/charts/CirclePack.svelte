@@ -349,7 +349,7 @@
 										fill={node.children ? "#fff" : linearColor(node.x)}
 										fill-opacity={node.children ? 1 : 0.8}
 										stroke={node.children ? linearColor(node.x) : "none"}
-										stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
+										stroke-width={node.children ? ($isMobile ? 1 : 1) : 0}
 										class:article-circle={!node.children}
 										class:event-circle={node.children}
 									/>
@@ -421,7 +421,7 @@
 	}
 	.article-circle:hover {
 		fill-opacity: 1;
-		stroke-width: 2;
+		stroke-width: 1;
 		stroke: #000;
 	}
 	.cluster-label-text {

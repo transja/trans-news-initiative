@@ -468,6 +468,7 @@
 
 				{#each yearLabels as label}
 					<g
+						class="year-label"
 						transform={`translate(${label.x}, ${label.y})`}
 						style="transition: transform {isWidthTransitioning || mode === 'intro'
 							? 0
@@ -533,6 +534,10 @@
 		font-family: sans-serif;
 		height: 100%;
 		display: block;
+
+		.year-label {
+			display: block;
+		}
 
 		text {
 			pointer-events: none;

@@ -289,7 +289,7 @@
 	}
 	th,
 	td {
-		padding: 1rem;
+		padding: 0.75rem;
 		text-align: left;
 		border-bottom: 1px solid #eee;
 	}
@@ -365,7 +365,7 @@
 		white-space: nowrap;
 		font-weight: 700;
 		font-size: 10px;
-		width: 90px;
+		width: 80px;
 		text-align: center;
 		display: inline-block;
 	}

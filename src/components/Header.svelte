@@ -79,7 +79,7 @@
 		top: 0;
 
 		@media (max-width: 1000px) {
-			padding: 0.5rem 1rem;
+			padding: 0.5rem;
 		}
 
 		@media (max-width: 600px) {
@@ -151,6 +151,10 @@
 
 		p {
 			font-size: var(--12px);
+		}
+
+		nav {
+			gap: 0.5rem;
 		}
 	}
 </style>

@@ -248,8 +248,11 @@
 		<div class="controls-content">
 			<div class="left-content">
 				<div class="eyebrow">
-					{#if inThemeView.state}With your current filters,&nbsp;
-					{/if}The Trans News Initiative identified
+					{#if inThemeView.state}
+						With these filters, the Trans News Initiative identified
+					{:else}
+						The Trans News Initiative identified
+					{/if}
 				</div>
 				<div class="subtitle-container">
 					{#if mode == "intro"}
@@ -355,9 +358,11 @@
 				{#if mode === "intro"}
 					<div class="instructions-content">
 						{#if $isDesktop}
-							<MousePointerClick size={30} /> Click anywhere to explore them all
+							<MousePointerClick size={30} /> 
+							<p>Click anywhere to explore them all</p>
 						{:else}
-							<Pointer size={30} /> Tap anywhere to explore them all
+							<Pointer size={24} /> 
+							<p>Tap anywhere to explore them all</p>
 						{/if}
 					</div>
 				{:else if highlightedContent.title !== "trans communities" && !inThemeView.state}
@@ -530,7 +535,15 @@
 				.instructions-content {
 					display: flex;
 					align-items: center;
+					justify-content: flex-end;
 					gap: 0.5rem;
+					font-size: var(--16px);
+					font-style: italic;
+					color: var(--color-gray-700);
+
+					p {
+						margin: 0;
+					}
 				}
 
 				.filter-control {
@@ -754,10 +767,14 @@
 				align-items: start;
 				gap: 2rem;
 
-				.left-content,
-				.right-content {
+				.left-content {
 					width: 100%;
 					justify-content: flex-start;
+				}
+				.right-content {
+					width: 100%;
+					justify-content: space-between;
+					align-items: center;
 				}
 			}
 		}
@@ -783,8 +800,28 @@
 					&.in-theme-view {
 						align-items: flex-end;
 					}
+					.instructions-content {
+						max-width: 140px;
+						font-size: var(--14px);
+						gap: 0.5rem;
+
+						p {
+							margin: 0;
+							max-width: 110px;
+						}
+					}
 				}
 			}
 		}
 	}
+
+	:global(.instructions-content svg) {
+		animation: wiggle 0.5s ease-in-out infinite;
+	}
+
+	@keyframes wiggle {
+        0%, 100% { transform: translateX(0px) }
+        25% { transform: translateX(-1px) }
+        75% { transform: translateX(1px) }
+    }
 </style>
