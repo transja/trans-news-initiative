@@ -16,7 +16,7 @@
                 <h3>Initial article collection</h3>
             {:else if i == 2}
                 <h3>Article classification</h3>
-            {:else if i == 4}
+            {:else if i == 3}
                 <h3>Publication political lean</h3>
             {/if}
             <p>{@html graf.value}</p>
@@ -24,11 +24,11 @@
                 <MethodologyTable data={copy.queryTerms} />
             {:else if i == 1}
                 <MethodologyTable data={copy.articleData} />
-            {:else if i == 3}
+            {:else if i == 2}
                 <MethodologyTable data={themeData} />
-            {:else if i == 4}
+            {:else if i == 3}
                 <MethodologyTable data={copy.leans} />
-            {:else if i == 5}
+            {:else if i == 4}
                 <MethodologyTable data={copy.avgLeans} />
             {/if}
         {/each}
@@ -56,6 +56,7 @@
     p {
         font-size: var(--16px);
         line-height: 1.65;
+        margin: 0 0 1rem 0;
     }
 
     :global(#methodology a:hover) {
