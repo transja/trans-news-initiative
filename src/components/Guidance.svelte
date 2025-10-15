@@ -63,6 +63,7 @@
 			.methodology-link {
 				margin: 0;
 				font-style: italic;
+				font-size: var(--14px);
 				a {
 					color: #555;
 					text-decoration: none;

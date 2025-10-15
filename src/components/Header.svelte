@@ -5,17 +5,13 @@
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 	import { dev } from "$app/environment";
-	import { isDesktop } from "$utils/breakpoints";
+	import { isDesktop, isMobile, isTablet, isXSmall } from "$utils/breakpoints";
 	import LogoLockup from "./LogoLockup.svelte";
 	import { goto } from "$app/navigation";
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 
-	let pages = ["home", "about"];
-
-	if (dev) {
-		pages.push("methodology");
-	}
+	let pages = ["home", "about", "methodology"];
 
 	function handlePageClick(btn) {
 		activePage.page = btn;
@@ -46,8 +42,8 @@
 	</div>
 
 	<div class="right-side">
-		{#if $isDesktop}
-			<LogoLockup />
+		{#if $isDesktop || $isTablet}
+			<LogoLockup type={$isTablet ? "icon" : "full"}/>
 			<div class="divider"></div>
 		{/if}
 		<nav>
@@ -68,7 +64,7 @@
 		width: 100%;
 		position: fixed;
 		height: 90px;
-		padding: 1rem 1.75rem;
+		padding: 1rem;
 		display: flex;
 		flex-direction: row;
 		align-items: center;

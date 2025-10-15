@@ -499,7 +499,7 @@
 		}
 	}
 
-	@media (max-width: 600px) {
+	@media (max-width: 1000px) {
 		.main-content {
 			.container-section {
 				padding: 2rem 1rem;

@@ -468,6 +468,7 @@
 
 				{#each yearLabels as label}
 					<g
+						id="year-{label.year}"
 						class="year-label"
 						transform={`translate(${label.x}, ${label.y})`}
 						style="transition: transform {isWidthTransitioning || mode === 'intro'
@@ -517,7 +518,7 @@
 			background-color: white;
 
 			&.apply-width {
-				width: calc(100% - 6rem);
+				width: calc(100% - 4rem);
 				@media (max-width: 600px) {
 					width: calc(100% - 4rem);
 				}
@@ -546,6 +547,12 @@
 
 		path {
 			cursor: pointer;
+		}
+	}
+
+	@media(max-width: 600px) {
+		#year-2021, #year-2023, #year-2025 {
+			display: none;
 		}
 	}
 </style>

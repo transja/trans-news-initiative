@@ -17,11 +17,12 @@ function mediaQuery(query) {
     });
 }
 
+export const isXSmall = mediaQuery('(max-width: 500px)');
 export const isMobile = mediaQuery('(max-width: 767.98px)');
 export const isTablet = mediaQuery('(min-width: 768px) and (max-width: 1023.98px)');
 export const isDesktop = mediaQuery('(min-width: 1024px)');
 
 export const breakpoint = derived(
-    [isMobile, isTablet, isDesktop],
+    [isMobile, isTablet, isDesktop, isXSmall],
     ([$m, $t, $d]) => ($m ? 'mobile' : $t ? 'tablet' : 'desktop')
 );
