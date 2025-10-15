@@ -5,7 +5,6 @@
     import themeData from "$data/themeDefs.csv";
     
     const copy = getContext("copy");
-
 </script>
 
 {#if activePage.page == "methodology"}
@@ -148,10 +147,6 @@
     @media (max-width: 600px) {
         #about {
             padding: 8rem 1rem 1rem 1rem;
-        }
-
-        .inner {
-            gap: 6rem;
         }
 
         h2 {
