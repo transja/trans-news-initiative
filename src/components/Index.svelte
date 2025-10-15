@@ -15,5 +15,5 @@
 	<ComingSoon />
 	<About />
 	<Methodology />
-	<Footer />
+	<!-- <Footer /> -->
 </svelte:boundary>
