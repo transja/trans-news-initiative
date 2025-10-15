@@ -393,7 +393,7 @@
 	.circlepack-container {
 		width: 100%;
 		height: 100%;
-
+		font-family: var(--sans);
 		position: relative;
 		display: flex;
 		justify-content: center;
@@ -425,6 +425,7 @@
 		stroke: #000;
 	}
 	.cluster-label-text {
+		font-family: var(--sans);
 		text-align: center;
 		font-weight: 700;
 		fill: var(--color-gray-1000);
@@ -436,6 +437,7 @@
 
 	.zoom-hint {
 		position: absolute;
+		font-family: var(--sans);
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);

@@ -2,11 +2,17 @@
 	import { scaleBand, scaleLinear } from "d3-scale";
 	import { stack, stackOrderNone, stackOffsetExpand } from "d3-shape";
 	import { format } from "d3-format";
+	import tippy from "tippy.js";
+	import "tippy.js/dist/tippy.css";
+	import "tippy.js/themes/light.css";
+	import { isMobile } from "$utils/breakpoints.js";
 
 	let { data = [], xKey = "year", seriesKeys = [], colors = {} } = $props();
 
 	let width = $state(0);
 	let height = $state(0);
+	let svgEl = $state(null);
+	let stickyInstance = null;
 
 	const margin = { top: 10, right: 0, bottom: 20, left: 40 };
 
@@ -29,6 +35,79 @@
 	const yScale = $derived(scaleLinear().domain([0, 1]).range([innerHeight, 0]));
 
 	const yFmt = format(".0%");
+
+	const createTooltipContent = (dataObject) => {
+		// Calculate the total for this specific data point (e.g., this year)
+		const total = seriesKeys.reduce((sum, key) => sum + (dataObject[key] || 0), 0);
+
+		if (total === 0) return "No data available";
+
+		// Build the title for the tooltip (e.g., "2023")
+		let html = `<div style="text-align: left; font-family: var(--sans); padding: 5px; max-width: 300px;">
+						<div style="font-size: 0.8em; text-transform: uppercase; color: #555; margin-bottom: 5px; font-weight: bold;">${dataObject[xKey]}</div>`;
+
+		// Add a line item for each series key
+		seriesKeys.forEach(key => {
+			const value = dataObject[key] || 0;
+			const percentage = total > 0 ? value / total : 0;
+			const color = colors[key] ?? '#ccc';
+			
+			html += `<div style="display: flex; align-items: center; margin-bottom: 3px; font-family: var(--sans)">
+						<span style="height: 10px; width: 10px; background-color: ${color}; margin-right: 4px; border-radius: 2px;"></span>
+						<span style="font-size: 0.8em; text-transform: uppercase; font-weight: 700; margin-right: 4px;">${key}:</span>
+						<span> ${yFmt(percentage)}</span>
+					</div>`;
+		});
+
+		html += `</div>`;
+		return html;
+	};
+
+	$effect(() => {
+		if (!svgEl) return;
+		let instances = [];
+		const timer = setTimeout(() => {
+			instances = tippy(svgEl.querySelectorAll("[data-tippy-content]"), {
+				allowHTML: true,
+				interactive: true,
+				appendTo: () => document.body,
+				theme: "light",
+				trigger: "mouseenter click",
+
+				onShow(instance) {
+					if (stickyInstance && stickyInstance !== instance) {
+						return false;
+					}
+				},
+
+				onTrigger(instance, event) {
+					if (event.type === "click") {
+						const isCurrentlySticky = stickyInstance === instance;
+						if (stickyInstance && !isCurrentlySticky) {
+							stickyInstance.hide();
+						}
+						if (!isCurrentlySticky) {
+							stickyInstance = instance;
+							if (!$isMobile) {
+								instance.setProps({ interactive: true });
+							}
+						}
+					}
+				},
+
+				onHide(instance) {
+					if (stickyInstance === instance) {
+						stickyInstance = null;
+					}
+				}
+			});
+		}, 100);
+		return () => {
+			clearTimeout(timer);
+			instances.forEach((instance) => instance.destroy());
+			stickyInstance = null;
+		};
+	});
 </script>
 
 <div
@@ -36,10 +115,8 @@
 	bind:clientWidth={width}
 	bind:clientHeight={height}
 >
-
-
 	{#if width && height}
-		<svg {width} {height}>
+		<svg {width} {height} bind:this={svgEl}>
 			<defs>
 				<pattern
 					id="diagonal-stripe-pattern"
@@ -93,8 +170,8 @@
 									width={xScale.bandwidth()}
 									height={yScale(y0) - yScale(y1)}
 									fill={colors[key] ?? "#ccc"}
+									data-tippy-content={createTooltipContent(d.data)}
 								>
-									<title>{key}: {yFmt(d.data[key])}</title>
 								</rect>
 							{/if}
 						{/each}
@@ -128,6 +205,7 @@
 	.chart-container {
 		width: 100%;
 		height: 250px;
+		font-family: var(--sans);
 	}
 
 	.x-axis text {
@@ -136,10 +214,14 @@
 		dominant-baseline: middle;
 		font-size: 12px;
 		font-weight: 600;
-		font-family: sans-serif;
+		font-family: var(--sans);
 		stroke-width: 4px;
 		stroke: white;
 		paint-order: stroke;
+	}
+
+	.series-group rect {
+		cursor: pointer;
 	}
 
 </style>

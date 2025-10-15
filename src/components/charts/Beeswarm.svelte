@@ -257,7 +257,6 @@
 							dominant-baseline="middle"
 							font-size="12px"
 							font-weight="600"
-							font-family="sans-serif"
 							stroke-width="4px"
 							stroke="white"
 							paint-order="stroke"
@@ -276,6 +275,7 @@
 		width: 100%;
 		overflow: hidden;
 		position: relative;
+		font-family: var(--sans);
 	}
 
 	.beeswarm-svg {
@@ -294,6 +294,7 @@
 		}
 		text {
 			pointer-events: none;
+			font-family: var(--sans);
 		}
 	}
 

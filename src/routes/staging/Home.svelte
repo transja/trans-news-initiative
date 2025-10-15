@@ -491,7 +491,7 @@
 
 <style lang="scss">
 	.main-content {
-		font-family: "Inter", sans-serif;
+		font-family: var(--sans);
 
 		.container-section {
 			padding: 4rem 2rem;

@@ -480,7 +480,6 @@
 							dominant-baseline="middle"
 							font-size="12px"
 							font-weight="600"
-							font-family="sans-serif"
 							stroke-width="4px"
 							stroke="white"
 							paint-order="stroke"
@@ -506,6 +505,7 @@
 		pointer-events: none;
 		background-color: transparent;
 		margin: 0 auto;
+		font-family: var(--sans);
 
 		&.interactive {
 			pointer-events: auto;
@@ -531,7 +531,7 @@
 		}
 	}
 	svg {
-		font-family: sans-serif;
+		font-family: var(--sans);
 		height: 100%;
 		display: block;
 
@@ -541,6 +541,7 @@
 
 		text {
 			pointer-events: none;
+			font-family: var(--sans);
 		}
 
 		path {
