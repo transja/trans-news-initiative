@@ -1,7 +1,9 @@
 <script>
-
+	import { onMount } from "svelte";
+	import { select } from "d3-selection";
+	import { easeLinear } from "d3-ease";
 	import { browser } from "$app/environment";
-	import tniLogo from "$svg/logos/TNI_static.svg";
+	import tniLogo from "$svg/logos/TNI_animate.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 	import { dev } from "$app/environment";
@@ -11,13 +13,60 @@
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 
-	let pages = ["home", "about", "methodology"];
+	let pages = ["home", "about", "methods"];
 
 	function handlePageClick(btn) {
 		activePage.page = btn;
 	}
 
 	let headerHeight = 0;
+	let transposePath;
+    let letterA;
+
+	function drawInPath() {
+        let pathElement = transposePath.node();
+        if (!pathElement) return;
+
+        let pathLen = pathElement.getTotalLength();
+
+        // Stop ongoing transitions to prevent overlaps
+        transposePath.interrupt();
+        letterA.interrupt();
+
+        // Reset to initial state
+        transposePath
+            .attr("stroke-dasharray", pathLen)
+            .attr("stroke-dashoffset", pathLen);
+
+        letterA.style("opacity", 1); // Reset letter A visibility
+
+        // Restart animation
+        transposePath
+            .transition()
+            .delay(500)
+            .duration(1000)
+            .ease(easeLinear)
+            .attr("stroke-dashoffset", 0);
+
+        letterA
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+    }
+
+	onMount(() => {
+		transposePath = select("header #transposePath");
+        letterA = select("header #letter-a");
+
+		letterA
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+	})
 
 	$effect(() => {
 		if (browser) {
@@ -30,7 +79,11 @@
 </script>
 
 <header bind:clientHeight={headerHeight}>
-	<div class="logo" onclick={() => {
+	<button id="tni-logo" class="logo" 
+	onmouseenter={() => {
+		drawInPath();
+	}}
+	onclick={() => {
 		handlePageClick("home")
 		inThemeView.state = false;
 		activeTheme.theme = null;
@@ -39,7 +92,7 @@
 
 	}}>
 		{@html tniLogo}
-	</div>
+</button>
 
 	<div class="right-side">
 		{#if $isDesktop || $isTablet}
@@ -49,6 +102,7 @@
 		<nav>
 			{#each pages as btn, i}
 				<button
+					class="page-btn"
 					class:active={activePage.page == btn}
 					onclick={() => handlePageClick(btn)}
 				>
@@ -69,7 +123,7 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
-		z-index: 1000;
+		z-index: 999;
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
 		top: 0;
@@ -109,7 +163,17 @@
 		}
 	}
 
-	button {
+	#tni-logo {
+		padding: 0;
+		background: transparent;
+		transition: transform 0.25s linear;
+
+		// &:hover {
+		// 	transform: translateY(-2px);
+		// }
+	}
+
+	.page-btn {
 		text-transform: uppercase;
 		font-size: var(--12px);
 		background: transparent;
@@ -117,7 +181,7 @@
 		position: relative;
 	}
 
-	button::after {
+	.page-btn::after {
 		content: "";
 		position: absolute;
 		left: 0;
@@ -129,12 +193,12 @@
 		transition: width 0.25s linear;
 	}
 
-	button.active::after,
-	button:hover::after {
+	.page-btn.active::after,
+	.page-btn:hover::after {
 		width: 100%;
 	}
 
-	button.active {
+	.page-btn.active {
 		font-weight: 700;
 		pointer-events: none;
 	}
