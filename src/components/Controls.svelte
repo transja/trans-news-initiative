@@ -238,9 +238,6 @@
 		year: "numeric"
 	});
 
-	$effect(() => {
-		console.log($isDesktop)
-	})
 </script>
 
 <div
