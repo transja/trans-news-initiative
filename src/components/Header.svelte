@@ -11,7 +11,7 @@
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
 
-	let pages = ["home", "about", "methodology"];
+	let pages = ["home", "about", "methods"];
 
 	function handlePageClick(btn) {
 		activePage.page = btn;
@@ -30,7 +30,7 @@
 </script>
 
 <header bind:clientHeight={headerHeight}>
-	<div class="logo" onclick={() => {
+	<button id="tni-logo" class="logo" onclick={() => {
 		handlePageClick("home")
 		inThemeView.state = false;
 		activeTheme.theme = null;
@@ -39,7 +39,7 @@
 
 	}}>
 		{@html tniLogo}
-	</div>
+</button>
 
 	<div class="right-side">
 		{#if $isDesktop || $isTablet}
@@ -49,6 +49,7 @@
 		<nav>
 			{#each pages as btn, i}
 				<button
+					class="page-btn"
 					class:active={activePage.page == btn}
 					onclick={() => handlePageClick(btn)}
 				>
@@ -69,7 +70,7 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
-		z-index: 1000;
+		z-index: 999;
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
 		top: 0;
@@ -109,7 +110,17 @@
 		}
 	}
 
-	button {
+	#tni-logo {
+		padding: 0;
+		background: transparent;
+		transition: transform 0.25s linear;
+
+		&:hover {
+			transform: translateY(-2px);
+		}
+	}
+
+	.page-btn {
 		text-transform: uppercase;
 		font-size: var(--12px);
 		background: transparent;
@@ -117,7 +128,7 @@
 		position: relative;
 	}
 
-	button::after {
+	.page-btn::after {
 		content: "";
 		position: absolute;
 		left: 0;
@@ -129,12 +140,12 @@
 		transition: width 0.25s linear;
 	}
 
-	button.active::after,
-	button:hover::after {
+	.page-btn.active::after,
+	.page-btn:hover::after {
 		width: 100%;
 	}
 
-	button.active {
+	.page-btn.active {
 		font-weight: 700;
 		pointer-events: none;
 	}

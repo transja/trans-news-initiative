@@ -112,8 +112,11 @@ a[role="button"]:focus,
 input:focus,
 select:focus,
 textarea:focus {
-	outline: 2px solid var(--color-focus);
-	outline-offset: 2px;
+	outline: 2px solid transparent !important;
+	outline-offset: 2px !important;
+	border: 1px solid #3b82f6 !important;
+	box-shadow: 0 0 0 2px rgba(59, 130, 230, 0.4) !important;
+	border-radius: 4px !important;
 }
 
 button:focus:not(:focus-visible),
@@ -197,20 +200,25 @@ ol, ul {
 }
 
 .skip-to-main {
-	border: none;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	position: absolute;
+    position: absolute;
+    left: -9999px; 
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
 }
 
 .skip-to-main:focus {
-	background-color: var(--color-gray-900, black);
-	color: var(--color-white, white);
-	width: auto;
-	height: auto;
-	padding: 8px;
-	z-index: var(--z-overlay, 1000);
+    position: fixed; 
+    top: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    height: auto;
+    padding: 8px;
+    background-color: var(--color-gray-900, black);
+    color: var(--color-white, white);
+    z-index: var(--z-overlay, 1000);
+    overflow: visible; 
 }
 
 .sr-only {

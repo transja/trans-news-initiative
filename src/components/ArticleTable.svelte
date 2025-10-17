@@ -29,6 +29,7 @@
 	let currentPage = $state(1);
 	let itemsPerPage = $derived($isMobile ? 5 : 10);
 	let searchTerm = $state("");
+	let tableContainerEl;
 
 	// Derived state
 	const filteredArticles = $derived(
@@ -149,9 +150,26 @@
 
 		return buttons;
 	}
+
+	function handleTableKeydown(event) {
+        if (event.key === 'Escape') {
+            event.stopPropagation();
+            event.preventDefault();
+
+            if (tableContainerEl) {
+                tableContainerEl.focus();
+            }
+        }
+    }
 </script>
 
-<div class="article-table-container">
+<div 
+	class="article-table-container" 
+	bind:this={tableContainerEl}
+	onkeydown={handleTableKeydown}
+    tabindex="-1"
+    aria-label="Articles table and controls"
+>
 	<div class="table-wrapper">
 		<table>
 			<thead>

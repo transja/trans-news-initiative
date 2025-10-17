@@ -31,6 +31,8 @@
 	let yOffset = $state(0);
 	let simulation = null;
 	let stickyInstance = null;
+	let hoverInstance = null;
+	let activeDotIndex = $state(-1);
 
 	const marginTop = 50;
 	const marginRight = 50;
@@ -161,54 +163,175 @@
 	$effect(() => {
 		if (loading || !svgEl) return;
 		let instances = [];
+
 		const timer = setTimeout(() => {
-			instances = tippy(svgEl.querySelectorAll("[data-tippy-content]"), {
+			instances = tippy(svgEl.querySelectorAll('[data-tippy-content]'), {
+				// Your existing options are good
 				allowHTML: true,
 				interactive: true,
 				appendTo: () => document.body,
-				theme: "light",
-				trigger: "mouseenter click",
+				theme: 'light',
+				trigger: 'mouseenter click',
+				// Add an offset to prevent flickering, just in case
+				popperOptions: {
+					modifiers: [
+						{ name: 'offset', options: { offset: [0, 10] } },
+					],
+				},
 
+				// --- REVISED LOGIC STARTS HERE ---
+
+				// onShow is the first gatekeeper. It runs before the tooltip appears.
 				onShow(instance) {
+					// RULE 1: If a tooltip is already sticky, don't show any other tooltips on hover.
 					if (stickyInstance && stickyInstance !== instance) {
-						return false;
+						return false; // Prevents the tooltip from showing
+					}
+
+					// RULE 2: If we are showing a new tooltip on hover, hide the previous one first.
+					// We check the trigger source to ensure this only applies to 'mouseenter' events.
+					if (instance.state.isShown === false && instance.props.trigger.includes('mouseenter')) {
+						if (hoverInstance && hoverInstance !== instance) {
+							hoverInstance.hide();
+						}
+						hoverInstance = instance;
 					}
 				},
 
+				// onTrigger handles the click logic for making tooltips sticky.
 				onTrigger(instance, event) {
-					if (event.type === "click") {
+					if (event.type === 'click') {
 						const isCurrentlySticky = stickyInstance === instance;
+
+						// If another tooltip is sticky, hide it.
 						if (stickyInstance && !isCurrentlySticky) {
 							stickyInstance.hide();
 						}
-						if (!isCurrentlySticky) {
-							stickyInstance = instance;
-							if (!$isMobile) {
-								instance.setProps({ interactive: true });
-							}
+						
+						// Toggle the current tooltip's sticky state.
+						stickyInstance = isCurrentlySticky ? null : instance;
+
+						// A click overrides any hover tooltips.
+						if (hoverInstance) {
+							hoverInstance = null;
 						}
 					}
 				},
 
+				// onHide cleans up our state variables when a tooltip closes.
 				onHide(instance) {
+					// If the closing tooltip was the sticky one, clear the sticky state.
 					if (stickyInstance === instance) {
 						stickyInstance = null;
 					}
-				}
+					// If the closing tooltip was the hovered one, clear the hover state.
+					if (hoverInstance === instance) {
+						hoverInstance = null;
+					}
+				},
 			});
 		}, 100);
+
 		return () => {
 			clearTimeout(timer);
 			instances.forEach((instance) => instance.destroy());
+			// Reset state on cleanup
 			stickyInstance = null;
+			hoverInstance = null;
 		};
 	});
+
+	$effect(() => {
+		if (!container) return;
+
+		const inactiveDots = container.querySelectorAll(`.beeswarm-svg circle:not([data-index='${activeDotIndex}'])`);
+		inactiveDots.forEach(el => el._tippy?.hide());
+
+		if (activeDotIndex > -1) {
+			const activeEl = container.querySelector(`[data-index='${activeDotIndex}']`);
+			if (activeEl?._tippy) {
+				activeEl._tippy.show();
+			}
+		}
+	});
+
+	$effect(() => {
+		if (!container) return;
+
+		// Hide any tooltips on inactive dots
+		const inactiveDots = container.querySelectorAll(`.beeswarm-svg circle:not([data-index='${activeDotIndex}'])`);
+		inactiveDots.forEach(el => el._tippy?.hide());
+
+		if (activeDotIndex > -1) {
+			const activeEl = container.querySelector(`[data-index='${activeDotIndex}']`);
+			raiseCircle(activeEl);
+			if (activeEl?._tippy) {
+				activeEl._tippy.show();
+			}
+		}
+	});
+
+	function handleKeydown(event) {
+		if (event.key === 'Tab') {
+			activeDotIndex = -1;
+			return;
+		}
+
+		if (!simulationData.length) return;
+
+		event.preventDefault();
+
+		let newIndex = activeDotIndex;
+		const maxIndex = simulationData.length - 1;
+
+		switch (event.key) {
+			case "ArrowRight":
+			case "ArrowDown":
+				newIndex = activeDotIndex >= maxIndex ? 0 : activeDotIndex + 1;
+				break;
+			case "ArrowLeft":
+			case "ArrowUp":
+				newIndex = activeDotIndex <= 0 ? maxIndex : activeDotIndex - 1;
+				break;
+			case "Home":
+				newIndex = 0;
+				break;
+			case "End":
+				newIndex = maxIndex;
+				break;
+			case "Escape":
+				event.preventDefault();
+				event.stopPropagation();
+				const currentEl = container.querySelector(`[data-index='${activeDotIndex}']`);
+				if (currentEl?._tippy) {
+					currentEl._tippy.hide();
+				}
+				newIndex = -1;
+				if (container) container.blur();
+				break;
+			default:
+				return;
+		}
+
+		if (newIndex !== activeDotIndex) {
+			activeDotIndex = newIndex;
+		}
+	}
+
+	const raiseCircle = (element) => {
+		if (!element) return;
+		select(element).raise(); // Brings the circle to the front
+	};
 </script>
 
 <div
 	class="beeswarm-container"
 	bind:this={container}
-	style:height="{dynamicHeight}px"
+    style:height="{dynamicHeight}px"
+    tabindex="0"
+    role="application"
+    aria-label="Interactive beeswarm chart of news articles"
+    onkeydown={handleKeydown}
 >
 	{#if loading}
 		<div class="loading-spinner"></div>
@@ -229,7 +352,7 @@
 
 			<!-- Circles -->
 			<g transform="translate(0, {yOffset})">
-				{#each simulationData as node}
+				{#each simulationData as node, i}
 					<circle
 						cx={node.x}
 						cy={node.y}
@@ -237,12 +360,11 @@
 						fill={colorScale(node.publish_date)}
 						stroke="#fff"
 						stroke-width={1}
-						on:mouseover={(event) => {
-							const circle = select(event.currentTarget);
-							console.log(circle)
-							circle.raise();
-						}}
+						role="tooltip"
+						onmouseover={(event) => raiseCircle(event.currentTarget)}
 						data-tippy-content={createTooltipContent(node)}
+						data-index={i}
+                        class:is-active={i === activeDotIndex}
 					/>
 				{/each}
 			</g>
@@ -288,6 +410,10 @@
 				stroke-width 0.2s ease-in-out;
 
 			&:hover {
+				stroke: #000;
+				stroke-width: 2;
+			}
+			&.is-active {
 				stroke: #000;
 				stroke-width: 2;
 			}

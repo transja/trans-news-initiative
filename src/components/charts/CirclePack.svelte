@@ -44,6 +44,7 @@
 	let hintTimeout;
 	let zoomBehavior;
 	let stickyInstance = null;
+	let activeCircleIndex = $state(-1);
 
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
@@ -53,6 +54,8 @@
 			.size([width - 2, heightVal - 2])
 			.padding(3)(root);
 	});
+
+	const leaves = $derived(packed ? packed.leaves() : []);
 
 	function processData(sourceData) {
 		const clusters = new Map();
@@ -304,6 +307,20 @@
 		};
 	});
 
+	$effect(() => {
+		if (!svgEl) return;
+
+		const inactiveCircles = svgEl.querySelectorAll(`.is-leaf:not([data-index='${activeCircleIndex}'])`);
+		inactiveCircles.forEach(el => el._tippy?.hide());
+
+		if (activeCircleIndex > -1) {
+			const activeEl = svgEl.querySelector(`[data-index='${activeCircleIndex}']`);
+			if (activeEl?._tippy) {
+				activeEl._tippy.show();
+			}
+		}
+	});
+
 	function zoomIn() {
 		if (!svgEl || !zoomBehavior) return;
 		const selection = select(svgEl);
@@ -314,6 +331,45 @@
 		if (!svgEl || !zoomBehavior) return;
 		const selection = select(svgEl);
 		selection.transition().call(zoomBehavior.scaleBy, 1 / 1.2);
+	}
+
+	function handleKeydown(event) {
+		if (!leaves.length) return;
+
+		event.preventDefault();
+
+		let newIndex = activeCircleIndex;
+
+		switch (event.key) {
+			case "ArrowRight":
+			case "ArrowDown":
+				newIndex = activeCircleIndex >= leaves.length - 1 ? 0 : activeCircleIndex + 1;
+				break;
+			case "ArrowLeft":
+			case "ArrowUp":
+				newIndex = activeCircleIndex <= 0 ? leaves.length - 1 : activeCircleIndex - 1;
+				break;
+			case "Home":
+				newIndex = 0;
+				break;
+			case "End":
+				newIndex = leaves.length - 1;
+				break;
+			case "Escape":
+				const currentEl = svgEl.querySelector(`[data-index='${activeCircleIndex}']`);
+				if (currentEl?._tippy) {
+					currentEl._tippy.hide();
+				}
+				newIndex = -1;
+				if (svgEl) svgEl.blur();
+				break;
+			default:
+				return;
+		}
+
+		if (newIndex !== activeCircleIndex) {
+			activeCircleIndex = newIndex;
+		}
 	}
 </script>
 
@@ -331,27 +387,47 @@
 			{@const xMax = Math.max(...xValues)}
 			{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
 			{#if descendants.length > 1}
-				<svg bind:this={svgEl} {width} height={heightVal}>
+				<svg 
+					bind:this={svgEl} 
+					{width} 
+					height={heightVal}
+					tabindex="0"
+    				role="application"
+    				aria-label="Interactive map of news articles"
+					onkeydown={handleKeydown}
+				>
 					<g {transform}>
 						<g transform="translate({width / 2}, {heightVal / 2})">
-							{#each descendants.filter((d) => d.depth > 0) as node}
+							{#each descendants.filter((d) => d.depth === 1) as node}
 								<g
 									transform="translate({node.x - width / 2},{node.y -
 										heightVal / 2})"
-									class:is-leaf={!node.children}
-									class:is-parent={node.depth === 1}
-									data-tippy-content={!node.children
-										? createTooltipContent(node.data)
-										: undefined}
+									class="is-parent"
 								>
 									<circle
 										r={node.r}
-										fill={node.children ? "#fff" : linearColor(node.x)}
-										fill-opacity={node.children ? 1 : 0.8}
-										stroke={node.children ? linearColor(node.x) : "none"}
-										stroke-width={node.children ? ($isMobile ? 1 : 1) : 0}
-										class:article-circle={!node.children}
-										class:event-circle={node.children}
+										fill="#fff"
+										stroke={linearColor(node.x)}
+										stroke-width={$isMobile ? 1 : 1}
+										class="event-circle"
+									/>
+								</g>
+							{/each}
+
+							{#each leaves as node, i}
+								<g
+									transform="translate({node.x - width / 2},{node.y -
+										heightVal / 2})"
+									class="is-leaf"
+									class:is-active={i === activeCircleIndex}
+									data-index={i}
+									data-tippy-content={createTooltipContent(node.data)}
+								>
+									<circle
+										r={node.r}
+										fill={linearColor(node.x)}
+										fill-opacity={0.8}
+										class="article-circle"
 									/>
 								</g>
 							{/each}
@@ -413,6 +489,13 @@
 		cursor: pointer;
 	}
 	.is-leaf circle:hover {
+		fill-opacity: 1;
+	}
+	.is-leaf.is-active circle,
+	.is-leaf:focus-visible circle {
+		stroke: #000;
+		stroke-width: 3;
+		stroke-opacity: 1;
 		fill-opacity: 1;
 	}
 

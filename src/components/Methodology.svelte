@@ -7,10 +7,10 @@
     const copy = getContext("copy");
 </script>
 
-{#if activePage.page == "methodology"}
+{#if activePage.page == "methods"}
 <section id="methodology">
     <div class="inner">
-        <h2>Methodology</h2>
+        <h2>Methods</h2>
         {#each copy.methods as graf, i}
             {#if i == 0}
                 <h3>Initial article collection</h3>

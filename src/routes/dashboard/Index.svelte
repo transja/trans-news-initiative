@@ -5,14 +5,22 @@
 	import Home from "./Home.svelte";
 	import About from "$components/About.svelte";
 	import Methodology from "$components/Methodology.svelte";
+	import { activePage } from "$runes/misc.svelte.js";
 
-	// const copy = getContext("copy");
-	// const data = getContext("data");
+	// $effect(() => {
+	// 	if (activePage.page) {
+	// 		if (typeof window !== 'undefined') {
+	// 			window.scrollTo(0, 0);
+	// 		}
+	// 	}
+    // });
 </script>
 
 <svelte:boundary onerror={(e) => console.error(e)}>
 	<Header />
-	<Home />
-	<About />
-	<Methodology />
+	<div id="main-content-wrapper">
+		<Home />
+		<About />
+		<Methodology />
+	</div>
 </svelte:boundary>
