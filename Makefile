@@ -8,6 +8,7 @@ github:
 	cp -r build docs
 	touch docs/.nojekyll
 	cp CNAME docs/
+	cp static/404.html docs/ 2>/dev/null || true
 	git add -A
 	git commit -m "update github pages"
 	git push
