@@ -1,10 +1,11 @@
 <script>
-	let {
-		title = "Trans News Initiative",
-		description = "A database and analysis of government actions and news coverage affecting trans communities.",
-		url = "https://transnewsinit.org",
-		keywords = "trans, transgender, government action, executive order, legisaltion, law, news, coverage, articles, reporting, data, analysis",
-	} = $props();
+	import { getContext } from "svelte";
+	
+	const copy = getContext("copy");
+	const title = copy.title;
+	const description = copy.seoDesc;
+	const url = copy.url;
+	const keywords = copy.keywords;
 </script>
 
 <svelte:head>

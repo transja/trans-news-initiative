@@ -47,6 +47,9 @@
 </div>
 
 <style>
+    .table-wrapper {
+        margin: 2rem 0;
+    }
     table {
 		width: 100%;
         max-width: 600px;
@@ -76,6 +79,7 @@
         border-radius: 5px;
         text-transform: uppercase;
         font-weight: 700;
+        font-size: var(--12px);
     }
     :global(#methodology .span-left) {
         background-color: var(--tni-left);

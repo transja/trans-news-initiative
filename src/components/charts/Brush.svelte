@@ -124,6 +124,7 @@
 		left: 0;
 		width: 100%;
 		height: calc(100% - 20px);
+		font-family: var(--sans);
 
 		&-mute {
 			position: absolute;

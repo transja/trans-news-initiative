@@ -491,7 +491,7 @@
 
 <style lang="scss">
 	.main-content {
-		font-family: "Inter", sans-serif;
+		font-family: var(--sans);
 
 		.container-section {
 			padding: 4rem 2rem;
@@ -499,7 +499,7 @@
 		}
 	}
 
-	@media (max-width: 600px) {
+	@media (max-width: 1000px) {
 		.main-content {
 			.container-section {
 				padding: 2rem 1rem;

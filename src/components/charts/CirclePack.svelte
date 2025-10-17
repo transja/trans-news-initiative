@@ -349,7 +349,7 @@
 										fill={node.children ? "#fff" : linearColor(node.x)}
 										fill-opacity={node.children ? 1 : 0.8}
 										stroke={node.children ? linearColor(node.x) : "none"}
-										stroke-width={node.children ? ($isMobile ? 1 : 2) : 0}
+										stroke-width={node.children ? ($isMobile ? 1 : 1) : 0}
 										class:article-circle={!node.children}
 										class:event-circle={node.children}
 									/>
@@ -393,7 +393,7 @@
 	.circlepack-container {
 		width: 100%;
 		height: 100%;
-
+		font-family: var(--sans);
 		position: relative;
 		display: flex;
 		justify-content: center;
@@ -421,10 +421,11 @@
 	}
 	.article-circle:hover {
 		fill-opacity: 1;
-		stroke-width: 2;
+		stroke-width: 1;
 		stroke: #000;
 	}
 	.cluster-label-text {
+		font-family: var(--sans);
 		text-align: center;
 		font-weight: 700;
 		fill: var(--color-gray-1000);
@@ -436,6 +437,7 @@
 
 	.zoom-hint {
 		position: absolute;
+		font-family: var(--sans);
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);

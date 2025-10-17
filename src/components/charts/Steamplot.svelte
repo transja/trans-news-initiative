@@ -468,6 +468,8 @@
 
 				{#each yearLabels as label}
 					<g
+						id="year-{label.year}"
+						class="year-label"
 						transform={`translate(${label.x}, ${label.y})`}
 						style="transition: transform {isWidthTransitioning || mode === 'intro'
 							? 0
@@ -479,7 +481,6 @@
 							dominant-baseline="middle"
 							font-size="12px"
 							font-weight="600"
-							font-family="sans-serif"
 							stroke-width="4px"
 							stroke="white"
 							paint-order="stroke"
@@ -505,6 +506,7 @@
 		pointer-events: none;
 		background-color: transparent;
 		margin: 0 auto;
+		font-family: var(--sans);
 
 		&.interactive {
 			pointer-events: auto;
@@ -516,7 +518,7 @@
 			background-color: white;
 
 			&.apply-width {
-				width: calc(100% - 6rem);
+				width: calc(100% - 4rem);
 				@media (max-width: 600px) {
 					width: calc(100% - 4rem);
 				}
@@ -530,16 +532,27 @@
 		}
 	}
 	svg {
-		font-family: sans-serif;
+		font-family: var(--sans);
 		height: 100%;
 		display: block;
 
+		.year-label {
+			display: block;
+		}
+
 		text {
 			pointer-events: none;
+			font-family: var(--sans);
 		}
 
 		path {
 			cursor: pointer;
+		}
+	}
+
+	@media(max-width: 600px) {
+		#year-2021, #year-2023, #year-2025 {
+			display: none;
 		}
 	}
 </style>

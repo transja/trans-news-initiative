@@ -145,7 +145,7 @@
 	}
 
 	.circlepack-wrapper {
-		width: calc(100% - 4rem);
+		width: calc(100% - 2rem);
 		margin: 0 auto;
 		height: 0;
 		overflow: hidden;

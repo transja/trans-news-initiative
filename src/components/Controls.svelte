@@ -21,7 +21,7 @@
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
 	import { getPublicationName } from "../utils/getPublicationName.js";
-	import { isDesktop, isMobile } from "$utils/breakpoints";
+	import { isDesktop, isMobile, isXSmall } from "$utils/breakpoints";
 	import Spinner from "$components/helpers/loaders/Loader.Spinner.svelte";
 
 	// stores
@@ -237,6 +237,10 @@
 		month: "short",
 		year: "numeric"
 	});
+
+	$effect(() => {
+		console.log($isDesktop)
+	})
 </script>
 
 <div
@@ -248,19 +252,21 @@
 		<div class="controls-content">
 			<div class="left-content">
 				<div class="eyebrow">
-					{#if inThemeView.state}With your current filters,&nbsp;
-					{/if}The Trans News Initiative identified
+					{#if inThemeView.state}
+						With these filters, the Trans News Initiative identified
+					{:else}
+						The Trans News Initiative identified
+					{/if}
 				</div>
 				<div class="subtitle-container">
 					{#if mode == "intro"}
 						<div class="subtitle-sizer" aria-hidden="true">
-							<span
+							<span class:introBreak={!$isDesktop}
 								>{inThemeView.state
 									? filteredData.length.toLocaleString()
-									: highlightedContent.count.toLocaleString()} articles</span
+									: highlightedContent.count.toLocaleString()} articles about</span
 							>
-							about
-							<span style={mode == "default" ? "margin-right: 2rem" : ""}
+							<span class:introBreak={!$isDesktop} style={mode == "default" ? "margin-right: 2rem" : ""}
 								>{highlightedContent.title}</span
 							>
 						</div>
@@ -270,6 +276,7 @@
 							class="subtitle"
 							class:disabled={loadingThemeArticles}
 							class:intro={mode == "intro"}
+							style="display:{$isDesktop || $isMobile ? 'inline-block' : 'flex'}; flex-direction: {$isDesktop || $isMobile ? 'none' : 'column'}"
 							in:fade={{
 								duration: mode == "intro" ? transitionDuration / 4 : 0,
 								easing: cubicInOut
@@ -287,9 +294,8 @@
 								{:else}
 									{highlightedContent.count.toLocaleString()}
 								{/if}
-								articles</span
+								articles <span style="font-weight: 400;">about</span></span
 							>
-							about
 
 							{#if mode == "default"}
 								<div
@@ -348,16 +354,18 @@
 				</div>
 			</div>
 			<div class="right-content" class:in-theme-view={inThemeView.state}>
-				{#if !$isDesktop && !inThemeView.state}
+				{#if $isMobile && !inThemeView.state}
 					<LogoLockup type="icon" />
 				{/if}
 
 				{#if mode === "intro"}
 					<div class="instructions-content">
 						{#if $isDesktop}
-							<MousePointerClick size={30} /> Click anywhere to explore them all
+							<MousePointerClick size={24} /> 
+							<p>Click anywhere to explore</p>
 						{:else}
-							<Pointer size={30} /> Tap anywhere to explore them all
+							<Pointer size={24} /> 
+							<p>Tap anywhere to explore</p>
 						{/if}
 					</div>
 				{:else if highlightedContent.title !== "trans communities" && !inThemeView.state}
@@ -436,7 +444,7 @@
 
 <style lang="scss">
 	.controls-container {
-		padding: 1rem 2rem 1rem;
+		padding: 1rem;
 		width: 100%;
 		margin: 0 auto;
 		// min-height: var(--controls-height, 0px);
@@ -455,8 +463,8 @@
 		backdrop-filter: blur(6px);
 		z-index: 500;
 
-		--subtitle-font-size: 36px;
-		--subtitle-line-height: 44px;
+		--subtitle-font-size: 32px;
+		--subtitle-line-height: 40px;
 
 		&.in-theme-view {
 			--subtitle-font-size: 24px;
@@ -469,7 +477,7 @@
 			width: 100%;
 			display: flex;
 			justify-content: space-between;
-			align-items: end;
+			align-items: center;
 			gap: 1rem;
 			.subtitle-container {
 				position: relative;
@@ -501,6 +509,9 @@
 				span {
 					font-weight: 700;
 				}
+				span.introBreak {
+					display: block;
+				}
 			}
 
 			.subtitle.disabled {
@@ -516,8 +527,11 @@
 			}
 
 			.left-content {
-				flex-grow: 1; /* Fill available space */
+				flex-grow: 1;
 				min-width: 0; /* Allow content to wrap */
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
 			}
 
 			.right-content {
@@ -526,11 +540,21 @@
 				gap: 10px;
 				justify-content: flex-end;
 				flex-shrink: 0;
+				margin-top: 1rem;
 
 				.instructions-content {
 					display: flex;
 					align-items: center;
+					justify-content: flex-end;
 					gap: 0.5rem;
+					font-size: var(--14px);
+					font-style: italic;
+					color: var(--color-gray-700);
+
+					p {
+						margin: 0;
+						max-width: 100px;
+					}
 				}
 
 				.filter-control {
@@ -668,6 +692,10 @@
 
 			.theme-dropdown {
 				bottom: 100%;
+
+				.dropdown-option {
+					text-transform: lowercase;
+				}
 			}
 
 			.dropdown-option {
@@ -738,11 +766,11 @@
 		}
 	}
 
-	@media (max-width: 1000px) {
+	@media (max-width: 768px) {
 		.controls-container {
 			padding: 1rem;
-			--subtitle-font-size: 36px;
-			--subtitle-line-height: 44px;
+			--subtitle-font-size: 32px;
+			--subtitle-line-height: 40px;
 
 			&.in-theme-view {
 				--subtitle-font-size: 24px;
@@ -752,12 +780,18 @@
 			.controls-content {
 				flex-direction: column;
 				align-items: start;
-				gap: 2rem;
+				gap: 1rem;
 
-				.left-content,
-				.right-content {
+				.left-content {
 					width: 100%;
 					justify-content: flex-start;
+					height: auto;
+					min-height: 4rem;
+				}
+				.right-content {
+					width: 100%;
+					justify-content: space-between;
+					align-items: center;
 				}
 			}
 		}
@@ -783,8 +817,27 @@
 					&.in-theme-view {
 						align-items: flex-end;
 					}
+					.instructions-content {
+						font-size: var(--14px);
+						gap: 0.5rem;
+
+						p {
+							margin: 0;
+							max-width: 100px;
+						}
+					}
 				}
 			}
 		}
 	}
+
+	:global(.instructions-content svg) {
+		animation: wiggle 0.5s ease-in-out infinite;
+	}
+
+	@keyframes wiggle {
+        0%, 100% { transform: translateX(0px) }
+        25% { transform: translateX(-1px) }
+        75% { transform: translateX(1px) }
+    }
 </style>

@@ -11,14 +11,14 @@
 	import umLogoIcon from "$svg/logos/UM-logo-small.svg";
 	import polygraphLogoIcon from "$svg/logos/polygraph-logo-small.svg";
 
-	let { type = "full" } = $props();
+	let { type } = $props();
 
 	const logos = [tjaLogo, umLogo, polygraphLogo];
 	const logosIcon = [tjaLogoIcon, umLogoIcon, polygraphLogoIcon];
 </script>
 
-<div class="logo-lockup">
-	{#if $isDesktop}
+<div class="logo-lockup" style="padding: { $isDesktop ? '1rem' : '0.5rem 0' }">
+	{#if !$isMobile}
 		<p>A collaboration between</p>
 	{/if}
 	<div class="org-wrapper {type === 'icon' ? 'icon' : 'full'}">
@@ -37,12 +37,12 @@
 		align-items: center;
 		justify-content: flex-end;
 		font-family: var(--sans);
-		padding: 1rem;
 		color: var(--color-gray-600);
 		font-size: var(--14px);
 
 		p {
 			margin-right: 1rem;
+			font-style: italic;
 		}
 	}
 

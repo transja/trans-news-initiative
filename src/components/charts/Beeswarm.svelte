@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from "svelte";
 	import { forceSimulation, forceX, forceY, forceCollide } from "d3-force";
 	import { scaleTime, scaleLinear } from "d3-scale";
+	import { select } from "d3-selection";
 	import { extent } from "d3-array";
 	import { timeYear, timeMonth } from "d3-time";
 	import tippy from "tippy.js";
@@ -235,7 +236,12 @@
 						r={NODE_RADIUS}
 						fill={colorScale(node.publish_date)}
 						stroke="#fff"
-						stroke-width="1"
+						stroke-width={1}
+						on:mouseover={(event) => {
+							const circle = select(event.currentTarget);
+							console.log(circle)
+							circle.raise();
+						}}
 						data-tippy-content={createTooltipContent(node)}
 					/>
 				{/each}
@@ -251,7 +257,6 @@
 							dominant-baseline="middle"
 							font-size="12px"
 							font-weight="600"
-							font-family="sans-serif"
 							stroke-width="4px"
 							stroke="white"
 							paint-order="stroke"
@@ -270,6 +275,7 @@
 		width: 100%;
 		overflow: hidden;
 		position: relative;
+		font-family: var(--sans);
 	}
 
 	.beeswarm-svg {
@@ -288,6 +294,7 @@
 		}
 		text {
 			pointer-events: none;
+			font-family: var(--sans);
 		}
 	}
 
