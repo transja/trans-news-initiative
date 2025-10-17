@@ -13,6 +13,7 @@
 		leanColors,
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
+	import { downloadEventCsv } from "../utils/downloadEventCsv.js";
 
 	let { event, isOpen, xDomain, onToggle } = $props();
 
@@ -118,6 +119,14 @@
 			<div class="article-table-container event-content-block">
 				<h4>Articles in this event</h4>
 				<ArticleTable articles={event.articles} {leanColors} />
+				{#if false} // hide for now
+					<button
+						class="download-button"
+						onclick={() => downloadEventCsv(event.articles, event.name)}
+					>
+						Download data
+					</button>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -133,13 +142,13 @@
 		overflow: hidden;
 
 		&.is-open {
-				&:hover {
-					transform: translateY(0);
-				}	
+			&:hover {
+				transform: translateY(0);
 			}
+		}
 
 		&:hover {
-			transform: translateY(-4px);	
+			transform: translateY(-4px);
 		}
 	}
 
@@ -201,8 +210,8 @@
 		flex-direction: column;
 		gap: 2rem;
 
-		@media(max-width: 600px) {
-			padding: 0 .5rem 1.5rem;
+		@media (max-width: 600px) {
+			padding: 0 0.5rem 1.5rem;
 		}
 	}
 
@@ -218,11 +227,32 @@
 		margin-top: 2rem;
 	}
 
+	.download-button {
+		background: none;
+		border: none;
+		color: #666;
+		text-decoration: underline;
+		cursor: pointer;
+		font-size: 0.9rem;
+		margin-top: 1rem;
+		padding: 0;
+		font-family: inherit;
+
+		&:hover {
+			color: #333;
+		}
+
+		&:focus {
+			outline: 2px solid var(--color-primary, #007bff);
+			outline-offset: 2px;
+		}
+	}
+
 	.div-legend {
 		display: flex;
 		gap: 0.25rem;
 		margin-bottom: 1rem;
-		@media(max-width: 600px) {
+		@media (max-width: 600px) {
 			flex-wrap: wrap;
 
 			.legend-item {
@@ -250,8 +280,8 @@
 		font-size: 10px;
 		font-weight: 700;
 
-		@media(max-width: 600px) {
-			padding: 0.75rem .5rem;
+		@media (max-width: 600px) {
+			padding: 0.75rem 0.5rem;
 		}
 
 		&.no-data {
@@ -271,7 +301,7 @@
 		}
 	}
 
-	@media(max-width: 600px) {
+	@media (max-width: 600px) {
 		.accordion-header {
 			.accordion-header-content {
 				flex-direction: column;
