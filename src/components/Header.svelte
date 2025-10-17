@@ -1,7 +1,9 @@
 <script>
-
+	import { onMount } from "svelte";
+	import { select } from "d3-selection";
+	import { easeLinear } from "d3-ease";
 	import { browser } from "$app/environment";
-	import tniLogo from "$svg/logos/TNI_static.svg";
+	import tniLogo from "$svg/logos/TNI_animate.svg";
 	import circleX from "$svg/circle-x.svg";
 	import { activePage } from "$runes/misc.svelte.js";
 	import { dev } from "$app/environment";
@@ -18,6 +20,53 @@
 	}
 
 	let headerHeight = 0;
+	let transposePath;
+    let letterA;
+
+	function drawInPath() {
+        let pathElement = transposePath.node();
+        if (!pathElement) return;
+
+        let pathLen = pathElement.getTotalLength();
+
+        // Stop ongoing transitions to prevent overlaps
+        transposePath.interrupt();
+        letterA.interrupt();
+
+        // Reset to initial state
+        transposePath
+            .attr("stroke-dasharray", pathLen)
+            .attr("stroke-dashoffset", pathLen);
+
+        letterA.style("opacity", 1); // Reset letter A visibility
+
+        // Restart animation
+        transposePath
+            .transition()
+            .delay(500)
+            .duration(1000)
+            .ease(easeLinear)
+            .attr("stroke-dashoffset", 0);
+
+        letterA
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+    }
+
+	onMount(() => {
+		transposePath = select("header #transposePath");
+        letterA = select("header #letter-a");
+
+		letterA
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+	})
 
 	$effect(() => {
 		if (browser) {
@@ -30,7 +79,11 @@
 </script>
 
 <header bind:clientHeight={headerHeight}>
-	<button id="tni-logo" class="logo" onclick={() => {
+	<button id="tni-logo" class="logo" 
+	onmouseenter={() => {
+		drawInPath();
+	}}
+	onclick={() => {
 		handlePageClick("home")
 		inThemeView.state = false;
 		activeTheme.theme = null;
@@ -115,9 +168,9 @@
 		background: transparent;
 		transition: transform 0.25s linear;
 
-		&:hover {
-			transform: translateY(-2px);
-		}
+		// &:hover {
+		// 	transform: translateY(-2px);
+		// }
 	}
 
 	.page-btn {
