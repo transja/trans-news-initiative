@@ -39,7 +39,7 @@
 		inThemeView.state = false;
 		activeTheme.theme = null;
 		// TODO: This is a temporary and will need to be updated to the actual path
-		goto("/staging");
+		goto("/dashboard");
 
 	}}>
 		{@html tniLogo}
