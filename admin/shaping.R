@@ -39,7 +39,7 @@ process_themes <- function(input_csv, output_dir = "themes_json") {
 }
 
 
-process_themes("all_data_tji_tags_threshold_0_85.csv", "out_json")
+process_themes("launch_0p85_threshold.csv", "out_json")
 
 #######################################################################################
 #######################################################################################
@@ -113,7 +113,7 @@ make_monthly_file <- function(input_csv, output_file = "monthly.json") {
   invisible(out)
 }
 
-make_monthly_file("all_data_tji_tags_threshold_0_85.csv", "out_json/monthly.json")
+make_monthly_file("launch_0p85_threshold.csv", "out_json/monthly.json")
 
 
 #######################################################################################
@@ -144,6 +144,6 @@ count_articles <- function(input_csv, output_file = "article_count.json") {
   invisible(out)
 }
 
-count_articles("all_data_tji_tags_threshold_0_85.csv", "out_json/article_count.json")
+count_articles("launch_0p85_threshold.csv", "out_json/article_count.json")
 
 
