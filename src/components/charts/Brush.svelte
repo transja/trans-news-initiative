@@ -8,10 +8,9 @@
 	} = $props();
 
 	let isDragging = $state(false);
-	let dragType = $state(""); // 'start' or 'end'
+	let dragType = $state("");
 	let brushEl;
 
-	// Calculate percentages from filters and dateExtent
 	const startPercent = $derived.by(() => {
 		if (!dateExtent || !filters.dateRange) return 0;
 		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
@@ -42,18 +41,19 @@
 		if (event.type === "touchmove") {
 			event.preventDefault();
 		}
-
+		
 		const rect = brushEl.getBoundingClientRect();
 		const clientX = event.touches ? event.touches[0].clientX : event.clientX;
 		const x = clientX - rect.left;
 		const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-
 		const range = dateExtent[1].getTime() - dateExtent[0].getTime();
+
 		const newDate = new Date(dateExtent[0].getTime() + (percent / 100) * range);
 
 		if (dragType === "start") {
 			const newStart = toMonthStart(newDate);
-			if (newStart < filters.dateRange.end) {
+			const endMonthStart = toMonthStart(filters.dateRange.end);
+			if (newStart.getTime() <= endMonthStart.getTime()) {
 				filters.dateRange = {
 					start: newStart,
 					end: filters.dateRange.end
@@ -61,7 +61,9 @@
 			}
 		} else if (dragType === "end") {
 			const newEnd = toMonthEnd(newDate);
-			if (newEnd > filters.dateRange.start) {
+			const startMonthStart = toMonthStart(filters.dateRange.start);
+
+			if (newEnd.getTime() >= startMonthStart.getTime()) {
 				filters.dateRange = {
 					start: filters.dateRange.start,
 					end: newEnd
@@ -76,6 +78,57 @@
 		window.removeEventListener("mouseup", handleDragEnd);
 		window.removeEventListener("touchmove", handleDragMove);
 		window.removeEventListener("touchend", handleDragEnd);
+	}
+
+	function handleKeyDown(event, type) {
+		if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+			return;
+		}
+		
+		event.preventDefault();
+		const currentDate = (type === 'start') ? filters.dateRange.start : filters.dateRange.end;
+		let newDate = new Date(currentDate);
+
+		switch (event.key) {
+			case 'ArrowLeft':
+				newDate.setDate(1); // Set day to 1 to avoid overflow
+				newDate.setMonth(newDate.getMonth() - 1);
+				break;
+			case 'ArrowRight':
+				newDate.setDate(1); // Set day to 1 to avoid overflow
+				newDate.setMonth(newDate.getMonth() + 1);
+				break;
+			case 'Home':
+				newDate = new Date(dateExtent[0]);
+				break;
+			case 'End':
+				newDate = new Date(dateExtent[1]);
+				break;
+		}
+
+		if (newDate < dateExtent[0]) {
+			newDate = new Date(dateExtent[0]);
+		}
+		if (newDate > dateExtent[1]) {
+			newDate = new Date(dateExtent[1]);
+		}
+
+		if (type === 'start') {
+			const newStart = toMonthStart(newDate);
+			const endMonthStart = toMonthStart(filters.dateRange.end);
+			
+			if (newStart.getTime() <= endMonthStart.getTime()) {
+				filters.dateRange = { start: newStart, end: filters.dateRange.end };
+			}
+		} else if (type === 'end') {
+			const newEnd = toMonthEnd(newDate);
+			const startMonthStart = toMonthStart(filters.dateRange.start);
+			
+			const newEndMonthStart = toMonthStart(newDate); 
+			if (newEndMonthStart.getTime() >= startMonthStart.getTime()) {
+				filters.dateRange = { start: filters.dateRange.start, end: newEnd };
+			}
+		}
 	}
 
 	const formatter = new Intl.DateTimeFormat("en-US", {
@@ -100,6 +153,13 @@
 		<button
 			onmousedown={(e) => handleDragStart(e, "start")}
 			ontouchstart={(e) => handleDragStart(e, "start")}
+			onkeydown={(e) => handleKeyDown(e, "start")}
+			role="slider"
+			aria-label="Start date"
+			aria-valuemin={dateExtent[0].getTime()}
+			aria-valuemax={dateExtent[1].getTime()}
+			aria-valuenow={filters.dateRange.start.getTime()}
+			aria-valuetext={formatter.format(filters.dateRange.start)}
 		>
 			<ChevronLeft color="white" />
 		</button>
@@ -111,6 +171,13 @@
 		<button
 			onmousedown={(e) => handleDragStart(e, "end")}
 			ontouchstart={(e) => handleDragStart(e, "end")}
+			onkeydown={(e) => handleKeyDown(e, "end")}
+			role="slider"
+			aria-label="End date"
+			aria-valuemin={dateExtent[0].getTime()}
+			aria-valuemax={dateExtent[1].getTime()}
+			aria-valuenow={filters.dateRange.end.getTime()}
+			aria-valuetext={formatter.format(filters.dateRange.end)}
 		>
 			<ChevronRight color="white" />
 		</button>

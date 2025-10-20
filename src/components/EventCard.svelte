@@ -1,4 +1,5 @@
 <script>
+	import { tick } from "svelte";
 	import { slide } from "svelte/transition";
 	import { quintOut } from "svelte/easing";
 	import Beeswarm from "./charts/Beeswarm.svelte";
@@ -15,7 +16,10 @@
 	} from "../utils/getLeanProperty.js";
 	import { downloadEventCsv } from "../utils/downloadEventCsv.js";
 
-	let { event, isOpen, xDomain, onToggle } = $props();
+	let { event, eventIndex, isOpen, xDomain, onToggle } = $props();
+
+	let contentEl;
+	let headerButtonEl;
 
 	const chartData = $derived.by(() => {
 		const articlesByYear = group(event.articles, (d) =>
@@ -61,20 +65,52 @@
 			};
 		});
 	});
+
+	async function handleToggleAndFocus() {
+		onToggle();
+
+		await tick();
+
+		if (isOpen && contentEl) {
+			const firstFocusable = contentEl.querySelector(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			if (firstFocusable) {
+				firstFocusable.focus();
+			}
+		}
+	}
+
+	function handleContentKeydown(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+
+        onToggle();
+
+        if (headerButtonEl) {
+            headerButtonEl.focus();
+        }
+    }
+}
 </script>
 
 <div class="accordion-item" class:is-open={isOpen}>
-	<button class="accordion-header" onclick={onToggle}>
+	<button class="accordion-header" 
+		onclick={handleToggleAndFocus}
+		bind:this={headerButtonEl}
+		aria-expanded={isOpen}
+        aria-controls="accordion-content-{eventIndex}"
+	>
 		<div class="accordion-header-content">
 			<h3>{event.name}</h3>
 			<span>{event.articles.length} news articles</span>
 		</div>
 
-		<div class="sparkline-wrapper">
+		<div class="sparkline-wrapper" aria-hidden="true">
 			<Sparkline data={sparklineData} {xDomain} />
 		</div>
 
-		<div class="accordion-icon" class:is-open={isOpen}>
+		<div class="accordion-icon" class:is-open={isOpen} aria-hidden="true">
 			<ChevronUp />
 		</div>
 	</button>
@@ -82,7 +118,11 @@
 	{#if isOpen}
 		<div
 			class="accordion-content"
+			bind:this={contentEl}
 			transition:slide={{ duration: 300, easing: quintOut }}
+			role="region"
+			aria-labelledby="accordion-header-{eventIndex}"
+			onkeydown={handleContentKeydown}
 		>
 			<div class="beeswarm-container event-content-block">
 				<h4>News articles by publish date</h4>
@@ -150,6 +190,11 @@
 		&:hover {
 			transform: translateY(-4px);
 		}
+
+		&:focus {
+			/* This glowing ring is now on the container and won't be clipped */
+			box-shadow: 0 0 0 3px rgba(59, 130, 230, 0.4);
+		}
 	}
 
 	.accordion-header {
@@ -166,6 +211,10 @@
 		font-size: 1rem;
 		gap: 1rem;
 		background: var(--color-gray-100);
+
+		&:focus {
+			outline: none;
+		}
 
 		.sparkline-wrapper {
 			margin-right: 1rem;

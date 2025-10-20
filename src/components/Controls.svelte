@@ -427,7 +427,7 @@
 					/>
 					{#if !$isMobile}
 						<button
-							class="explore-button"
+							class="explore-button back-button"
 							onclick={handleThemeExit}
 							disabled={loadingThemeArticles}
 							><ArrowLeft size={24} /> Back</button
@@ -748,8 +748,12 @@
 		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		height: 38px;
 
+		&.back-button:hover {
+			transform: translateX(-2px);
+		}
+
 		&:hover {
-			transform: translateY(-2px);
+			transform: translateX(2px);
 		}
 
 		&:disabled {
@@ -828,8 +832,12 @@
 		}
 	}
 
-	:global(.instructions-content svg) {
+	:global(.instructions-content svg, .explore-button svg) {
 		animation: wiggle 0.5s ease-in-out infinite;
+	}
+
+	:global(.back-button svg) {
+		animation: none;
 	}
 
 	@keyframes wiggle {

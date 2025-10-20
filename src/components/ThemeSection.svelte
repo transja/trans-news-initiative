@@ -38,11 +38,12 @@
 		</h2>
 
 		<div class="accordion">
-			{#each groupedByEvent as event}
+			{#each groupedByEvent as event, i}
 				{@const isOpen = openAccordionItems.includes(event.name)}
 				<EventCard
 					{event}
 					{isOpen}
+					eventIndex={i}
 					{xDomain}
 					onToggle={() => {
 						if (isOpen) {
