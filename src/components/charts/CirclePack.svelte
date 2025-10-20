@@ -68,7 +68,8 @@
 				publication: d.media_name,
 				publication_date: d.publish_date,
 				themes: d.themes,
-				lean: d.lean
+				lean: d.lean,
+				event: d.event
 			});
 		});
 

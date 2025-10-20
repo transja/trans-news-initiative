@@ -28,12 +28,12 @@ export function createTooltipContent(node) {
 	if (themes && Array.isArray(themes)) {
 		themesHtml = `
 			<div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px; font-family: var(--sans);">
-				<strong style="text-transform: uppercase; font-size: 0.7em; color: #555;">Appears in</strong>
-				<ul style="list-style: none; padding: 0; margin: 5px 0 0 0; font-size: 0.9em;">
+				<strong style="text-transform: uppercase; font-size: 0.7em; color: #555;">Themes</strong>
+				<ul style="list-style: none; padding: 0; margin: 5px 0 0 0; font-size: 0.9em; display: flex; flex-wrap: wrap; gap: 4px;">
 					${themes
 				.map(
 					(theme) =>
-						`<li style="text-transform: capitalize;">${themeMap[theme]}</li>`
+						`<li style="text-transform: capitalize; padding: 0px 4px; border-radius: 4px; background: var(--color-gray-100);">${themeMap[theme]}</li>`
 				)
 				.join("")}
 				</ul>
@@ -42,7 +42,11 @@ export function createTooltipContent(node) {
 	}
 
 	return `
-		<div style="text-align: left; font-family: var(--sans); padding: 5px; max-width: 300px;" onpointerdown="event.stopPropagation()">
+		<div style="text-align: left; font-family: var(--sans); padding: 5px; max-width: 350px;" onpointerdown="event.stopPropagation()">
+
+		    <div style="font-size: 0.9em; color: #000; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid #000; padding-bottom: 5px;">${node.event}</div>
+			
+			
 			<div style="font-size: 0.8em; text-transform: uppercase; color: #555; margin-bottom: 5px; font-weight: bold;">${date.toUpperCase()}</div>
 			<a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size: 1.1em; color: black; text-decoration: underline; line-height: 1.2; font-style: italic;">${title}</a>
 			<div style="margin-top: 8px; display: flex; align-items: center; font-size: 1em;">
