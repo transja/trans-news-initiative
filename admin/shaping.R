@@ -4,7 +4,6 @@ library(jsonlite)
 library(readr)
 library(fs)
 library(purrr)
-
 library(dplyr)
 library(tidyr)
 library(jsonlite)
@@ -12,10 +11,18 @@ library(readr)
 library(fs)
 library(purrr)
 
-process_themes <- function(input_csv, output_dir = "themes_json") {
-  # Read CSV
-  df <- read_csv(input_csv, show_col_types = FALSE)
-  
+df <- read_csv("data_clean.csv", show_col_types = FALSE) %>% 
+  filter(
+    publish_date < '2025-10-01'
+  )
+
+df_deduped <- df %>%
+  group_by(url) %>%
+  slice_max(nchar(themes), with_ties = FALSE) %>%
+  ungroup()
+
+
+process_themes <- function(df, output_dir = "themes_json") {
   # Ensure output directory exists
   dir_create(output_dir)
   
@@ -39,7 +46,7 @@ process_themes <- function(input_csv, output_dir = "themes_json") {
 }
 
 
-process_themes("launch_0p85_threshold.csv", "out_json")
+process_themes(df_deduped, "out_json")
 
 #######################################################################################
 #######################################################################################
@@ -54,8 +61,7 @@ library(fs)
 # helper for safely coalescing NULL to ""
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
-make_monthly_file <- function(input_csv, output_file = "monthly.json") {
-  df <- read_csv(input_csv, show_col_types = FALSE)
+make_monthly_file <- function(df, output_file = "monthly.json") {
   
   # Parse publish_date (handles 'YYYY-MM-DD...' and 'MM/DD/YY')
   pub_iso <- suppressWarnings(ymd(str_sub(df$publish_date %||% "", 1, 10)))
@@ -113,7 +119,7 @@ make_monthly_file <- function(input_csv, output_file = "monthly.json") {
   invisible(out)
 }
 
-make_monthly_file("launch_0p85_threshold.csv", "out_json/monthly.json")
+make_monthly_file(df, "out_json/monthly.json")
 
 
 #######################################################################################
@@ -123,9 +129,8 @@ library(readr)
 library(jsonlite)
 library(fs)
 
-count_articles <- function(input_csv, output_file = "article_count.json") {
-  # Read CSV
-  df <- read_csv(input_csv, show_col_types = FALSE)
+count_articles <- function(df, output_file = "article_count.json") {
+
   
   df < filter(df, length(themes) > 0)
   
@@ -144,6 +149,6 @@ count_articles <- function(input_csv, output_file = "article_count.json") {
   invisible(out)
 }
 
-count_articles("launch_0p85_threshold.csv", "out_json/article_count.json")
+count_articles(df_deduped, "out_json/article_count.json")
 
 
