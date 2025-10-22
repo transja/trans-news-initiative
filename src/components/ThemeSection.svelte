@@ -6,6 +6,8 @@
 
 	let { data, xDomain } = $props();
 
+	const EVENT_COUNT_THRESHOLD = 5;
+
 	const groupedByEvent = $derived.by(() => {
 		return Array.from(
 			new Map(data.filter((d) => d.event).map((item) => [item.event, item])).values()
@@ -16,7 +18,9 @@
 					articles: data.filter((d) => d.event === item.event)
 				};
 			})
-			.sort((a, b) => b.articles.length - a.articles.length);
+			.sort((a, b) => b.articles.length - a.articles.length)
+
+			.filter(d => d.articles.length >= EVENT_COUNT_THRESHOLD)
 	});
 
 	let openAccordionItems = $state([]);

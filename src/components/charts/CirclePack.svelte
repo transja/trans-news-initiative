@@ -35,6 +35,8 @@
 		]
 	} = $props();
 
+	const EVENT_COUNT_THRESHOLD = 5;
+
 	let container;
 	let svgEl = $state(null);
 	let width = $state(0);
@@ -76,9 +78,11 @@
 			});
 		});
 
+
+
 		return {
 			name: "root",
-			children: Array.from(clusters.entries()).map(([name, children]) => ({
+			children: Array.from(clusters.entries()).filter(d => d[1].length >= EVENT_COUNT_THRESHOLD).map(([name, children]) => ({
 				name,
 				children
 			}))
