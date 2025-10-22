@@ -51,7 +51,7 @@ filter(new_noise_remove, label == "Noise") %>%  nrow()
 
 # Clean
 
-roundups <- c("AP Top News", 
+event_exclusions <- c("AP Top News", 
               "AP Top Political News", 
               "AP Health News", 
               "AP Top Headlines", 
@@ -81,7 +81,8 @@ roundups <- c("AP Top News",
               "Today in History", 
               "Thursday Briefing", 
               "Corrections", 
-              "Things To Do in"
+              "Things To Do in",
+              "Sex Toys"
 )
 
 under_10_article_events <- new_events %>% 
@@ -96,8 +97,8 @@ new_noise_clean <-new_noise_remove %>%
     TRUE ~ event
   )) %>% 
 filter(
-  !event %in% roundups,
-  !event %in% under_10_article_events
+  !event %in% event_exclusions,
+  !event %in% under_10_article_events,
 )
     
  

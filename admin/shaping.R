@@ -1,25 +1,38 @@
-library(dplyr)
-library(tidyr)
-library(jsonlite)
-library(readr)
-library(fs)
-library(purrr)
-library(dplyr)
-library(tidyr)
-library(jsonlite)
-library(readr)
-library(fs)
-library(purrr)
+library(googlesheets4)
 
-df <- read_csv("data_clean.csv", show_col_types = FALSE) %>% 
+raw <- read_sheet("https://docs.google.com/spreadsheets/d/1yo59KnHsybeBC2rqcMkULDS7sBlwjBytP8VON9FU-0g/edit?gid=1449988544#gid=1449988544", "RAW")
+
+df <- raw %>% 
   filter(
+    is.na(filterOVERRIDE),
     publish_date < '2025-10-01'
-  )
+  ) %>% 
+  select(
+    title,
+    publish_date,
+    media_name,
+    url,
+    themes = categoriesOVERRIDE,
+    event = labelOVERRIDE
+  ) %>% 
+  mutate(event = case_when(
+    event == 'Noise' ~ NA,
+    TRUE ~ event
+  ))
 
-df_deduped <- df %>%
-  group_by(url) %>%
-  slice_max(nchar(themes), with_ties = FALSE) %>%
-  ungroup()
+
+library(dplyr)
+library(tidyr)
+library(jsonlite)
+library(readr)
+library(fs)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(jsonlite)
+library(readr)
+library(fs)
+library(purrr)
 
 
 process_themes <- function(df, output_dir = "themes_json") {
@@ -46,7 +59,7 @@ process_themes <- function(df, output_dir = "themes_json") {
 }
 
 
-process_themes(df_deduped, "out_json")
+process_themes(df, "out_json")
 
 #######################################################################################
 #######################################################################################
@@ -149,6 +162,6 @@ count_articles <- function(df, output_file = "article_count.json") {
   invisible(out)
 }
 
-count_articles(df_deduped, "out_json/article_count.json")
+count_articles(df, "out_json/article_count.json")
 
 
