@@ -139,6 +139,7 @@
 	let totalArticleCount = $state(0);
 	let themeArticles = $state([]);
 	let loadingThemeArticles = $state(false);
+	let showThemeSections = $state(false);
 	let initialDataStatus = $state("pending");
 
 	// Theme data cache to prevent duplicate downloads
@@ -419,6 +420,29 @@
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
 
 	let controlsHeight = $state();
+	let debouncedControlsHeight = $state();
+
+	const updateDebouncedControlsHeight = debounce((newHeight) => {
+		debouncedControlsHeight = newHeight;
+	}, 100);
+
+	$effect(() => {
+		updateDebouncedControlsHeight(controlsHeight);
+	});
+
+	// Delay showing theme sections until after transition completes
+	$effect(() => {
+		if (!loadingThemeArticles && inThemeView.state) {
+			// Wait for transition duration before showing theme sections
+			const timer = setTimeout(() => {
+				showThemeSections = true;
+			}, transitionDuration/2);
+			return () => clearTimeout(timer);
+		} else if (!inThemeView.state) {
+			// Reset when not in theme view
+			showThemeSections = false;
+		}
+	});
 </script>
 
 {#if activePage.page == "home"}
@@ -429,7 +453,7 @@
 	{:else if initialDataStatus === "success"}
 		<div
 			class="main-content"
-			style="--controls-height: {controlsHeight}px"
+			style="--controls-height: {debouncedControlsHeight}px"
 			transition:fade
 		>
 			<section class="wide-section">
@@ -448,7 +472,7 @@
 					bind:isHoveringOverPlot
 					{transitionDuration}
 					{summaryContent}
-					{controlsHeight}
+					controlsHeight={debouncedControlsHeight}
 					{vizColors}
 				/>
 			</section>
@@ -474,7 +498,7 @@
 
 			{#if inThemeView.state}
 				{#key activeTheme.theme}
-					{#if !loadingThemeArticles}
+					{#if showThemeSections}
 						<section class="container-section" transition:fade>
 							<ThemeSection data={filteredDataWithDateRange} {xDomain} />
 						</section>
