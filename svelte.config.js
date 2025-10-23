@@ -15,6 +15,9 @@ const config = {
 	preprocess,
 	kit: {
 		adapter: adapterStatic({ strict: false }),
+		prerender: {
+            handleMissingId: 'warn'
+        }
 	}
 };
 
