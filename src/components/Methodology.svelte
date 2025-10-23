@@ -28,7 +28,7 @@
                 <MethodologyTable data={themeData} />
             {:else if i == 3}
                 <MethodologyTable data={copy.leans} />
-            {:else if i == 4}
+            {:else if i == 5}
                 <MethodologyTable data={copy.avgLeans} />
             {/if}
         {/each}
