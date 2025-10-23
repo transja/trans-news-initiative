@@ -48,6 +48,16 @@
 	let stickyInstance = null;
 	let activeCircleIndex = $state(-1);
 
+
+	onMount(() => {
+		setTimeout(() => {
+			showZoomHint = true;
+			hintTimeout = setTimeout(() => {
+				showZoomHint = false;
+			}, 1500);
+		}, 500);
+	});
+	
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
 

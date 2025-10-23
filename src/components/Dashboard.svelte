@@ -46,7 +46,7 @@
 		};
 	});
 
-	const brushHeight = $derived(inThemeView.state ? 150 : 0);
+	const brushHeight = 75
 	const steamplotHeight = $derived(
 		inThemeView.state ? brushHeight : contentHeight
 	);
@@ -56,9 +56,9 @@
 	id="dashboard"
 	bind:clientHeight={dashboardHeight}
 	style:--brush-height="{brushHeight}px"
-	style:--controls-height="{inThemeView.state ? 200 : controlsHeight}px"
+	style:--controls-height="{inThemeView.state ? 200 - 16 : controlsHeight}px"
 	class:in-theme-view={inThemeView.state}
->	
+>
 	<div
 		id="content-container"
 		bind:clientHeight={contentHeight}
@@ -119,6 +119,10 @@
 		transition: height 0.5s ease-in-out;
 
 		&.in-theme-view {
+			height: calc(
+				100svh - var(--footer-height, 0px) - var(--controls-height, 0px)
+			);
+
 			@media (max-width: 600px) {
 				height: calc(
 					100svh - var(--header-height, 0px) - var(--footer-height, 0px)

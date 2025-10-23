@@ -464,6 +464,7 @@
 		--subtitle-line-height: 40px;
 
 		&.in-theme-view {
+			padding: 0rem 1rem 1rem 1rem;
 			--subtitle-font-size: 24px;
 			--subtitle-line-height: 30px;
 			border-bottom: 1px solid var(--color-gray-200);
