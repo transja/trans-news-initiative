@@ -54,7 +54,7 @@
 			showZoomHint = true;
 			hintTimeout = setTimeout(() => {
 				showZoomHint = false;
-			}, 1500);
+			}, 2000);
 		}, 500);
 	});
 	
@@ -246,19 +246,17 @@
 
 		const selection = select(svgEl).call(zoomBehavior);
 
-		const minRadius = min(packed.leaves(), (d) => d.r);
-		if (minRadius) {
-			const minTargetRadius = $isMobile ? 2 : 4;
-			let k = Math.max(1, minTargetRadius / minRadius);
-			k = Math.min(k, 8);
+		if (packed.r) {
 
-			const initialTransform = zoomIdentity
-				.translate(width / 2, heightVal / 2)
-				.scale(k)
-				.translate(-packed.x, -packed.y);
+            const k = Math.min(width, heightVal) / packed.r * 0.95;
 
-			selection.call(zoomBehavior.transform, initialTransform);
-		}
+            const initialTransform = zoomIdentity
+                .translate(width / 2, heightVal / 2) // 1. Move origin to SVG center
+                .scale(k)                             // 2. Apply our new scale
+                .translate(-packed.x, -packed.y);     // 3. Move pack's center to the new origin
+
+            selection.call(zoomBehavior.transform, initialTransform);
+        }
 	});
 
 	$effect(() => {
@@ -391,7 +389,8 @@
 <div class="circlepack-container" bind:this={container} style:--height={height}>
 	{#if showZoomHint}
 		<div class="zoom-hint" transition:fade={{ duration: 200 }}>
-			Use <kbd>⌘</kbd> + scroll to zoom in and out
+			<p>Use <kbd>⌘</kbd> + scroll to zoom in and out.</p>
+			<p>Interact with the circles for article info.</p>
 		</div>
 	{/if}
 	{#if width && heightVal}
@@ -423,8 +422,9 @@
 										r={node.r}
 										fill="#fff"
 										stroke={linearColor(node.x)}
-										stroke-width={$isMobile ? 1 : 1}
+										stroke-width={2}
 										class="event-circle"
+										vector-effect="non-scaling-stroke"
 									/>
 								</g>
 							{/each}
@@ -443,6 +443,7 @@
 										fill={linearColor(node.x)}
 										fill-opacity={0.8}
 										class="article-circle"
+										vector-effect="non-scaling-stroke"
 									/>
 								</g>
 							{/each}
@@ -509,7 +510,7 @@
 	.is-leaf.is-active circle,
 	.is-leaf:focus-visible circle {
 		stroke: #000;
-		stroke-width: 3;
+		stroke-width: 2;
 		stroke-opacity: 1;
 		fill-opacity: 1;
 	}
@@ -519,7 +520,7 @@
 	}
 	.article-circle:hover {
 		fill-opacity: 1;
-		stroke-width: 1;
+		stroke-width: 2;
 		stroke: #000;
 	}
 	.cluster-label-text {
@@ -551,8 +552,13 @@
 		width: 100%;
 		height: 100%;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
+
+		p {
+			margin: 0;
+		}
 	}
 
 	kbd {

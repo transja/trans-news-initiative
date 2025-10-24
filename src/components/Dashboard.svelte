@@ -120,12 +120,13 @@
 
 		&.in-theme-view {
 			height: calc(
-				100svh - var(--footer-height, 0px) - var(--controls-height, 0px)
+				98svh - var(--footer-height, 0px) - var(--controls-height, 0px)
 			);
+			padding-top: 1.25rem;
 
 			@media (max-width: 600px) {
 				height: calc(
-					100svh - var(--header-height, 0px) - var(--footer-height, 0px)
+					80svh - var(--header-height, 0px) - var(--footer-height, 0px)
 				);
 			}
 		}
