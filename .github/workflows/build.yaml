@@ -41,10 +41,10 @@ jobs:
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-    - name: Protect docs
-      run: make protect
-      env:
-        PASSWORD: ${{ secrets.PASSWORD }}
+    # - name: Protect docs
+    #   run: make protect
+    #   env:
+    #     PASSWORD: ${{ secrets.PASSWORD }}
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
