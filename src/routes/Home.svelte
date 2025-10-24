@@ -23,7 +23,7 @@
 	import LoaderCircles from "$components/helpers/loaders/Loader.Circles.svelte";
 	import DataError from "$components/DataError.svelte";
 
-	import leanData from "../../data/lean.csv";
+	import leanData from "../data/lean.csv";
 
 	/* =========================
 	   URL <-> STATE SYNC
