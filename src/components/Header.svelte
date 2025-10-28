@@ -12,69 +12,61 @@
 	import { goto } from "$app/navigation";
 	import { activeTheme, inThemeView } from "$runes/misc.svelte.js";
 
+
 	let pages = ["home", "about", "methods"];
 
 	function handlePageClick(btn) {
 		activePage.page = btn;
-		
-		// Remove theme URL parameters from current URL
-		if (browser) {
-			inThemeView.state = false;
-			activeTheme.theme = null;
-			const url = new URL(window.location);
-			url.searchParams.delete('theme');
-			window.history.replaceState({}, '', url);
-		}
 	}
 
 	let headerHeight = 0;
 	let transposePath;
-	let letterA;
+    let letterA;
 
 	function drawInPath() {
-		let pathElement = transposePath.node();
-		if (!pathElement) return;
+        let pathElement = transposePath.node();
+        if (!pathElement) return;
 
-		let pathLen = pathElement.getTotalLength();
+        let pathLen = pathElement.getTotalLength();
 
-		// Stop ongoing transitions to prevent overlaps
-		transposePath.interrupt();
-		letterA.interrupt();
+        // Stop ongoing transitions to prevent overlaps
+        transposePath.interrupt();
+        letterA.interrupt();
 
-		// Reset to initial state
-		transposePath
-			.attr("stroke-dasharray", pathLen)
-			.attr("stroke-dashoffset", pathLen);
+        // Reset to initial state
+        transposePath
+            .attr("stroke-dasharray", pathLen)
+            .attr("stroke-dashoffset", pathLen);
 
-		letterA.style("opacity", 1); // Reset letter A visibility
+        letterA.style("opacity", 1); // Reset letter A visibility
 
-		// Restart animation
-		transposePath
-			.transition()
-			.delay(500)
-			.duration(1000)
-			.ease(easeLinear)
-			.attr("stroke-dashoffset", 0);
+        // Restart animation
+        transposePath
+            .transition()
+            .delay(500)
+            .duration(1000)
+            .ease(easeLinear)
+            .attr("stroke-dashoffset", 0);
 
-		letterA
-			.transition()
-			.delay(1500)
-			.duration(500)
-			.ease(easeLinear)
-			.style("opacity", 0);
-	}
+        letterA
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+    }
 
 	onMount(() => {
 		transposePath = select("header #transposePath");
-		letterA = select("header #letter-a");
+        letterA = select("header #letter-a");
 
 		letterA
-			.transition()
-			.delay(1500)
-			.duration(500)
-			.ease(easeLinear)
-			.style("opacity", 0);
-	});
+            .transition()
+            .delay(1500)
+            .duration(500)
+            .ease(easeLinear)
+            .style("opacity", 0);
+	})
 
 	$effect(() => {
 		if (browser) {
@@ -87,25 +79,24 @@
 </script>
 
 <header bind:clientHeight={headerHeight}>
-	<button
-		id="tni-logo"
-		class="logo"
-		onmouseenter={() => {
-			drawInPath();
-		}}
-		onclick={() => {
-			handlePageClick("home");
-			inThemeView.state = false;
-			activeTheme.theme = null;
-			goto("/");
-		}}
-	>
+	<button id="tni-logo" class="logo" 
+	onmouseenter={() => {
+		drawInPath();
+	}}
+	onclick={() => {
+		handlePageClick("home")
+		inThemeView.state = false;
+		activeTheme.theme = null;
+		// TODO: This is a temporary and will need to be updated to the actual path
+		goto("/dashboard");
+
+	}}>
 		{@html tniLogo}
-	</button>
+</button>
 
 	<div class="right-side">
 		{#if $isDesktop || $isTablet}
-			<LogoLockup type={$isTablet ? "icon" : "full"} />
+			<LogoLockup type={$isTablet ? "icon" : "full"}/>
 			<div class="divider"></div>
 		{/if}
 		<nav>
@@ -211,6 +202,7 @@
 		font-weight: 700;
 		pointer-events: none;
 	}
+
 
 	@media (max-width: 720px) {
 		footer {
