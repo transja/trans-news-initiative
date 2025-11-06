@@ -436,12 +436,34 @@
 			// Wait for transition duration before showing theme sections
 			const timer = setTimeout(() => {
 				showThemeSections = true;
-			}, transitionDuration/2);
+			}, transitionDuration / 2);
 			return () => clearTimeout(timer);
 		} else if (!inThemeView.state) {
 			// Reset when not in theme view
 			showThemeSections = false;
 		}
+	});
+
+	const EVENT_COUNT_THRESHOLD = 5;
+
+	const groupedByEvent = $derived.by(() => {
+		return Array.from(
+			new Map(
+				filteredDataWithDateRange
+					.filter((d) => d.event)
+					.map((item) => [item.event, item])
+			).values()
+		)
+			.map((item) => {
+				return {
+					name: item.event,
+					articles: filteredDataWithDateRange.filter(
+						(d) => d.event === item.event
+					)
+				};
+			})
+			.sort((a, b) => b.articles.length - a.articles.length)
+			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD);
 	});
 </script>
 
@@ -483,6 +505,7 @@
 				{resetFilters}
 				allData={themeArticles}
 				filteredData={filteredDataWithDateRange}
+				{groupedByEvent}
 				bind:controlsHeight
 				{transitionDuration}
 				{summaryContent}
@@ -500,7 +523,7 @@
 				{#key activeTheme.theme}
 					{#if showThemeSections}
 						<section class="container-section" transition:fade>
-							<ThemeSection data={filteredDataWithDateRange} {xDomain} />
+							<ThemeSection {groupedByEvent} {xDomain} />
 						</section>
 					{/if}
 				{/key}

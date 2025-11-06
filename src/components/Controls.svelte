@@ -47,10 +47,10 @@
 		maxDate,
 		resetFilters,
 		controlsHeight = $bindable(),
-		loadingThemeArticles
+		loadingThemeArticles,
+		groupedByEvent
 	} = $props();
 
-	// TODO see why default allData and filteredData are different lengths
 
 	const publicationDomainToName = new Map(
 		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
@@ -237,6 +237,8 @@
 		month: "short",
 		year: "numeric"
 	});
+	
+
 
 </script>
 
@@ -250,7 +252,16 @@
 			<div class="left-content">
 				<div class="eyebrow">
 					{#if inThemeView.state}
-						With these filters, the Trans News Initiative identified
+						With these filters, the Trans News Initiative identified <span
+							>{#if loadingThemeArticles}
+								<Spinner />
+							{:else if inThemeView.state}
+								{filteredData.length.toLocaleString()} articles
+							{:else}
+								{highlightedContent.count.toLocaleString()} articles
+							{/if}
+							</span
+						> and
 					{:else}
 						The Trans News Initiative identified
 					{/if}
@@ -261,9 +272,11 @@
 							<span class:introBreak={!$isDesktop}
 								>{inThemeView.state
 									? filteredData.length.toLocaleString()
-									: highlightedContent.count.toLocaleString()} articles about</span
+									: highlightedContent.count.toLocaleString()} about</span
 							>
-							<span class:introBreak={!$isDesktop} style={mode == "default" ? "margin-right: 2rem" : ""}
+							<span
+								class:introBreak={!$isDesktop}
+								style={mode == "default" ? "margin-right: 2rem" : ""}
 								>{highlightedContent.title}</span
 							>
 						</div>
@@ -273,7 +286,11 @@
 							class="subtitle"
 							class:disabled={loadingThemeArticles}
 							class:intro={mode == "intro"}
-							style="display:{$isDesktop || $isMobile ? 'inline-block' : 'flex'}; flex-direction: {$isDesktop || $isMobile ? 'none' : 'column'}"
+							style="display:{$isDesktop || $isMobile
+								? 'inline-block'
+								: 'flex'}; flex-direction: {$isDesktop || $isMobile
+								? 'none'
+								: 'column'}"
 							in:fade={{
 								duration: mode == "intro" ? transitionDuration / 4 : 0,
 								easing: cubicInOut
@@ -287,11 +304,11 @@
 								>{#if loadingThemeArticles}
 									<Spinner />
 								{:else if inThemeView.state}
-									{filteredData.length.toLocaleString()}
+									{groupedByEvent.length} events
 								{:else}
-									{highlightedContent.count.toLocaleString()}
+									{highlightedContent.count.toLocaleString()} articles
 								{/if}
-								articles <span style="font-weight: 400;">about</span></span
+								 <span style="font-weight: 400;">about</span></span
 							>
 
 							{#if mode == "default"}
@@ -358,10 +375,10 @@
 				{#if mode === "intro"}
 					<div class="instructions-content">
 						{#if $isDesktop}
-							<MousePointerClick size={24} /> 
+							<MousePointerClick size={24} />
 							<p>Click anywhere to explore</p>
 						{:else}
-							<Pointer size={24} /> 
+							<Pointer size={24} />
 							<p>Tap anywhere to explore</p>
 						{/if}
 					</div>
@@ -842,8 +859,15 @@
 	}
 
 	@keyframes wiggle {
-        0%, 100% { transform: translateX(0px) }
-        25% { transform: translateX(-1px) }
-        75% { transform: translateX(1px) }
-    }
+		0%,
+		100% {
+			transform: translateX(0px);
+		}
+		25% {
+			transform: translateX(-1px);
+		}
+		75% {
+			transform: translateX(1px);
+		}
+	}
 </style>

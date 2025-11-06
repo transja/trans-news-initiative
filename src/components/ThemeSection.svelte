@@ -4,24 +4,8 @@
 	import EventCard from "./EventCard.svelte";
 
 
-	let { data, xDomain } = $props();
+	let { groupedByEvent, xDomain } = $props();
 
-	const EVENT_COUNT_THRESHOLD = 5;
-
-	const groupedByEvent = $derived.by(() => {
-		return Array.from(
-			new Map(data.filter((d) => d.event).map((item) => [item.event, item])).values()
-		)
-			.map((item) => {
-				return {
-					name: item.event,
-					articles: data.filter((d) => d.event === item.event)
-				};
-			})
-			.sort((a, b) => b.articles.length - a.articles.length)
-
-			.filter(d => d.articles.length >= EVENT_COUNT_THRESHOLD)
-	});
 
 	let openAccordionItems = $state([]);
 	let initialized = false; // Add a flag to run the effect only once
@@ -37,9 +21,9 @@
 <div class="theme-section-container">
 	<Guidance />
 	<div class="events-container">
-		<h2>
+		<!-- <h2>
 			<strong>{groupedByEvent.length} events</strong> match your current selections
-		</h2>
+		</h2> -->
 
 		<div class="accordion">
 			{#each groupedByEvent as event, i}
