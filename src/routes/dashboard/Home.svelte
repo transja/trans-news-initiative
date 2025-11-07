@@ -28,9 +28,9 @@
 	/* =========================
 	   URL <-> STATE SYNC
 	   ========================= */
-	const THEME_PARAM = "theme"; // only param we use
-	let suppressURLSync = false; // prevents loops on hydration/popstate
-	let lastHistoryKey = $state(""); // dedupe pushes
+	const THEME_PARAM = "theme";
+	let suppressURLSync = false;
+	let lastHistoryKey = $state("");
 	let isHydratingWithTheme = $state(false);
 
 	function deriveThemeFromURL(url = new URL(window.location.href)) {
@@ -82,7 +82,7 @@
 
 	function onPopState(ev) {
 		suppressURLSync = true;
-		// Trust history state when available, else derive from URL
+
 		const st = ev.state;
 		const theme = st && "theme" in st ? st.theme : deriveThemeFromURL();
 
@@ -99,7 +99,7 @@
 			activeTheme.theme = null;
 		}
 		suppressURLSync = false;
-		// Your existing data-loading $effect reacts to rune changes.
+	
 	}
 
 	onMount(() => {
@@ -109,7 +109,7 @@
 		return () => window.removeEventListener("popstate", onPopState);
 	});
 
-	// Push a shallow history entry whenever view<->theme changes meaningfully
+
 	$effect(() => {
 		if (suppressURLSync) return;
 		const key = inThemeView.state ? `theme:${activeTheme.theme ?? ""}` : "home";
@@ -118,7 +118,7 @@
 		pushURL();
 	});
 
-	// Optional helpers if you want to call from buttons/children
+	
 	export function openTheme(theme) {
 		if (!theme) return;
 		suppressURLSync = true;
@@ -142,7 +142,7 @@
 	let showThemeSections = $state(false);
 	let initialDataStatus = $state("pending");
 
-	// Theme data cache to prevent duplicate downloads
+
 	let themeCache = new Map();
 
 	let minDate = $state(new Date());
