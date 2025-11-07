@@ -1,7 +1,6 @@
 <script>
-	import { onMount, onDestroy } from "svelte";
 	import { forceSimulation, forceX, forceY, forceCollide } from "d3-force";
-	import { scaleTime, scaleLinear } from "d3-scale";
+	import { scaleTime } from "d3-scale";
 	import { select } from "d3-selection";
 	import { extent } from "d3-array";
 	import { timeYear, timeMonth } from "d3-time";
@@ -68,17 +67,6 @@
 			.range([marginLeft, width - marginRight])
 	);
 
-	const colorScale = $derived(
-		scaleLinear()
-			.domain([
-				xScale.domain()[0],
-				new Date(
-					(xScale.domain()[0].getTime() + xScale.domain()[1].getTime()) / 2
-				),
-				xScale.domain()[1]
-			])
-			.range(["#a8d8f0", "#c8b4e2", "#f3c2d7"])
-	);
 
 	const yearLabels = $derived.by(() => {
 		if (!width || !dynamicHeight) return [];
@@ -356,9 +344,10 @@
 						cx={node.x}
 						cy={node.y}
 						r={NODE_RADIUS}
-						fill={colorScale(node.publish_date)}
+						fill="var(--tni-yellow)"
 						stroke="#fff"
 						stroke-width={1}
+						opacity={0.75}
 						role="tooltip"
 						onmouseover={(event) => raiseCircle(event.currentTarget)}
 						data-tippy-content={createTooltipContent(node)}
