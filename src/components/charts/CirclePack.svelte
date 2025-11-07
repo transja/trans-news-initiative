@@ -393,6 +393,12 @@
 	}
 </script>
 
+{#snippet noEvents()}
+	<div class="circlepack-empty">
+		<b>0 events</b> match your current selections
+	</div>
+{/snippet}
+
 <div class="circlepack-container" bind:this={container} style:--height={height}>
 	{#if showZoomHint}
 		<div class="zoom-hint" transition:fade={{ duration: 200 }}>
@@ -400,90 +406,89 @@
 			<p>Interact with the circles for article info.</p>
 		</div>
 	{/if}
-	{#if width && heightVal}
-		<div class="chart-label">
-			Articles grouped by event <Info instance="chart_circlePack" />
-		</div>
 
-		{#if packed}
-			{@const descendants = packed.descendants()}
-			{@const xValues = descendants.map((d) => d.x)}
-			{@const xMin = Math.min(...xValues)}
-			{@const xMax = Math.max(...xValues)}
-			{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
-			{#if descendants.length > 1}
-				<svg
-					bind:this={svgEl}
-					{width}
-					height={heightVal}
-					tabindex="0"
-					role="application"
-					aria-label="Interactive map of news articles"
-					onkeydown={handleKeydown}
-				>
-					<g {transform}>
-						<g transform="translate({width / 2}, {heightVal / 2})">
-							{#each descendants.filter((d) => d.depth === 1) as node}
-								<g
-									transform="translate({node.x - width / 2},{node.y -
-										heightVal / 2})"
-									class="is-parent"
-								>
-									<circle
-										r={node.r}
-										fill="#fff"
-										stroke={linearColor(node.x)}
-										stroke-width={2}
-										class="event-circle"
-										vector-effect="non-scaling-stroke"
-									/>
-								</g>
-							{/each}
+	<div class="chart-label">
+		Articles grouped by event <Info instance="chart_circlePack" />
+	</div>
 
-							{#each leaves as node, i}
-								<g
-									transform="translate({node.x - width / 2},{node.y -
-										heightVal / 2})"
-									class="is-leaf"
-									class:is-active={i === activeCircleIndex}
-									data-index={i}
-									data-tippy-content={createTooltipContent(node.data)}
-								>
-									<circle
-										r={node.r}
-										fill={linearColor(node.x)}
-										fill-opacity={0.8}
-										class="article-circle"
-										vector-effect="non-scaling-stroke"
-									/>
-								</g>
-							{/each}
+	{#if packed && width && heightVal}
+		{@const descendants = packed.descendants()}
+		{@const xValues = descendants.map((d) => d.x)}
+		{@const xMin = Math.min(...xValues)}
+		{@const xMax = Math.max(...xValues)}
+		{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
+		{#if descendants.length > 1}
+			<svg
+				bind:this={svgEl}
+				{width}
+				height={heightVal}
+				tabindex="0"
+				role="application"
+				aria-label="Interactive map of news articles"
+				onkeydown={handleKeydown}
+			>
+				<g {transform}>
+					<g transform="translate({width / 2}, {heightVal / 2})">
+						{#each descendants.filter((d) => d.depth === 1) as node}
+							<g
+								transform="translate({node.x - width / 2},{node.y -
+									heightVal / 2})"
+								class="is-parent"
+							>
+								<circle
+									r={node.r}
+									fill="#fff"
+									stroke={linearColor(node.x)}
+									stroke-width={2}
+									class="event-circle"
+									vector-effect="non-scaling-stroke"
+								/>
+							</g>
+						{/each}
 
-							{#each descendants.filter((d) => d.depth === 1) as node}
-								<text
-									class="cluster-label-text"
-									x={node.x - width / 2}
-									y={node.y - heightVal / 2}
-									text-anchor="middle"
-									dominant-baseline="central"
-									font-size={16 / transform.k}
-									stroke-width={5 / transform.k}
-									pointer-events="none"
-									data-radius={node.r}
-									data-text={node.data.name}
-								>
-									{node.data.name}
-								</text>
-							{/each}
-						</g>
+						{#each leaves as node, i}
+							<g
+								transform="translate({node.x - width / 2},{node.y -
+									heightVal / 2})"
+								class="is-leaf"
+								class:is-active={i === activeCircleIndex}
+								data-index={i}
+								data-tippy-content={createTooltipContent(node.data)}
+							>
+								<circle
+									r={node.r}
+									fill={linearColor(node.x)}
+									fill-opacity={0.8}
+									class="article-circle"
+									vector-effect="non-scaling-stroke"
+								/>
+							</g>
+						{/each}
+
+						{#each descendants.filter((d) => d.depth === 1) as node}
+							<text
+								class="cluster-label-text"
+								x={node.x - width / 2}
+								y={node.y - heightVal / 2}
+								text-anchor="middle"
+								dominant-baseline="central"
+								font-size={16 / transform.k}
+								stroke-width={5 / transform.k}
+								pointer-events="none"
+								data-radius={node.r}
+								data-text={node.data.name}
+							>
+								{node.data.name}
+							</text>
+						{/each}
 					</g>
-				</svg>
-			{:else}
-				<div class="circlepack-empty">
-					<b>0 events</b> match your current selections
-				</div>
-			{/if}
+				</g>
+			</svg>
+		{:else}
+			{@render noEvents()}
 		{/if}
+	{:else}
+		{@render noEvents()}
 	{/if}
 
 	<div class="zoom-controls">
