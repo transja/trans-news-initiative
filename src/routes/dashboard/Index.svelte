@@ -20,7 +20,5 @@
 	<Header />
 	<div id="main-content-wrapper">
 		<Home />
-		<About />
-		<Methodology />
 	</div>
 </svelte:boundary>
