@@ -6,7 +6,7 @@
 	import { inThemeView } from "$runes/misc.svelte.js";
 
 	// components
-	import Steamplot from "./charts/Steamplot.svelte";
+	import Streamplot from "./charts/Streamplot.svelte";
 	import CirclePack from "./charts/CirclePack.svelte";
 	import LoaderCircles from "./helpers/loaders/Loader.Circles.svelte";
 
@@ -47,7 +47,7 @@
 	});
 
 	const brushHeight = 75
-	const steamplotHeight = $derived(
+	const streamplotHeight = $derived(
 		inThemeView.state ? brushHeight : contentHeight
 	);
 </script>
@@ -84,10 +84,10 @@
 				{/if}
 			</div>
 
-			<Steamplot
+			<Streamplot
 				data={monthlyArticleCounts}
 				{themes}
-				height="{steamplotHeight}px"
+				height="{streamplotHeight}px"
 				{transitionDuration}
 				bind:filters
 				colors={vizColors}

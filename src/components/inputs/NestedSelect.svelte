@@ -12,12 +12,14 @@
 		groupColors = {},
 		groupTextColors = {},
 		class: className = "",
-		disabled = false
+		disabled = false,
+		infoBoxInstance
 	} = $props();
 
 	let showDropdown = $state(false);
 	let wrapperEl;
 	let openGroups = $state(new Set());
+	import Info from "$components/Info.svelte";
 
 	let isGroupSelected = $derived(
 		groupValue && groupValue !== "All" && itemValue === "All"
@@ -174,7 +176,7 @@
 >
 	<div class="input-wrapper">
 		<label class="filter-control__label" for="nested-select-button"
-			>{label}</label
+			>{label} {#if infoBoxInstance} <Info instance={infoBoxInstance} />{/if}</label
 		>
 		<button
 			id="nested-select-button"
@@ -272,6 +274,9 @@
 		color: var(--color-gray-1000);
 		text-transform: uppercase;
 		padding-left: 0.25rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.filter-control__input {

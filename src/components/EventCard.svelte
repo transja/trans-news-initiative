@@ -9,6 +9,7 @@
 	import ColumnChart from "./charts/ColumnChart.svelte";
 	import ArticleTable from "./ArticleTable.svelte";
 	import Sparkline from "./charts/Sparkline.svelte";
+	import Info from "$components/Info.svelte";
 	import {
 		leanOrder,
 		leanColors,
@@ -82,24 +83,25 @@
 	}
 
 	function handleContentKeydown(event) {
-    if (event.key === 'Escape') {
-        event.preventDefault();
+		if (event.key === "Escape") {
+			event.preventDefault();
 
-        onToggle();
+			onToggle();
 
-        if (headerButtonEl) {
-            headerButtonEl.focus();
-        }
-    }
-}
+			if (headerButtonEl) {
+				headerButtonEl.focus();
+			}
+		}
+	}
 </script>
 
 <div class="accordion-item" class:is-open={isOpen}>
-	<button class="accordion-header" 
+	<button
+		class="accordion-header"
 		onclick={handleToggleAndFocus}
 		bind:this={headerButtonEl}
 		aria-expanded={isOpen}
-        aria-controls="accordion-content-{eventIndex}"
+		aria-controls="accordion-content-{eventIndex}"
 	>
 		<div class="accordion-header-content">
 			<h3>{event.name}</h3>
@@ -125,11 +127,13 @@
 			onkeydown={handleContentKeydown}
 		>
 			<div class="beeswarm-container event-content-block">
-				<h4>News articles by publish date</h4>
+				<h4 class="chart-label">
+					News articles by publish date <Info instance="chart_beeswarm" />
+				</h4>
 				<Beeswarm data={event.articles} {xDomain} />
 			</div>
 			<div class="column-chart-container event-content-block">
-				<h4>Publication political lean by year</h4>
+				<h4 class="chart-label">Publication political lean by year <Info instance="lean" /></h4>
 				<div class="div-legend">
 					{#each leanOrder as key, i}
 						<div
@@ -159,7 +163,8 @@
 			<div class="article-table-container event-content-block">
 				<h4>Articles in this event</h4>
 				<ArticleTable articles={event.articles} {leanColors} />
-				{#if false} // hide for now
+				{#if false}
+					// hide for now
 					<button
 						class="download-button"
 						onclick={() => downloadEventCsv(event.articles, event.name)}
@@ -269,6 +274,12 @@
 			font-size: 1rem;
 			font-weight: 600;
 			margin-bottom: 0.5rem;
+
+			&.chart-label {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+			}
 		}
 	}
 

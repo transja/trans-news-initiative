@@ -13,6 +13,7 @@
 	import { fade } from "svelte/transition";
 	import { cubicInOut } from "svelte/easing";
 
+	import Info from "$components/Info.svelte";
 	import Brush from "./Brush.svelte";
 
 	// runes
@@ -35,7 +36,6 @@
 		isHoveringOverPlot = $bindable()
 	} = $props();
 
-
 	let container;
 	let width = $state(0);
 
@@ -50,8 +50,6 @@
 			applyWidthChange = false;
 		}
 	});
-
-
 
 	let isWidthTransitioning = $state(false);
 	$effect(() => {
@@ -123,7 +121,7 @@
 			isViewTransitioning = true;
 
 			// The flag should remain true for the duration of the exit animation,
-			// which includes the steamplot morphing and the highlight's fade-in.
+			// which includes the streamplot morphing and the highlight's fade-in.
 			const timer = setTimeout(
 				() => {
 					isViewTransitioning = false;
@@ -140,10 +138,7 @@
 		}
 	});
 
-
-
 	const binnedData = $derived.by(() => {
-
 		const byMonth = new Map();
 
 		// If monthly data already include zero-filled grid from the DB, this
@@ -164,7 +159,7 @@
 		return Array.from(byMonth.values()).sort((a, b) => a.date - b.date);
 	});
 
-	const steamSeries = $derived.by(() => {
+	const streamSeries = $derived.by(() => {
 		if (!binnedData.length) return [];
 		const stackGenerator = stack()
 			.keys(themes)
@@ -200,7 +195,7 @@
 	const unifiedYScale = $derived.by(() => {
 		if (
 			(inThemeView.state && !areaSeries.length) ||
-			(!inThemeView.state && !steamSeries.length)
+			(!inThemeView.state && !streamSeries.length)
 		) {
 			return scaleLinear();
 		}
@@ -212,9 +207,9 @@
 			yMin = 0; // Area chart starts at 0 baseline
 			yMax = max(areaSeries[0], (d) => d[1]);
 		} else {
-			// In steamgraph view, scale is based on all themes
-			yMax = max(steamSeries, (s) => max(s, (d) => d[1]));
-			yMin = min(steamSeries, (s) => min(s, (d) => d[0]));
+			// In streamgraph view, scale is based on all themes
+			yMax = max(streamSeries, (s) => max(s, (d) => d[1]));
+			yMin = min(streamSeries, (s) => min(s, (d) => d[0]));
 		}
 
 		// Ensure yMax is not 0 to avoid a flat scale
@@ -235,7 +230,7 @@
 
 		const yPosition = inThemeView.state
 			? numericHeight - marginTop - marginBottom + 15 // Position near bottom for area chart
-			: (numericHeight - marginTop - marginBottom) / 2 + 15; // Centered for steamgraph
+			: (numericHeight - marginTop - marginBottom) / 2 + 15; // Centered for streamgraph
 
 		for (let year = startYear; year <= endYear; year++) {
 			const yearStartDate = new Date(year, 0, 1);
@@ -266,7 +261,7 @@
 		return labels;
 	});
 
-	const steamAreaGenerator = $derived(
+	const streamAreaGenerator = $derived(
 		area()
 			.x((d) => xScale(d.data.date.getTime()))
 			.y0((d) => unifiedYScale(d[0]))
@@ -284,8 +279,8 @@
 
 	const seriesToHighlight = $derived.by(() => {
 		const themeToHighlight = highlightedContent?.theme;
-		if (!steamSeries.length || !themeToHighlight) return null;
-		return steamSeries.find((s) => s.key === themeToHighlight);
+		if (!streamSeries.length || !themeToHighlight) return null;
+		return streamSeries.find((s) => s.key === themeToHighlight);
 	});
 
 	function handlePathClick(theme) {
@@ -356,7 +351,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="steamplot-container"
+	class="streamplot-container"
 	bind:this={container}
 	bind:clientWidth={width}
 	style:--height={height}
@@ -369,11 +364,14 @@
 		handleOutsideClick();
 	}}
 >
+	{#if !inThemeView.state}
+		<div class="chart-label">
+			Articles by theme over time <Info instance="chart_stream" />
+		</div>
+	{/if}
+
 	{#if inThemeView.state}
-		<Brush
-			bind:filters
-			{dateExtent}
-		/>
+		<Brush bind:filters {dateExtent} />
 	{/if}
 
 	{#if width && numericHeight}
@@ -381,7 +379,7 @@
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<svg width="100%" height={numericHeight}>
 			<defs>
-				<linearGradient id="steam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+				<linearGradient id="stream-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
 					{#if colors.length > 0}
 						{#each colors as color, i}
 							<stop
@@ -399,21 +397,21 @@
 				</linearGradient>
 			</defs>
 			<g transform={`translate(${marginLeft}, ${marginTop})`}>
-				{#each steamSeries as s}
+				{#each streamSeries as s}
 					<g style="transition: transform 0.5s ease-in-out;">
 						<path
 							d={inThemeView.state && areaSeries.length
 								? isMorphingToFlat
 									? flattenedAreaGenerator(areaSeries[0])
-									: steamAreaGenerator(areaSeries[0])
-								: steamAreaGenerator(s)}
-							fill="url(#steam-gradient)"
+									: streamAreaGenerator(areaSeries[0])
+								: streamAreaGenerator(s)}
+							fill="url(#stream-gradient)"
 							stroke="white"
 							stroke-width={$isMobile ? "0.5px" : "1px"}
 							opacity={getPathOpacity(s.key)}
 							style="
 								transition-property: d, opacity;
-								transition-duration: {isWidthTransitioning  || mode === 'intro'
+								transition-duration: {isWidthTransitioning || mode === 'intro'
 								? 0
 								: transitionDuration}ms, {inThemeView.state || mode === 'intro'
 								? transitionDuration / 2
@@ -438,7 +436,7 @@
 
 				{#if !inThemeView.state && seriesToHighlight}
 					<path
-						d={steamAreaGenerator(seriesToHighlight)}
+						d={streamAreaGenerator(seriesToHighlight)}
 						class="highlight-outline"
 						fill="none"
 						stroke="black"
@@ -447,10 +445,10 @@
 						style="
 								transition-property: d, opacity;
 								transition-duration: {isWidthTransitioning || mode === 'intro'
-								? 0
-								: transitionDuration}ms, {inThemeView.state || mode === 'intro'
-								? transitionDuration / 2
-								: 0}ms;
+							? 0
+							: transitionDuration}ms, {inThemeView.state || mode === 'intro'
+							? transitionDuration / 2
+							: 0}ms;
 								transition-timing-function: ease-in-out, ease-in-out;
 							"
 						out:fade={{
@@ -471,7 +469,8 @@
 						id="year-{label.year}"
 						class="year-label"
 						transform={`translate(${label.x}, ${label.y})`}
-						style="transition: transform {isWidthTransitioning || mode === 'intro'
+						style="transition: transform {isWidthTransitioning ||
+						mode === 'intro'
 							? 0
 							: transitionDuration}ms ease-in-out;"
 					>
@@ -495,7 +494,7 @@
 </div>
 
 <style lang="scss">
-	.steamplot-container {
+	.streamplot-container {
 		width: 100%;
 		height: var(--height);
 		position: relative;
@@ -550,9 +549,26 @@
 		}
 	}
 
-	@media(max-width: 600px) {
-		#year-2021, #year-2023, #year-2025 {
+	@media (max-width: 600px) {
+		#year-2021,
+		#year-2023,
+		#year-2025 {
 			display: none;
 		}
+	}
+
+	.chart-label {
+		font-size: 1rem;
+		font-weight: 600;
+		background: var(--color-gray-1000);
+		color: #fff;
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		z-index: 10;
+		padding: 0.125rem 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 </style>

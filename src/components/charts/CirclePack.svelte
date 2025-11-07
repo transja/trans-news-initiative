@@ -12,6 +12,7 @@
 	import { Plus, Minus } from "@lucide/svelte";
 	import { createTooltipContent } from "../../utils/createTooltipContent.js";
 	import { isMobile } from "$utils/breakpoints.js";
+	import Info from "$components/Info.svelte";
 
 	const {
 		data = [],
@@ -48,7 +49,6 @@
 	let stickyInstance = null;
 	let activeCircleIndex = $state(-1);
 
-
 	onMount(() => {
 		setTimeout(() => {
 			showZoomHint = true;
@@ -57,7 +57,7 @@
 			}, 2000);
 		}, 500);
 	});
-	
+
 	const packed = $derived.by(() => {
 		if (!data.length || !width || !heightVal) return null;
 
@@ -88,14 +88,14 @@
 			});
 		});
 
-
-
 		return {
 			name: "root",
-			children: Array.from(clusters.entries()).filter(d => d[1].length >= EVENT_COUNT_THRESHOLD).map(([name, children]) => ({
-				name,
-				children
-			}))
+			children: Array.from(clusters.entries())
+				.filter((d) => d[1].length >= EVENT_COUNT_THRESHOLD)
+				.map(([name, children]) => ({
+					name,
+					children
+				}))
 		};
 	}
 
@@ -247,16 +247,15 @@
 		const selection = select(svgEl).call(zoomBehavior);
 
 		if (packed.r) {
+			const k = (Math.min(width, heightVal) / packed.r) * 0.95;
 
-            const k = Math.min(width, heightVal) / packed.r * 0.95;
+			const initialTransform = zoomIdentity
+				.translate(width / 2, heightVal / 2) // 1. Move origin to SVG center
+				.scale(k) // 2. Apply our new scale
+				.translate(-packed.x, -packed.y); // 3. Move pack's center to the new origin
 
-            const initialTransform = zoomIdentity
-                .translate(width / 2, heightVal / 2) // 1. Move origin to SVG center
-                .scale(k)                             // 2. Apply our new scale
-                .translate(-packed.x, -packed.y);     // 3. Move pack's center to the new origin
-
-            selection.call(zoomBehavior.transform, initialTransform);
-        }
+			selection.call(zoomBehavior.transform, initialTransform);
+		}
 	});
 
 	$effect(() => {
@@ -323,11 +322,15 @@
 	$effect(() => {
 		if (!svgEl) return;
 
-		const inactiveCircles = svgEl.querySelectorAll(`.is-leaf:not([data-index='${activeCircleIndex}'])`);
-		inactiveCircles.forEach(el => el._tippy?.hide());
+		const inactiveCircles = svgEl.querySelectorAll(
+			`.is-leaf:not([data-index='${activeCircleIndex}'])`
+		);
+		inactiveCircles.forEach((el) => el._tippy?.hide());
 
 		if (activeCircleIndex > -1) {
-			const activeEl = svgEl.querySelector(`[data-index='${activeCircleIndex}']`);
+			const activeEl = svgEl.querySelector(
+				`[data-index='${activeCircleIndex}']`
+			);
 			if (activeEl?._tippy) {
 				activeEl._tippy.show();
 			}
@@ -356,11 +359,13 @@
 		switch (event.key) {
 			case "ArrowRight":
 			case "ArrowDown":
-				newIndex = activeCircleIndex >= leaves.length - 1 ? 0 : activeCircleIndex + 1;
+				newIndex =
+					activeCircleIndex >= leaves.length - 1 ? 0 : activeCircleIndex + 1;
 				break;
 			case "ArrowLeft":
 			case "ArrowUp":
-				newIndex = activeCircleIndex <= 0 ? leaves.length - 1 : activeCircleIndex - 1;
+				newIndex =
+					activeCircleIndex <= 0 ? leaves.length - 1 : activeCircleIndex - 1;
 				break;
 			case "Home":
 				newIndex = 0;
@@ -369,7 +374,9 @@
 				newIndex = leaves.length - 1;
 				break;
 			case "Escape":
-				const currentEl = svgEl.querySelector(`[data-index='${activeCircleIndex}']`);
+				const currentEl = svgEl.querySelector(
+					`[data-index='${activeCircleIndex}']`
+				);
 				if (currentEl?._tippy) {
 					currentEl._tippy.hide();
 				}
@@ -394,6 +401,10 @@
 		</div>
 	{/if}
 	{#if width && heightVal}
+		<div class="chart-label">
+			Articles grouped by event <Info instance="chart_circlePack" />
+		</div>
+
 		{#if packed}
 			{@const descendants = packed.descendants()}
 			{@const xValues = descendants.map((d) => d.x)}
@@ -401,13 +412,13 @@
 			{@const xMax = Math.max(...xValues)}
 			{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
 			{#if descendants.length > 1}
-				<svg 
-					bind:this={svgEl} 
-					{width} 
+				<svg
+					bind:this={svgEl}
+					{width}
 					height={heightVal}
 					tabindex="0"
-    				role="application"
-    				aria-label="Interactive map of news articles"
+					role="application"
+					aria-label="Interactive map of news articles"
 					onkeydown={handleKeydown}
 				>
 					<g {transform}>
@@ -593,5 +604,20 @@
 		font-size: 2rem;
 		margin-bottom: 1.5rem;
 		font-weight: 400;
+	}
+
+	.chart-label {
+		font-size: 1rem;
+		font-weight: 600;
+		background: var(--color-gray-1000);
+		color: #fff;
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		z-index: 10;
+		padding: 0.125rem 0.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 </style>

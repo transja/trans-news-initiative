@@ -13,6 +13,7 @@
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
 	import { getPublicationName } from "../utils/getPublicationName.js";
+	import Info from "$components/Info.svelte";
 
 	let { articles = [] } = $props();
 
@@ -217,7 +218,7 @@
 					</th>
 					<th>
 						<button class="header-button" onclick={() => setSort("lean")}>
-							PUB. LEAN
+							PUB. LEAN <Info instance="lean" />
 							{#if sortKey === "lean"}
 								{#if sortDirection === "desc"}
 									<ArrowDown size={14} />

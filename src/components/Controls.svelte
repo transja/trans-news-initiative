@@ -14,6 +14,7 @@
 
 	import NestedSelect from "./inputs/NestedSelect.svelte";
 	import LogoLockup from "./LogoLockup.svelte";
+
 	// utils
 	import {
 		leanOrder,
@@ -387,7 +388,7 @@
 						class="explore-button"
 						onclick={handleExploreButtonClick}
 						disabled={loadingThemeArticles}
-						>Explore more<ArrowRight size={24} />
+						>Explore events<ArrowRight size={24} />
 					</button>
 				{:else if inThemeView.state}
 					<div
@@ -441,6 +442,7 @@
 						groupTextColors={leanTextColors}
 						class="wide"
 						disabled={loadingThemeArticles}
+						infoBoxInstance="lean"
 					/>
 					{#if !$isMobile}
 						<button
