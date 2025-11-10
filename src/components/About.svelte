@@ -21,6 +21,7 @@
 				{#each copy.longdesc as graf, i}
 					<p>{@html graf.value}</p>
 				{/each}
+				<p class="error-form">{@html copy.errorForm}</p>
 			</div>
 			<div class="org-contributor-wrapper">
 				<div class="orgs">
@@ -99,6 +100,12 @@
 
 	.about-wrapper {
 		max-width: 720px;
+	}
+
+	.error-form {
+		font-style: italic;
+		padding: 1rem;
+		background: #f9f9f9;
 	}
 
 	.org-contributor-wrapper {

@@ -10,6 +10,7 @@
 <section id="methodology">
 	<div class="inner">
 		<h2>Methods</h2>
+		<p class="error-form">{@html copy.errorForm}</p>
 		{#each copy.methods as graf, i}
 			{#if i == 0}
 				<h3>Initial article collection</h3>
@@ -55,6 +56,12 @@
 		font-size: var(--16px);
 		line-height: 1.65;
 		margin: 0 0 1rem 0;
+	}
+
+	.error-form {
+		font-style: italic;
+		padding: 1rem;
+		background: #f9f9f9;
 	}
 
 	:global(#methodology a:hover) {
