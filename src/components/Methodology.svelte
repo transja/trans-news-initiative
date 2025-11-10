@@ -13,21 +13,21 @@
 		{#each copy.methods as graf, i}
 			{#if i == 0}
 				<h3>Initial article collection</h3>
-			{:else if i == 2}
-				<h3>Article classification</h3>
 			{:else if i == 3}
+				<h3>Article classification</h3>
+			{:else if i == 5}
 				<h3>Publication political lean</h3>
 			{/if}
 			<p>{@html graf.value}</p>
-			{#if i == 0}
+			{#if i == 1}
 				<MethodologyTable data={copy.queryTerms} />
-			{:else if i == 1}
-				<MethodologyTable data={copy.articleData} />
 			{:else if i == 2}
+				<MethodologyTable data={copy.articleData} />
+			{:else if i == 4}
 				<MethodologyTable data={themeData} />
-			{:else if i == 3}
+			{:else if i == 6}
 				<MethodologyTable data={copy.leans} />
-			{:else if i == 5}
+			{:else if i == 7}
 				<MethodologyTable data={copy.avgLeans} />
 			{/if}
 		{/each}

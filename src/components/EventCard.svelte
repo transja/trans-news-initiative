@@ -276,6 +276,7 @@
 			margin-bottom: 0.5rem;
 
 			&.chart-label {
+				font-size: var(--14px);
 				display: flex;
 				align-items: center;
 				gap: 0.5rem;

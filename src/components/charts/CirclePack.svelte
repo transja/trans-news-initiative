@@ -612,7 +612,7 @@
 	}
 
 	.chart-label {
-		font-size: 1rem;
+		font-size: var(--14px);
 		font-weight: 600;
 		background: var(--color-gray-1000);
 		color: #fff;
