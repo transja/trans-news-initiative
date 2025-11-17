@@ -14,7 +14,7 @@
 				<h3>Coverage guidance</h3>
 			</div>
 			<div class="methodology-link">
-				<a href="/methodology">See the methodology <Info size={18} /></a>
+				<a href="/methods">See the methodology <Info size={18} /></a>
 			</div>
 		</div>
 		<div class="guidance-content">

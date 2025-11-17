@@ -16,7 +16,7 @@
 		tippy(element, {
 			allowHTML: true,
 			interactive: true,
-			content: `<div style="text-align: left; font-family: var(--sans); padding: 5px; min-width: 300px; text-transform: none;">
+			content: `<div style="z-index: 1000; text-align: left; font-family: var(--sans); padding: 5px; min-width: 300px; text-transform: none;">
  <div style="font-size: 1,2em; color: #000; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid #000; padding-bottom: 5px;">${content.title}</div>
 
             ${content.text
@@ -24,7 +24,9 @@
 							.map((d) => `<p style="font-weight: 400">${d}</p>`)
 							.join("")}
 		</div>`,
-			theme: "light"
+			theme: "light",
+			appendTo: () => document.body,
+			zIndex: 10000
 		});
 	});
 </script>
@@ -37,5 +39,6 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
+		cursor: pointer;
 	}
 </style>
