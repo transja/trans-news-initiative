@@ -643,6 +643,7 @@
 
 			.interactive-title-wrapper {
 				display: inline;
+				position: relative;
 
 				.interactive-title {
 					position: relative;
@@ -686,6 +687,7 @@
 			}
 
 			.dropdown-options {
+				right: 0;
 				background-color: #fff;
 				border-radius: 0.375rem;
 				border: 1px solid #d1d5db;
