@@ -99,7 +99,6 @@
 			activeTheme.theme = null;
 		}
 		suppressURLSync = false;
-	
 	}
 
 	onMount(() => {
@@ -109,7 +108,6 @@
 		return () => window.removeEventListener("popstate", onPopState);
 	});
 
-
 	$effect(() => {
 		if (suppressURLSync) return;
 		const key = inThemeView.state ? `theme:${activeTheme.theme ?? ""}` : "home";
@@ -118,7 +116,6 @@
 		pushURL();
 	});
 
-	
 	export function openTheme(theme) {
 		if (!theme) return;
 		suppressURLSync = true;
@@ -141,7 +138,6 @@
 	let loadingThemeArticles = $state(false);
 	let showThemeSections = $state(false);
 	let initialDataStatus = $state("pending");
-
 
 	let themeCache = new Map();
 
@@ -375,6 +371,34 @@
 		}
 	});
 
+
+	const eventsToInclude = $derived.by(() => {
+		let data = themeArticles.filter((item) => {
+			const d = new Date(item.publish_date);
+			const correctedDate = new Date(
+				d.valueOf() + d.getTimezoneOffset() * 60 * 1000
+			);
+			return (
+				correctedDate >= debouncedDateRange.start &&
+				correctedDate <= debouncedDateRange.end
+			);
+		});
+		return Array.from(
+			new Map(
+				data.filter((d) => d.event).map((item) => [item.event, item])
+			).values()
+		)
+			.map((item) => {
+				return {
+					name: item.event,
+					articles: data.filter((d) => d.event === item.event)
+				};
+			})
+			.sort((a, b) => b.articles.length - a.articles.length)
+			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD)
+			// .map(d => d.name)
+	});
+
 	let filteredData = $derived(
 		themeArticles
 			.filter((item) => {
@@ -444,7 +468,7 @@
 		}
 	});
 
-	const EVENT_COUNT_THRESHOLD = 5;
+	const EVENT_COUNT_THRESHOLD = 10;
 
 	const groupedByEvent = $derived.by(() => {
 		return Array.from(
@@ -463,7 +487,18 @@
 				};
 			})
 			.sort((a, b) => b.articles.length - a.articles.length)
-			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD);
+			.filter(d => eventsToInclude.map(d => d.name).includes(d.name))
+		// .filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD);
+	});
+
+	let filteredPublications = $derived.by(() => {
+		return [
+			...new Set(
+				eventsToInclude
+					.map((event) => event.articles.map((article) => article.media_name))
+					.flat()
+			)
+		];
 	});
 </script>
 
@@ -496,6 +531,7 @@
 					{summaryContent}
 					controlsHeight={debouncedControlsHeight}
 					{vizColors}
+					eventsToInclude={eventsToInclude.map(d => d.name)}
 				/>
 			</section>
 
@@ -517,6 +553,7 @@
 				{minDate}
 				{maxDate}
 				{loadingThemeArticles}
+				{filteredPublications}
 			/>
 
 			{#if inThemeView.state}

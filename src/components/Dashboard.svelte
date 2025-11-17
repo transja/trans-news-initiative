@@ -24,7 +24,8 @@
 		summaryContent,
 		controlsHeight,
 		vizColors,
-		monthlyArticleCounts
+		monthlyArticleCounts,
+		eventsToInclude
 	} = $props();
 
 	let dashboardHeight = $state();
@@ -78,6 +79,7 @@
 								data={filteredDataWithDateRange}
 								height="{contentHeight - brushHeight}px"
 								colors={vizColors}
+								{eventsToInclude}
 							/>
 						{/if}
 					</div>

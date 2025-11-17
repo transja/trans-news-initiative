@@ -13,7 +13,7 @@
 		groupTextColors = {},
 		class: className = "",
 		disabled = false,
-		infoBoxInstance
+		infoBoxInstance,
 	} = $props();
 
 	let showDropdown = $state(false);
@@ -167,6 +167,7 @@
 			});
 		})()
 	);
+
 </script>
 
 <div
@@ -176,7 +177,9 @@
 >
 	<div class="input-wrapper">
 		<label class="filter-control__label" for="nested-select-button"
-			>{label} {#if infoBoxInstance} <Info instance={infoBoxInstance} />{/if}</label
+			>{label}
+			{#if infoBoxInstance}
+				<Info instance={infoBoxInstance} />{/if}</label
 		>
 		<button
 			id="nested-select-button"
@@ -340,6 +343,12 @@
 		white-space: nowrap;
 		border-radius: 2px;
 		font-weight: 500;
+
+		&.disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			pointer-events: none;
+		}
 
 		&:hover {
 			background: var(--color-gray-100);

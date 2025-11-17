@@ -49,7 +49,8 @@
 		resetFilters,
 		controlsHeight = $bindable(),
 		loadingThemeArticles,
-		groupedByEvent
+		groupedByEvent,
+		filteredPublications
 	} = $props();
 
 
@@ -73,7 +74,7 @@
 		)
 			.map(([lean, publicationsSet]) => ({
 				lean,
-				publications: [...publicationsSet].sort()
+				publications: [...publicationsSet].filter((p) => filteredPublications.includes(p)).sort()
 			}))
 			.sort((a, b) => a.lean.localeCompare(b.lean))
 	);
@@ -155,6 +156,7 @@
 		activeTheme.theme = null;
 		highlightedContent = summaryContent[0];
 		resetFilters(["publicationLean", "publication", "dateRange"]);
+		selectedPublicationName = "All";
 	}
 
 	function handleThemeKeydown(event) {
@@ -239,6 +241,7 @@
 		year: "numeric"
 	});
 	
+
 
 
 </script>

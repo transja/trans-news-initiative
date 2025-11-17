@@ -33,10 +33,11 @@
 			"#0abde3",
 			"#ff3838",
 			"#ff6348"
-		]
+		],
+		eventsToInclude = []
 	} = $props();
 
-	const EVENT_COUNT_THRESHOLD = 5;
+	const EVENT_COUNT_THRESHOLD = 10;
 
 	let container;
 	let svgEl = $state(null);
@@ -91,7 +92,7 @@
 		return {
 			name: "root",
 			children: Array.from(clusters.entries())
-				.filter((d) => d[1].length >= EVENT_COUNT_THRESHOLD)
+				.filter((d) => eventsToInclude.includes(d[0]))
 				.map(([name, children]) => ({
 					name,
 					children
