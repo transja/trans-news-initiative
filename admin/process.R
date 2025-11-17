@@ -25,20 +25,36 @@ df <- raw %>%
     ) %>% 
   filter(
     is.na(filterOVERRIDE),
-    publish_date < '2025-10-01'
-  ) %>% 
+    publish_date < '2025-11-01'
+  ) %>%
   select(
     title,
     publish_date,
     media_name,
     url,
-    themes = categoriesOVERRIDE,
-    event = labelOVERRIDE
+    themes,
+    event = label
   ) %>% 
   mutate(event = case_when(
     event == 'Noise' ~ NA,
     TRUE ~ event
   ))
+
+
+df %>% 
+  filter(
+    grepl('popCulture', themes),
+    media_name == "nytimes.com"
+  ) %>%
+  group_by(event) %>% 
+  summarise(
+    count = n()
+  ) %>% 
+  filter(
+    !is.na(event),
+    count >= 10
+  ) %>% 
+  arrange(desc(count))
 
 
 process_themes <- function(df, output_dir = "themes_json") {
