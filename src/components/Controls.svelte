@@ -697,6 +697,8 @@
 				margin-top: 0.25rem;
 				position: absolute;
 				z-index: 1000;
+				max-height: 500px;
+				overflow-y: auto;
 
 				overflow-x: hidden;
 
