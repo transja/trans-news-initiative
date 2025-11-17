@@ -382,7 +382,7 @@
 				correctedDate >= debouncedDateRange.start &&
 				correctedDate <= debouncedDateRange.end
 			);
-		});
+		})
 		return Array.from(
 			new Map(
 				data.filter((d) => d.event).map((item) => [item.event, item])
@@ -398,6 +398,7 @@
 			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD)
 			// .map(d => d.name)
 	});
+
 
 	let filteredData = $derived(
 		themeArticles
@@ -500,6 +501,8 @@
 			)
 		];
 	});
+
+
 </script>
 
 {#if activePage.page == "home"}

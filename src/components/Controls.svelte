@@ -61,9 +61,12 @@
 		allData.map((d) => [getPublicationName(d.media_name), d.media_name])
 	);
 
+
 	const publicationsByLean = $derived(
 		Object.entries(
-			allData.reduce((acc, d) => {
+			allData
+			.filter((d) => filteredPublications.includes(d.media_name))
+			.reduce((acc, d) => {
 				if (!d.lean || !d.media_name) return acc;
 				if (!acc[d.lean]) {
 					acc[d.lean] = new Set();
@@ -74,7 +77,7 @@
 		)
 			.map(([lean, publicationsSet]) => ({
 				lean,
-				publications: [...publicationsSet].filter((p) => filteredPublications.includes(p)).sort()
+				publications: [...publicationsSet].sort()
 			}))
 			.sort((a, b) => a.lean.localeCompare(b.lean))
 	);
