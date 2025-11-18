@@ -21,7 +21,7 @@
 		leanColors,
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
-	import { getPublicationName } from "../utils/getPublicationName.js";
+	import { getPublicationName, getPublicationDomain } from "../utils/getPublicationName.js";
 	import { isDesktop, isMobile, isXSmall } from "$utils/breakpoints";
 	import Spinner from "$components/helpers/loaders/Loader.Spinner.svelte";
 
@@ -54,14 +54,6 @@
 	} = $props();
 
 
-	const publicationDomainToName = new Map(
-		allData.map((d) => [d.media_name, getPublicationName(d.media_name)])
-	);
-	const publicationNameToDomain = new Map(
-		allData.map((d) => [getPublicationName(d.media_name), d.media_name])
-	);
-
-
 	const publicationsByLean = $derived(
 		Object.entries(
 			allData
@@ -83,21 +75,18 @@
 	);
 
 	let selectedPublicationName = $state(
-		publicationDomainToName.get(filters.publication) || filters.publication
+		getPublicationName(filters.publication)
 	);
 
 	$effect(() => {
-		const domain =
-			publicationNameToDomain.get(selectedPublicationName) ||
-			selectedPublicationName;
+		const domain = getPublicationDomain(selectedPublicationName);
 		if (filters.publication !== domain) {
 			filters.publication = domain;
 		}
 	});
 
 	$effect(() => {
-		const name =
-			publicationDomainToName.get(filters.publication) || filters.publication;
+		const name = getPublicationName(filters.publication);
 		if (selectedPublicationName !== name) {
 			selectedPublicationName = name;
 		}

@@ -5,3 +5,9 @@ export const getPublicationName = (publication) => {
     if (!label) return publication
     return label;
 };
+
+export const getPublicationDomain = (name) => {
+    const domain = leanData.find((d) => d.label === name)?.domain
+    if (!domain) return name
+    return domain;
+};
