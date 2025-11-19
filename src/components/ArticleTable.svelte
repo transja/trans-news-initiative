@@ -5,7 +5,8 @@
 		ArrowUp,
 		ArrowLeft,
 		ArrowRight,
-		ArrowLeftRight
+		ArrowLeftRight,
+		Download
 	} from "@lucide/svelte";
 	import {
 		leanOrder,
@@ -162,6 +163,42 @@
             }
         }
     }
+
+	console.log(sortedArticles)
+
+	function downloadCsv() {
+        const headers = ["event", "lean", "media_name", "publish_date", "themes", "title", "url"];
+
+        const csvRows = sortedArticles.map(article => {
+            const escape = (text) => `"${String(text).replace(/"/g, '""')}"`;
+
+            return [
+				escape(article.event),
+				escape(article.lean),
+				escape(getPublicationName(article.media_name)),
+				escape(formatDate(article.publish_date)),
+				escape(article.themes),
+                escape(article.title),
+                escape(article.url)
+            ].join(',');
+        });
+
+        const csvContent = [
+            headers.join(','),
+            ...csvRows
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", "articles_data.csv");
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 
 <div 
@@ -292,6 +329,15 @@
 			>
 		</div>
 	{/if}
+
+	<button
+		class="data-download"
+		onclick={downloadCsv}
+		disabled={sortedArticles.length === 0}
+	>	
+		Download {sortedArticles.length} Articles as CSV
+		<Download size={16} />
+	</button>
 </div>
 
 <style lang="scss">
