@@ -198,9 +198,11 @@
 			}
 		};
 		document.addEventListener("click", handleClick, true);
+		document.addEventListener("touchstart", handleClick, true);
 		return {
 			destroy() {
 				document.removeEventListener("click", handleClick, true);
+				document.removeEventListener("touchstart", handleClick, true);
 			}
 		};
 	}
@@ -637,7 +639,7 @@
 			}
 
 			.interactive-title-wrapper {
-				display: inline;
+				display: inline-block;
 				position: relative;
 
 				.interactive-title {
