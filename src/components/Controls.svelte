@@ -681,6 +681,10 @@
 						justify-content: space-between;
 					}
 				}
+
+				@media (max-width: 600px) {
+					width: 100%;
+				}
 			}
 
 			.dropdown-options {
@@ -702,7 +706,7 @@
 				overflow-x: hidden;
 
 				@media (max-width: 600px) {
-					width: 100%;
+					width: 100;
 					font-size: 1rem;
 					line-height: 0.8rem;
 				}
