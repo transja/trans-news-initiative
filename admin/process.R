@@ -11,21 +11,24 @@ library(stringr)
 # helper for safely coalescing NULL to ""
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
-raw <- read_csv("joined_data_oct_2025.csv")
-override <- read_sheet("https://docs.google.com/spreadsheets/d/1yo59KnHsybeBC2rqcMkULDS7sBlwjBytP8VON9FU-0g/edit?gid=1449988544#gid=1449988544", "OVERRIDE_OCT2025")
+ss <- "https://docs.google.com/spreadsheets/d/1yo59KnHsybeBC2rqcMkULDS7sBlwjBytP8VON9FU-0g/edit?gid=1449988544#gid=1449988544"
+raw <- read_csv("joined_data_nov_2025.csv")
+END_DATE <- '2025-12-01'
+override <- read_sheet(ss, "OVERRIDE_NOV2025")
 
 
 df <- raw %>% 
   left_join(
     override,
+    by="label"
   ) %>%
   mutate(
     label = coalesce(labelOVERRIDE, label),
-    themes = coalesce(categoriesOVERRIDE, categories_above_floor)
+    themes = coalesce(categoriesOVERRIDE, categories_above_floor.x)
     ) %>% 
   filter(
     is.na(filterOVERRIDE),
-    publish_date < '2025-11-01'
+    publish_date < END_DATE
   ) %>%
   select(
     title,
@@ -41,21 +44,30 @@ df <- raw %>%
   ))
 
 
-df %>% 
-  filter(
-    grepl('popCulture', themes),
-    media_name == "nytimes.com"
-  ) %>%
-  group_by(event) %>% 
-  summarise(
-    count = n()
-  ) %>% 
-  filter(
-    !is.na(event),
-    count >= 10
-  ) %>% 
-  arrange(desc(count))
+########## RECLASSIFICATION STEP
 
+
+# new_data <- df %>% 
+#   rename(label = event, categories_above_floor = themes) %>% 
+#   separate_rows(categories_above_floor, sep = ",\\s*") %>% 
+#   distinct(label, categories_above_floor) %>% 
+#   group_by(label) %>% 
+#   summarise(
+#     categories_above_floor = paste(sort(categories_above_floor), collapse = ", "),
+#     .groups = "drop"
+#   )
+# 
+# 
+# rows_to_add <- new_data %>% 
+#   anti_join(override, by = "label") %>% 
+#   mutate(new = TRUE)
+# 
+# updated_override <- bind_rows(override, rows_to_add)
+# 
+# write_sheet(updated_override, ss, sheet = "OVERRIDE_NOV2025")
+
+
+########## END RECLASSIFICATION STEP
 
 process_themes <- function(df, output_dir = "themes_json") {
   # Ensure output directory exists
