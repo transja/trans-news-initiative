@@ -21,7 +21,10 @@
 		leanColors,
 		leanTextColors
 	} from "../utils/getLeanProperty.js";
-	import { getPublicationName, getPublicationDomain } from "../utils/getPublicationName.js";
+	import {
+		getPublicationName,
+		getPublicationDomain
+	} from "../utils/getPublicationName.js";
 	import { isDesktop, isMobile, isXSmall } from "$utils/breakpoints";
 	import Spinner from "$components/helpers/loaders/Loader.Spinner.svelte";
 
@@ -53,19 +56,18 @@
 		filteredPublications
 	} = $props();
 
-
 	const publicationsByLean = $derived(
 		Object.entries(
 			allData
-			.filter((d) => filteredPublications.includes(d.media_name))
-			.reduce((acc, d) => {
-				if (!d.lean || !d.media_name) return acc;
-				if (!acc[d.lean]) {
-					acc[d.lean] = new Set();
-				}
-				acc[d.lean].add(getPublicationName(d.media_name));
-				return acc;
-			}, {})
+				.filter((d) => filteredPublications.includes(d.media_name))
+				.reduce((acc, d) => {
+					if (!d.lean || !d.media_name) return acc;
+					if (!acc[d.lean]) {
+						acc[d.lean] = new Set();
+					}
+					acc[d.lean].add(getPublicationName(d.media_name));
+					return acc;
+				}, {})
 		)
 			.map(([lean, publicationsSet]) => ({
 				lean,
@@ -74,9 +76,7 @@
 			.sort((a, b) => a.lean.localeCompare(b.lean))
 	);
 
-	let selectedPublicationName = $state(
-		getPublicationName(filters.publication)
-	);
+	let selectedPublicationName = $state(getPublicationName(filters.publication));
 
 	$effect(() => {
 		const domain = getPublicationDomain(selectedPublicationName);
@@ -234,10 +234,6 @@
 		month: "short",
 		year: "numeric"
 	});
-	
-
-
-
 </script>
 
 <div
@@ -258,8 +254,7 @@
 							{:else}
 								{highlightedContent.count.toLocaleString()} articles
 							{/if}
-							</span
-						> and
+						</span> and
 					{:else}
 						The Trans News Initiative identified
 					{/if}
@@ -306,7 +301,7 @@
 								{:else}
 									{highlightedContent.count.toLocaleString()} articles
 								{/if}
-								 <span style="font-weight: 400;">about</span></span
+								<span style="font-weight: 400;">about</span></span
 							>
 
 							{#if mode == "default"}
@@ -353,7 +348,7 @@
 															<ArrowLeft size={24} /> Back
 														</span>
 													{:else}
-														{theme.title}
+														{theme.title.toLowerCase().replace("u.s.", "U.S.")}
 													{/if}
 												</div>
 											{/each}
@@ -709,6 +704,9 @@
 					width: 100;
 					font-size: 1rem;
 					line-height: 0.8rem;
+					max-height: 70vh;
+					overflow-y: auto;
+					-webkit-overflow-scrolling: touch;
 				}
 			}
 
@@ -716,7 +714,7 @@
 				bottom: 100%;
 
 				.dropdown-option {
-					text-transform: lowercase;
+					text-transform: none;
 				}
 			}
 
