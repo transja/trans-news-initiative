@@ -465,11 +465,10 @@
 		top: calc(var(--header-height) - 1rem);
 		left: 0;
 		right: 0;
-
 		font-family: var(--sans);
 		background: rgba(255, 255, 255, 0.95);
 		backdrop-filter: blur(6px);
-		z-index: 500;
+		z-index: 1000;
 
 		--subtitle-font-size: 32px;
 		--subtitle-line-height: 40px;
@@ -694,7 +693,7 @@
 				margin: 0;
 				margin-top: 0.25rem;
 				position: absolute;
-				z-index: 1000;
+				z-index: 10000;
 				max-height: 500px;
 				overflow-y: auto;
 
