@@ -46,24 +46,24 @@ df <- raw %>%
 ########## RECLASSIFICATION STEP
 
 
-# new_data <- df %>% 
-#   rename(label = event, categories_above_floor = themes) %>% 
-#   separate_rows(categories_above_floor, sep = ",\\s*") %>% 
-#   distinct(label, categories_above_floor) %>% 
-#   group_by(label) %>% 
-#   summarise(
-#     categories_above_floor = paste(sort(categories_above_floor), collapse = ", "),
-#     .groups = "drop"
-#   )
-# 
-# 
-# rows_to_add <- new_data %>% 
-#   anti_join(override, by = "label") %>% 
-#   mutate(new = TRUE)
-# 
-# updated_override <- bind_rows(override, rows_to_add)
-# 
-# write_sheet(updated_override, ss, sheet = "OVERRIDE_NOV2025")
+new_data <- df %>%
+  rename(label = event, categories_above_floor = themes) %>%
+  separate_rows(categories_above_floor, sep = ",\\s*") %>%
+  distinct(label, categories_above_floor) %>%
+  group_by(label) %>%
+  summarise(
+    categories_above_floor = paste(sort(categories_above_floor), collapse = ", "),
+    .groups = "drop"
+  )
+
+
+rows_to_add <- new_data %>%
+  anti_join(select(override, -new), by = "label") %>%
+  mutate(new = TRUE)
+
+updated_override <- bind_rows(select(override, -new), rows_to_add)
+
+write_sheet(updated_override, ss, sheet = "OVERRIDE_DEC2025")
 
 
 ########## END RECLASSIFICATION STEP
