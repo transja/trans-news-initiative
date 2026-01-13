@@ -12,8 +12,8 @@ library(stringr)
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 ss <- "https://docs.google.com/spreadsheets/d/1yo59KnHsybeBC2rqcMkULDS7sBlwjBytP8VON9FU-0g/edit?gid=1449988544#gid=1449988544"
-raw <- read_csv("joined_data_nov_2025.csv")
-END_DATE <- '2025-12-01'
+raw <- read_csv("joined_data_dec_2025.csv")
+END_DATE <- '2026-01-01'
 override <- read_sheet(ss, "OVERRIDE_NOV2025")
 
 
@@ -42,7 +42,6 @@ df <- raw %>%
     event == 'Noise' ~ NA,
     TRUE ~ event
   ))
-
 
 ########## RECLASSIFICATION STEP
 
