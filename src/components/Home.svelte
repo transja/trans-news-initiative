@@ -25,6 +25,11 @@
 
 	import leanData from "$data/lean.csv";
 
+	const isStaging =
+		typeof window !== "undefined"
+			? new URLSearchParams(window.location.search).get("staging") === "true"
+			: false;
+
 	/* =========================
 	   URL <-> STATE SYNC
 	   ========================= */
@@ -245,8 +250,8 @@
 	(async () => {
 		try {
 			const [counts, total] = await Promise.all([
-				withRetries(() => getMonthlyCounts()),
-				withRetries(() => getTotalArticleCount())
+				withRetries(() => getMonthlyCounts(false, isStaging)),
+				withRetries(() => getTotalArticleCount(false, isStaging))
 			]);
 
 			monthlyArticleCounts = counts;
@@ -334,7 +339,7 @@
 				loadingThemeArticles = true;
 				try {
 					const fetchedArticles = await withRetries(() =>
-						getArticlesByTheme(activeTheme.theme)
+						getArticlesByTheme(activeTheme.theme, false, isStaging)
 					);
 
 					const processedArticles = fetchedArticles.map((item) => ({
