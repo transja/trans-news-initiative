@@ -1,4 +1,4 @@
-const BASE_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/output';
+const BASE_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/output/latest';
 
 const STAGING_FOLDER = '/staging';
 
