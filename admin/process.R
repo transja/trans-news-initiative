@@ -12,9 +12,10 @@ library(stringr)
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 ss <- "https://docs.google.com/spreadsheets/d/1yo59KnHsybeBC2rqcMkULDS7sBlwjBytP8VON9FU-0g/edit?gid=1449988544#gid=1449988544"
-raw <- read_csv("joined_data_dec_2025.csv")
+raw <- read_csv("data_for_viz.csv")
+
 END_DATE <- '2026-01-01'
-override <- read_sheet(ss, "OVERRIDE_NOV2025")
+override <- read_sheet(ss, "OVERRIDE")
 
 
 df <- raw %>% 
@@ -33,7 +34,7 @@ df <- raw %>%
   select(
     title,
     publish_date,
-    media_name,
+    media_name,f
     url,
     themes,
     event = label
@@ -63,7 +64,7 @@ rows_to_add <- new_data %>%
 
 updated_override <- bind_rows(select(override, -new), rows_to_add)
 
-write_sheet(updated_override, ss, sheet = "OVERRIDE_DEC2025")
+write_sheet(updated_override, ss, sheet = "OVERRIDE")
 
 
 ########## END RECLASSIFICATION STEP
