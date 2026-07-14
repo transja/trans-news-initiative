@@ -20,10 +20,6 @@
 	// utils
 	import { isMobile } from "$utils/breakpoints.js";
 
-	const uniqueArticles = Array.from(
-		new Map(articles.map((item) => [item.url, item])).values()
-	);
-
 	// State
 	let sortKey = $state("publish_date");
 	let sortDirection = $state("desc");
@@ -32,9 +28,14 @@
 	let searchTerm = $state("");
 	let tableContainerEl;
 
+	// Source data can list the same URL more than once per event
+	const uniqueArticles = $derived(
+		Array.from(new Map(articles.map((item) => [item.url, item])).values())
+	);
+
 	// Derived state
 	const filteredArticles = $derived(
-		articles.filter((article) =>
+		uniqueArticles.filter((article) =>
 			article.title.toLowerCase().includes(searchTerm.toLowerCase())
 		)
 	);
