@@ -1,8 +1,8 @@
 <script>
 	import { onMount } from "svelte";
-	import { hierarchy, pack } from "d3-hierarchy";
+	import { hierarchy, pack, packEnclose } from "d3-hierarchy";
 	import { scaleLinear } from "d3-scale";
-	import { min } from "d3-array";
+	import { quadtree } from "d3-quadtree";
 	import { zoom, zoomIdentity } from "d3-zoom";
 	import { select } from "d3-selection";
 	import tippy from "tippy.js";
@@ -37,18 +37,61 @@
 		eventsToInclude = []
 	} = $props();
 
-	const EVENT_COUNT_THRESHOLD = 10;
+	const LEAF_ALPHA = 0.8;
+	const BAKE_SCALE = 2;
+	const MAX_BAKE_DIM = 8192;
+
+	function quantizeColor(color) {
+		const match = String(color).match(/[\d.]+/g);
+		if (!match || match.length < 3) return color;
+		const r = Math.round(+match[0] / 8) * 8;
+		const g = Math.round(+match[1] / 8) * 8;
+		const b = Math.round(+match[2] / 8) * 8;
+		return `rgb(${r},${g},${b})`;
+	}
+
+	function extent(values, accessor) {
+		let min = Infinity;
+		let max = -Infinity;
+		for (let i = 0; i < values.length; i++) {
+			const v = accessor ? accessor(values[i]) : values[i];
+			if (v < min) min = v;
+			if (v > max) max = v;
+		}
+		return [min, max];
+	}
 
 	let container;
+	let canvasEl = $state(null);
 	let svgEl = $state(null);
 	let width = $state(0);
 	let heightVal = $state(0);
+	/** Debounced layout used for expensive pack() — avoids repacking on every resize tick */
+	let packWidth = $state(0);
+	let packHeight = $state(0);
 	let transform = $state(zoomIdentity);
 	let showZoomHint = $state(false);
 	let hintTimeout;
 	let zoomBehavior;
 	let stickyInstance = null;
 	let activeCircleIndex = $state(-1);
+	let hoveredCircleIndex = $state(-1);
+	let tippyInstance = null;
+	let labelsWrappedForPacked = null;
+
+	/** @type {OffscreenCanvas | HTMLCanvasElement | null} */
+	let leafBake = null;
+	/** @type {{ x: number, y: number, r: number, color: string }[]} */
+	let parentNodes = [];
+	/** @type {ReturnType<typeof quadtree> | null} */
+	let leafTree = null;
+	let maxLeafR = 0;
+	let bakeOriginX = 0;
+	let bakeOriginY = 0;
+	let leafBakeScale = BAKE_SCALE;
+	let needsRedraw = false;
+	let rafId = 0;
+	let resizePackTimeout;
 
 	onMount(() => {
 		setTimeout(() => {
@@ -57,23 +100,54 @@
 				showZoomHint = false;
 			}, 2000);
 		}, 500);
+
+		return () => {
+			cancelAnimationFrame(rafId);
+			clearTimeout(resizePackTimeout);
+			tippyInstance?.destroy();
+			tippyInstance = null;
+			stickyInstance = null;
+		};
 	});
 
-	const packed = $derived.by(() => {
-		if (!data.length || !width || !heightVal) return null;
+	const eventIncludeKey = $derived(
+		Array.isArray(eventsToInclude) ? eventsToInclude.join("\0") : ""
+	);
+	const eventIncludeSet = $derived(new Set(eventsToInclude));
 
-		const root = hierarchy(processData(data)).sum((d) => d.value);
+	const packed = $derived.by(() => {
+		if (!data.length || !packWidth || !packHeight) return null;
+		void eventIncludeKey;
+
+		const root = hierarchy(processData(data))
+			.sum((d) => d.value)
+			.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+
+		// depth 0 = space between event bubbles; depth 1+ = tiny gap inside events
 		return pack()
-			.size([width - 2, heightVal - 2])
-			.padding(3)(root);
+			.size([packWidth - 2, packHeight - 2])
+			.padding((node) => (node.depth === 0 ? 3 : 1))(root);
 	});
 
 	const leaves = $derived(packed ? packed.leaves() : []);
+	const parents = $derived(
+		packed ? packed.descendants().filter((d) => d.depth === 1) : []
+	);
+	const hasContent = $derived(!!packed && packed.descendants().length > 1);
+
+	const colorScale = $derived.by(() => {
+		if (!packed) return null;
+		const [xMin, xMax] = extent(packed.descendants(), (d) => d.x);
+		if (!Number.isFinite(xMin) || !Number.isFinite(xMax)) return null;
+		return scaleLinear().domain([xMin, xMax]).range(colors);
+	});
 
 	function processData(sourceData) {
 		const clusters = new Map();
+		const include = eventIncludeSet;
 		sourceData.forEach((d) => {
 			if (!d.event) return;
+			if (!include.has(d.event)) return;
 			if (!clusters.has(d.event)) {
 				clusters.set(d.event, []);
 			}
@@ -91,12 +165,10 @@
 
 		return {
 			name: "root",
-			children: Array.from(clusters.entries())
-				.filter((d) => eventsToInclude.includes(d[0]))
-				.map(([name, children]) => ({
-					name,
-					children
-				}))
+			children: Array.from(clusters.entries()).map(([name, children]) => ({
+				name,
+				children
+			}))
 		};
 	}
 
@@ -104,14 +176,36 @@
 		if (!container) return;
 		const resizeObserver = new ResizeObserver((entries) => {
 			for (let entry of entries) {
-				width = entry.contentRect.width;
-				heightVal = entry.contentRect.height;
+				const nextW = entry.contentRect.width;
+				const nextH = entry.contentRect.height;
+				width = nextW;
+				heightVal = nextH;
+
+				clearTimeout(resizePackTimeout);
+				resizePackTimeout = setTimeout(() => {
+					if (
+						Math.abs(packWidth - nextW) > 1 ||
+						Math.abs(packHeight - nextH) > 1
+					) {
+						packWidth = nextW;
+						packHeight = nextH;
+					}
+				}, 150);
+
+				// First layout: pack immediately so we don't flash empty
+				if (!packWidth || !packHeight) {
+					packWidth = nextW;
+					packHeight = nextH;
+				}
 			}
 		});
 
 		resizeObserver.observe(container);
 
-		return () => resizeObserver.disconnect();
+		return () => {
+			resizeObserver.disconnect();
+			clearTimeout(resizePackTimeout);
+		};
 	});
 
 	function checkOverlap(boxA, boxB) {
@@ -162,7 +256,13 @@
 		textEl.textContent = "";
 
 		const x = textEl.getAttribute("x");
-		const lineHeight = 1.1;
+		// Use px, not em: Safari iOS compounds em-based tspan dy with zoom
+		// transforms and dominant-baseline, creating huge gaps between lines.
+		const fontSize = parseFloat(textEl.getAttribute("font-size")) || 16;
+		const lineHeightPx = fontSize * 1.1;
+		// Without dominant-baseline="central" (unsafe on iOS), shift alphabetic
+		// baseline so the block optically matches the old centered look.
+		const baselineNudge = fontSize * 0.35;
 
 		let tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 		tspan.setAttribute("x", x);
@@ -178,23 +278,47 @@
 				line = [word];
 				tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 				tspan.setAttribute("x", x);
-				tspan.setAttribute("dy", `${lineHeight}em`);
+				tspan.setAttribute("dy", String(lineHeightPx));
 				tspan.textContent = word;
 				textEl.appendChild(tspan);
 			}
 		}
 
 		const tspans = textEl.querySelectorAll("tspan");
-		const initialDy = -((tspans.length - 1) * lineHeight) / 2;
 		if (tspans.length > 0) {
-			tspans[0].setAttribute("dy", `${initialDy}em`);
+			const initialDy =
+				-((tspans.length - 1) * lineHeightPx) / 2 + baselineNudge;
+			tspans[0].setAttribute("dy", String(initialDy));
 		}
 	}
 
-	function updateLabels() {
+	/** Keep tspan spacing in sync when font-size changes with zoom. */
+	function syncLabelLineHeights() {
 		if (!svgEl) return;
 		const labels = svgEl.querySelectorAll(".cluster-label-text");
-		labels.forEach(wrapText);
+		labels.forEach((textEl) => {
+			const tspans = textEl.querySelectorAll("tspan");
+			if (!tspans.length) return;
+			const fontSize = parseFloat(textEl.getAttribute("font-size")) || 16;
+			const lineHeightPx = fontSize * 1.1;
+			const baselineNudge = fontSize * 0.35;
+			tspans[0].setAttribute(
+				"dy",
+				String(-((tspans.length - 1) * lineHeightPx) / 2 + baselineNudge)
+			);
+			for (let i = 1; i < tspans.length; i++) {
+				tspans[i].setAttribute("dy", String(lineHeightPx));
+			}
+		});
+	}
+
+	function updateLabels({ forceWrap = false } = {}) {
+		if (!svgEl) return;
+		const labels = svgEl.querySelectorAll(".cluster-label-text");
+		if (forceWrap || labelsWrappedForPacked !== packed) {
+			labels.forEach(wrapText);
+			labelsWrappedForPacked = packed;
+		}
 		debouncedHandleLabelOverlap();
 	}
 
@@ -211,9 +335,407 @@
 	}
 
 	const debouncedHandleLabelOverlap = debounce(handleLabelOverlap, 100);
+	const debouncedLabelOverlapOnly = debounce(() => {
+		if (!svgEl) return;
+		handleLabelOverlap();
+	}, 120);
+
+	function scheduleRedraw() {
+		needsRedraw = true;
+		if (rafId) return;
+		rafId = requestAnimationFrame(() => {
+			rafId = 0;
+			if (needsRedraw) {
+				needsRedraw = false;
+				drawFrame();
+			}
+		});
+	}
+
+	function rebuildGeometry() {
+		if (!packed || !colorScale || !hasContent || !leaves.length) {
+			leafBake = null;
+			leafTree = null;
+			parentNodes = [];
+			scheduleRedraw();
+			return;
+		}
+
+		parentNodes = parents.map((node) => ({
+			x: node.x,
+			y: node.y,
+			r: node.r,
+			color: colorScale(node.x)
+		}));
+
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+		maxLeafR = 0;
+
+		const treeData = new Array(leaves.length);
+		for (let i = 0; i < leaves.length; i++) {
+			const node = leaves[i];
+			minX = Math.min(minX, node.x - node.r);
+			minY = Math.min(minY, node.y - node.r);
+			maxX = Math.max(maxX, node.x + node.r);
+			maxY = Math.max(maxY, node.y + node.r);
+			if (node.r > maxLeafR) maxLeafR = node.r;
+			treeData[i] = { x: node.x, y: node.y, r: node.r, index: i };
+		}
+
+		leafTree = quadtree()
+			.x((d) => d.x)
+			.y((d) => d.y)
+			.addAll(treeData);
+
+		bakeOriginX = minX;
+		bakeOriginY = minY;
+		let bakeW = Math.max(1, Math.ceil((maxX - minX) * BAKE_SCALE));
+		let bakeH = Math.max(1, Math.ceil((maxY - minY) * BAKE_SCALE));
+		const scaleX = bakeW > MAX_BAKE_DIM ? MAX_BAKE_DIM / bakeW : 1;
+		const scaleY = bakeH > MAX_BAKE_DIM ? MAX_BAKE_DIM / bakeH : 1;
+		const bakeScale = BAKE_SCALE * Math.min(scaleX, scaleY);
+		bakeW = Math.max(1, Math.ceil((maxX - minX) * bakeScale));
+		bakeH = Math.max(1, Math.ceil((maxY - minY) * bakeScale));
+
+		try {
+			const bake =
+				typeof OffscreenCanvas !== "undefined"
+					? new OffscreenCanvas(bakeW, bakeH)
+					: Object.assign(document.createElement("canvas"), {
+							width: bakeW,
+							height: bakeH
+						});
+			const bctx = bake.getContext("2d");
+			if (!bctx) {
+				leafBake = null;
+			} else {
+				bctx.clearRect(0, 0, bakeW, bakeH);
+				bctx.setTransform(
+					bakeScale,
+					0,
+					0,
+					bakeScale,
+					-minX * bakeScale,
+					-minY * bakeScale
+				);
+
+				const byColor = new Map();
+				for (let i = 0; i < leaves.length; i++) {
+					const node = leaves[i];
+					const color = quantizeColor(colorScale(node.x));
+					let path = byColor.get(color);
+					if (!path) {
+						path = new Path2D();
+						byColor.set(color, path);
+					}
+					path.moveTo(node.x + node.r, node.y);
+					path.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+				}
+
+				bctx.globalAlpha = LEAF_ALPHA;
+				for (const [color, path] of byColor) {
+					bctx.fillStyle = color;
+					bctx.fill(path);
+				}
+
+				leafBake = bake;
+				leafBakeScale = bakeScale;
+			}
+		} catch (err) {
+			console.warn("CirclePack: leaf bake failed, using live draw", err);
+			leafBake = null;
+		}
+
+		scheduleRedraw();
+		queueMicrotask(() => updateLabels({ forceWrap: true }));
+	}
+
+	function drawFrame() {
+		if (!canvasEl || !width || !heightVal) return;
+
+		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		const targetW = Math.floor(width * dpr);
+		const targetH = Math.floor(heightVal * dpr);
+		if (canvasEl.width !== targetW || canvasEl.height !== targetH) {
+			canvasEl.width = targetW;
+			canvasEl.height = targetH;
+			canvasEl.style.width = `${width}px`;
+			canvasEl.style.height = `${heightVal}px`;
+		}
+
+		const ctx = canvasEl.getContext("2d");
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+		ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+		ctx.setTransform(
+			transform.k * dpr,
+			0,
+			0,
+			transform.k * dpr,
+			transform.x * dpr,
+			transform.y * dpr
+		);
+
+		// Parent event rings (non-scaling stroke ≈ strokeWidth / k)
+		const strokeWidth = 2 / transform.k;
+		for (const node of parentNodes) {
+			ctx.beginPath();
+			ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+			ctx.fillStyle = "#fff";
+			ctx.fill();
+			ctx.lineWidth = strokeWidth;
+			ctx.strokeStyle = node.color;
+			ctx.stroke();
+		}
+
+		if (leafBake && transform.k <= leafBakeScale) {
+			ctx.drawImage(
+				leafBake,
+				bakeOriginX,
+				bakeOriginY,
+				leafBake.width / leafBakeScale,
+				leafBake.height / leafBakeScale
+			);
+		} else if (colorScale && leaves.length && leafTree) {
+			// Crisp redraw of only in-view leaves when zoomed past bake resolution
+			const pad = maxLeafR;
+			const [x0, y0] = transform.invert([-pad, -pad]);
+			const [x1, y1] = transform.invert([width + pad, heightVal + pad]);
+			const minX = Math.min(x0, x1);
+			const maxX = Math.max(x0, x1);
+			const minY = Math.min(y0, y1);
+			const maxY = Math.max(y0, y1);
+
+			const byColor = new Map();
+			leafTree.visit((node, x0b, y0b, x1b, y1b) => {
+				if (!node.length) {
+					do {
+						const d = node.data;
+						const leaf = leaves[d.index];
+						if (
+							leaf &&
+							leaf.x + leaf.r >= minX &&
+							leaf.x - leaf.r <= maxX &&
+							leaf.y + leaf.r >= minY &&
+							leaf.y - leaf.r <= maxY
+						) {
+							const color = quantizeColor(colorScale(leaf.x));
+							let path = byColor.get(color);
+							if (!path) {
+								path = new Path2D();
+								byColor.set(color, path);
+							}
+							path.moveTo(leaf.x + leaf.r, leaf.y);
+							path.arc(leaf.x, leaf.y, leaf.r, 0, Math.PI * 2);
+						}
+					} while ((node = node.next));
+					return;
+				}
+				return x0b > maxX || x1b < minX || y0b > maxY || y1b < minY;
+			});
+
+			ctx.globalAlpha = LEAF_ALPHA;
+			for (const [color, path] of byColor) {
+				ctx.fillStyle = color;
+				ctx.fill(path);
+			}
+			ctx.globalAlpha = 1;
+		} else if (leafBake) {
+			ctx.drawImage(
+				leafBake,
+				bakeOriginX,
+				bakeOriginY,
+				leafBake.width / leafBakeScale,
+				leafBake.height / leafBakeScale
+			);
+		}
+
+		const highlightIndex =
+			activeCircleIndex > -1 ? activeCircleIndex : hoveredCircleIndex;
+		if (highlightIndex > -1 && leaves[highlightIndex]) {
+			const node = leaves[highlightIndex];
+			const color = colorScale ? colorScale(node.x) : "#999";
+			ctx.beginPath();
+			ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+			ctx.fillStyle = color;
+			ctx.globalAlpha = 1;
+			ctx.fill();
+			ctx.globalAlpha = 1;
+			ctx.lineWidth = strokeWidth;
+			ctx.strokeStyle = "#000";
+			ctx.stroke();
+		}
+	}
+
+	function findLeafAt(dataX, dataY) {
+		if (!leafTree) return null;
+		let found = null;
+		let foundR = Infinity;
+		const searchR = maxLeafR;
+
+		leafTree.visit((node, x0, y0, x1, y1) => {
+			if (!node.length) {
+				do {
+					const d = node.data;
+					const dx = dataX - d.x;
+					const dy = dataY - d.y;
+					if (dx * dx + dy * dy <= d.r * d.r && d.r <= foundR) {
+						found = d;
+						foundR = d.r;
+					}
+				} while ((node = node.next));
+				return;
+			}
+			return (
+				x0 > dataX + searchR ||
+				x1 < dataX - searchR ||
+				y0 > dataY + searchR ||
+				y1 < dataY - searchR
+			);
+		});
+
+		return found;
+	}
+
+	function getCanvasPoint(event) {
+		if (!canvasEl) return null;
+		const rect = canvasEl.getBoundingClientRect();
+		return [event.clientX - rect.left, event.clientY - rect.top];
+	}
+
+	function getTooltipRect(index) {
+		if (!canvasEl || index < 0 || !leaves[index]) {
+			return {
+				width: 0,
+				height: 0,
+				top: 0,
+				left: 0,
+				right: 0,
+				bottom: 0
+			};
+		}
+		const node = leaves[index];
+		const [sx, sy] = transform.apply([node.x, node.y]);
+		const rect = canvasEl.getBoundingClientRect();
+		const top = rect.top + sy;
+		const left = rect.left + sx;
+		return {
+			width: 0,
+			height: 0,
+			top,
+			left,
+			right: left,
+			bottom: top
+		};
+	}
+
+	function ensureTippy() {
+		if (tippyInstance || !canvasEl) return tippyInstance;
+		tippyInstance = tippy(canvasEl, {
+			allowHTML: true,
+			interactive: $isMobile,
+			appendTo: () => document.body,
+			theme: "light",
+			trigger: "manual",
+			animation: false,
+			getReferenceClientRect: () =>
+				getTooltipRect(
+					activeCircleIndex > -1 ? activeCircleIndex : hoveredCircleIndex
+				),
+			onShow(instance) {
+				if (stickyInstance && stickyInstance !== instance) {
+					return false;
+				}
+			},
+			onHide(instance) {
+				if (stickyInstance === instance) {
+					stickyInstance = null;
+				}
+			}
+		});
+		return tippyInstance;
+	}
+
+	function showTooltipForIndex(index, { sticky = false } = {}) {
+		if (index < 0 || !leaves[index]) {
+			hideTooltip(true);
+			return;
+		}
+		const instance = ensureTippy();
+		if (!instance) return;
+
+		instance.setContent(
+			(() => {
+				try {
+					return createTooltipContent(leaves[index].data);
+				} catch (err) {
+					console.warn("CirclePack: tooltip content failed", err);
+					return leaves[index].data?.name || "Article";
+				}
+			})()
+		);
+		instance.setProps({
+			getReferenceClientRect: () => getTooltipRect(index),
+			interactive: sticky || $isMobile
+		});
+
+		if (sticky) {
+			if (stickyInstance && stickyInstance !== instance) {
+				stickyInstance.hide();
+			}
+			stickyInstance = instance;
+		}
+
+		instance.show();
+	}
+
+	function hideTooltip(force = false) {
+		if (!force && stickyInstance) return;
+		if (force) stickyInstance = null;
+		tippyInstance?.hide();
+	}
+
+	function syncTooltipPosition() {
+		if (!tippyInstance?.state.isVisible) return;
+		const idx =
+			activeCircleIndex > -1 ? activeCircleIndex : hoveredCircleIndex;
+		if (idx < 0) return;
+		tippyInstance.setProps({
+			getReferenceClientRect: () => getTooltipRect(idx)
+		});
+		tippyInstance.popperInstance?.update();
+	}
+
+	function setHovered(index) {
+		if (hoveredCircleIndex === index) return;
+		hoveredCircleIndex = index;
+		if (canvasEl) {
+			canvasEl.style.cursor = index > -1 ? "pointer" : "grab";
+		}
+		scheduleRedraw();
+	}
 
 	$effect(() => {
-		if (!svgEl || !width || !heightVal || !packed) return;
+		void leaves;
+		void parents;
+		void colors;
+		void eventIncludeKey;
+		void colorScale;
+		void hasContent;
+		rebuildGeometry();
+	});
+
+	$effect(() => {
+		void transform;
+		void activeCircleIndex;
+		void hoveredCircleIndex;
+		scheduleRedraw();
+	});
+
+	$effect(() => {
+		if (!canvasEl || !width || !heightVal || !packed || !hasContent) return;
 
 		zoomBehavior = zoom()
 			.scaleExtent([1, 8])
@@ -242,116 +764,126 @@
 			})
 			.on("zoom", (event) => {
 				transform = event.transform;
-				updateLabels();
+				// Overlap only — wrapping is expensive and only needs to run after layout changes
+				syncLabelLineHeights();
+				debouncedLabelOverlapOnly();
+				syncTooltipPosition();
 			});
 
-		const selection = select(svgEl).call(zoomBehavior);
+		const selection = select(canvasEl).call(zoomBehavior);
 
-		if (packed.r) {
-			const k = (Math.min(width, heightVal) / packed.r) * 0.95;
+		const onPointerMove = (event) => {
+			if (stickyInstance) return;
+			const point = getCanvasPoint(event);
+			if (!point) return;
+			const [dx, dy] = transform.invert(point);
+			const hit = findLeafAt(dx, dy);
+			const index = hit ? hit.index : -1;
+			setHovered(index);
+			if (index > -1) {
+				showTooltipForIndex(index);
+			} else {
+				hideTooltip();
+			}
+		};
 
+		const onPointerLeave = () => {
+			if (stickyInstance) return;
+			setHovered(-1);
+			hideTooltip();
+		};
+
+		const onClick = (event) => {
+			const point = getCanvasPoint(event);
+			if (!point) return;
+			const [dx, dy] = transform.invert(point);
+			const hit = findLeafAt(dx, dy);
+
+			if (!hit) {
+				hideTooltip(true);
+				activeCircleIndex = -1;
+				return;
+			}
+
+			if (stickyInstance && activeCircleIndex === hit.index) {
+				hideTooltip(true);
+				activeCircleIndex = -1;
+				return;
+			}
+
+			activeCircleIndex = hit.index;
+			hoveredCircleIndex = hit.index;
+			showTooltipForIndex(hit.index, { sticky: true });
+		};
+
+		const onKeyDown = (event) => handleKeydown(event);
+
+		canvasEl.addEventListener("pointermove", onPointerMove);
+		canvasEl.addEventListener("pointerleave", onPointerLeave);
+		canvasEl.addEventListener("click", onClick);
+		canvasEl.addEventListener("keydown", onKeyDown);
+
+		if (packed.r && parents.length) {
+			// Fit the event circles themselves (not the padded root hull)
+			const content = packEnclose(
+				parents.map((p) => ({ x: p.x, y: p.y, r: p.r }))
+			);
+			const k =
+				(Math.min(width, heightVal) / (2 * content.r)) * 0.98;
 			const initialTransform = zoomIdentity
-				.translate(width / 2, heightVal / 2) // 1. Move origin to SVG center
-				.scale(k) // 2. Apply our new scale
-				.translate(-packed.x, -packed.y); // 3. Move pack's center to the new origin
-
+				.translate(width / 2, heightVal / 2)
+				.scale(k)
+				.translate(-content.x, -content.y);
 			selection.call(zoomBehavior.transform, initialTransform);
 		}
-	});
 
-	$effect(() => {
-		if (svgEl) {
-			updateLabels();
-		}
-	});
-
-	$effect(() => {
-		if (data) {
-			updateLabels();
-		}
-	});
-
-	$effect(() => {
-		if (!packed || !svgEl) return;
-		let instances = [];
-		const timer = setTimeout(() => {
-			instances = tippy(
-				svgEl.querySelectorAll(".is-leaf[data-tippy-content]"),
-				{
-					allowHTML: true,
-					interactive: $isMobile,
-					appendTo: () => document.body,
-					theme: "light",
-					trigger: "mouseenter click",
-
-					onShow(instance) {
-						if (stickyInstance && stickyInstance !== instance) {
-							return false;
-						}
-					},
-
-					onTrigger(instance, event) {
-						if (event.type === "click") {
-							const isCurrentlySticky = stickyInstance === instance;
-							if (stickyInstance && !isCurrentlySticky) {
-								stickyInstance.hide();
-							}
-							if (!isCurrentlySticky) {
-								stickyInstance = instance;
-								if (!$isMobile) {
-									instance.setProps({ interactive: true });
-								}
-							}
-						}
-					},
-
-					onHide(instance) {
-						if (stickyInstance === instance) {
-							stickyInstance = null;
-						}
-					}
-				}
-			);
-		}, 100);
 		return () => {
-			clearTimeout(timer);
-			instances.forEach((instance) => instance.destroy());
+			canvasEl.removeEventListener("pointermove", onPointerMove);
+			canvasEl.removeEventListener("pointerleave", onPointerLeave);
+			canvasEl.removeEventListener("click", onClick);
+			canvasEl.removeEventListener("keydown", onKeyDown);
+			select(canvasEl).on(".zoom", null);
+			tippyInstance?.destroy();
+			tippyInstance = null;
 			stickyInstance = null;
 		};
 	});
 
 	$effect(() => {
-		if (!svgEl) return;
+		if (svgEl && parents.length) {
+			updateLabels({ forceWrap: true });
+		}
+	});
 
-		const inactiveCircles = svgEl.querySelectorAll(
-			`.is-leaf:not([data-index='${activeCircleIndex}'])`
-		);
-		inactiveCircles.forEach((el) => el._tippy?.hide());
-
+	$effect(() => {
 		if (activeCircleIndex > -1) {
-			const activeEl = svgEl.querySelector(
-				`[data-index='${activeCircleIndex}']`
-			);
-			if (activeEl?._tippy) {
-				activeEl._tippy.show();
-			}
+			showTooltipForIndex(activeCircleIndex, { sticky: true });
 		}
 	});
 
 	function zoomIn() {
-		if (!svgEl || !zoomBehavior) return;
-		const selection = select(svgEl);
-		selection.transition().call(zoomBehavior.scaleBy, 1.2);
+		if (!canvasEl || !zoomBehavior) return;
+		select(canvasEl).transition().call(zoomBehavior.scaleBy, 1.2);
 	}
 
 	function zoomOut() {
-		if (!svgEl || !zoomBehavior) return;
-		const selection = select(svgEl);
-		selection.transition().call(zoomBehavior.scaleBy, 1 / 1.2);
+		if (!canvasEl || !zoomBehavior) return;
+		select(canvasEl).transition().call(zoomBehavior.scaleBy, 1 / 1.2);
 	}
 
 	function handleKeydown(event) {
 		if (!leaves.length) return;
+
+		const navKeys = [
+			"ArrowRight",
+			"ArrowDown",
+			"ArrowLeft",
+			"ArrowUp",
+			"Home",
+			"End",
+			"Escape"
+		];
+		if (!navKeys.includes(event.key)) return;
 
 		event.preventDefault();
 
@@ -375,14 +907,9 @@
 				newIndex = leaves.length - 1;
 				break;
 			case "Escape":
-				const currentEl = svgEl.querySelector(
-					`[data-index='${activeCircleIndex}']`
-				);
-				if (currentEl?._tippy) {
-					currentEl._tippy.hide();
-				}
+				hideTooltip(true);
 				newIndex = -1;
-				if (svgEl) svgEl.blur();
+				canvasEl?.blur();
 				break;
 			default:
 				return;
@@ -390,6 +917,10 @@
 
 		if (newIndex !== activeCircleIndex) {
 			activeCircleIndex = newIndex;
+			if (newIndex > -1) {
+				hoveredCircleIndex = newIndex;
+				showTooltipForIndex(newIndex, { sticky: true });
+			}
 		}
 	}
 </script>
@@ -413,66 +944,32 @@
 	</div>
 
 	{#if packed && width && heightVal}
-		{@const descendants = packed.descendants()}
-		{@const xValues = descendants.map((d) => d.x)}
-		{@const xMin = Math.min(...xValues)}
-		{@const xMax = Math.max(...xValues)}
-		{@const linearColor = scaleLinear().domain([xMin, xMax]).range(colors)}
-		{#if descendants.length > 1}
-			<svg
-				bind:this={svgEl}
-				{width}
-				height={heightVal}
-				tabindex="0"
-				role="application"
-				aria-label="Interactive map of news articles"
-				onkeydown={handleKeydown}
+		{#if hasContent}
+			<div
+				class="viz-layers"
+				style:width="{width}px"
+				style:height="{heightVal}px"
 			>
-				<g {transform}>
-					<g transform="translate({width / 2}, {heightVal / 2})">
-						{#each descendants.filter((d) => d.depth === 1) as node}
-							<g
-								transform="translate({node.x - width / 2},{node.y -
-									heightVal / 2})"
-								class="is-parent"
-							>
-								<circle
-									r={node.r}
-									fill="#fff"
-									stroke={linearColor(node.x)}
-									stroke-width={2}
-									class="event-circle"
-									vector-effect="non-scaling-stroke"
-								/>
-							</g>
-						{/each}
-
-						{#each leaves as node, i}
-							<g
-								transform="translate({node.x - width / 2},{node.y -
-									heightVal / 2})"
-								class="is-leaf"
-								class:is-active={i === activeCircleIndex}
-								data-index={i}
-								data-tippy-content={createTooltipContent(node.data)}
-							>
-								<circle
-									r={node.r}
-									fill={linearColor(node.x)}
-									fill-opacity={0.8}
-									class="article-circle"
-									vector-effect="non-scaling-stroke"
-								/>
-							</g>
-						{/each}
-
-						{#each descendants.filter((d) => d.depth === 1) as node}
+				<canvas
+					bind:this={canvasEl}
+					class="circlepack-canvas"
+					tabindex="0"
+					aria-label="Interactive map of news articles"
+				></canvas>
+				<svg
+					bind:this={svgEl}
+					{width}
+					height={heightVal}
+					class="label-overlay"
+					aria-hidden="true"
+				>
+					<g {transform}>
+						{#each parents as node}
 							<text
 								class="cluster-label-text"
-								x={node.x - width / 2}
-								y={node.y - heightVal / 2}
+								x={node.x}
+								y={node.y}
 								text-anchor="middle"
-								dominant-baseline="central"
 								font-size={16 / transform.k}
 								stroke-width={5 / transform.k}
 								pointer-events="none"
@@ -483,8 +980,8 @@
 							</text>
 						{/each}
 					</g>
-				</g>
-			</svg>
+				</svg>
+			</div>
 		{:else}
 			{@render noEvents()}
 		{/if}
@@ -508,38 +1005,33 @@
 		justify-content: center;
 		align-items: center;
 	}
-	svg {
-		font-family: sans-serif;
-		cursor: grab;
-	}
-	svg *:focus {
-		outline: 0;
-	}
-	svg:active {
-		cursor: grabbing;
-	}
-	.is-leaf {
-		cursor: pointer;
-	}
-	.is-leaf circle:hover {
-		fill-opacity: 1;
-	}
-	.is-leaf.is-active circle,
-	.is-leaf:focus-visible circle {
-		stroke: #000;
-		stroke-width: 2;
-		stroke-opacity: 1;
-		fill-opacity: 1;
+
+	.viz-layers {
+		position: relative;
 	}
 
-	.event-circle {
+	.circlepack-canvas {
+		position: absolute;
+		inset: 0;
+		display: block;
+		cursor: grab;
+	}
+
+	.circlepack-canvas:active {
+		cursor: grabbing;
+	}
+
+	.circlepack-canvas:focus {
+		outline: 0;
+	}
+
+	.label-overlay {
+		position: absolute;
+		inset: 0;
 		pointer-events: none;
+		overflow: hidden;
 	}
-	.article-circle:hover {
-		fill-opacity: 1;
-		stroke-width: 2;
-		stroke: #000;
-	}
+
 	.cluster-label-text {
 		font-family: var(--sans);
 		text-align: center;
@@ -579,7 +1071,7 @@
 
 		p {
 			margin: 0;
-			padding: 0 1rem
+			padding: 0 1rem;
 		}
 	}
 
@@ -599,6 +1091,7 @@
 		display: flex;
 		gap: 5px;
 		flex-direction: column;
+		z-index: 11;
 		button {
 			background: var(--color-gray-1000);
 			color: #fff;

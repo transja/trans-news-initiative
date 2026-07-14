@@ -25,6 +25,21 @@
 
 	import leanData from "$data/lean.csv";
 
+	const leanByDomain = new Map(leanData.map((d) => [d.domain, d.aggLean]));
+
+	function correctedDateMs(publishDate) {
+		const d = new Date(publishDate);
+		return d.valueOf() + d.getTimezoneOffset() * 60 * 1000;
+	}
+
+	function prepareArticles(articles) {
+		return articles.map((item) => ({
+			...item,
+			lean: leanByDomain.get(item.media_name) || "unknown",
+			_dateMs: correctedDateMs(item.publish_date)
+		}));
+	}
+
 	const isStaging =
 		typeof window !== "undefined"
 			? new URLSearchParams(window.location.search).get("staging") === "true"
@@ -342,12 +357,7 @@
 						getArticlesByTheme(activeTheme.theme, false, isStaging)
 					);
 
-					const processedArticles = fetchedArticles.map((item) => ({
-						...item,
-						lean:
-							leanData.find((d) => d.domain === item.media_name)?.aggLean ||
-							"unknown"
-					}));
+					const processedArticles = prepareArticles(fetchedArticles);
 
 					// Store in cache
 					themeCache.set(activeTheme.theme, processedArticles);
@@ -377,62 +387,7 @@
 	});
 
 
-	const eventsToInclude = $derived.by(() => {
-		let data = themeArticles.filter((item) => {
-			const d = new Date(item.publish_date);
-			const correctedDate = new Date(
-				d.valueOf() + d.getTimezoneOffset() * 60 * 1000
-			);
-			return (
-				correctedDate >= debouncedDateRange.start &&
-				correctedDate <= debouncedDateRange.end
-			);
-		})
-		return Array.from(
-			new Map(
-				data.filter((d) => d.event).map((item) => [item.event, item])
-			).values()
-		)
-			.map((item) => {
-				return {
-					name: item.event,
-					articles: data.filter((d) => d.event === item.event)
-				};
-			})
-			.sort((a, b) => b.articles.length - a.articles.length)
-			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD)
-			// .map(d => d.name)
-	});
-
-
-	let filteredData = $derived(
-		themeArticles
-			.filter((item) => {
-				if (filters.publication === "All") {
-					return true;
-				}
-				return item.media_name === filters.publication;
-			})
-			.filter((item) => {
-				if (filters.publicationLean === "All") {
-					return true;
-				}
-				return item.lean === filters.publicationLean;
-			})
-	);
-
-	let filteredDataWithDateRange = $derived(
-		filteredData.filter((item) => {
-			const d = new Date(item.publish_date);
-			const correctedDate = new Date(
-				d.valueOf() + d.getTimezoneOffset() * 60 * 1000
-			);
-			return (
-				correctedDate >= debouncedDateRange.start &&
-				correctedDate <= debouncedDateRange.end
-			);
-		})
-	);
+	const EVENT_COUNT_THRESHOLD = 10;
 
 	let debouncedDateRange = $state({
 		start: minDate,
@@ -445,6 +400,60 @@
 
 	$effect(() => {
 		updateDebouncedDateRange(filters.dateRange);
+	});
+
+	const eventsToInclude = $derived.by(() => {
+		const startMs = debouncedDateRange.start?.valueOf?.() ?? 0;
+		const endMs = debouncedDateRange.end?.valueOf?.() ?? Infinity;
+		const articlesByEvent = new Map();
+
+		for (const item of themeArticles) {
+			if (!item.event) continue;
+			const dateMs = item._dateMs ?? correctedDateMs(item.publish_date);
+			if (dateMs < startMs || dateMs > endMs) continue;
+
+			let list = articlesByEvent.get(item.event);
+			if (!list) {
+				list = [];
+				articlesByEvent.set(item.event, list);
+			}
+			list.push(item);
+		}
+
+		return Array.from(articlesByEvent.entries())
+			.map(([name, articles]) => ({ name, articles }))
+			.filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD)
+			.sort((a, b) => b.articles.length - a.articles.length);
+	});
+
+	const eventNamesToInclude = $derived(eventsToInclude.map((d) => d.name));
+	const eventNameSet = $derived(new Set(eventNamesToInclude));
+
+	let filteredData = $derived(
+		themeArticles.filter((item) => {
+			if (
+				filters.publication !== "All" &&
+				item.media_name !== filters.publication
+			) {
+				return false;
+			}
+			if (
+				filters.publicationLean !== "All" &&
+				item.lean !== filters.publicationLean
+			) {
+				return false;
+			}
+			return true;
+		})
+	);
+
+	let filteredDataWithDateRange = $derived.by(() => {
+		const startMs = debouncedDateRange.start?.valueOf?.() ?? 0;
+		const endMs = debouncedDateRange.end?.valueOf?.() ?? Infinity;
+		return filteredData.filter((item) => {
+			const dateMs = item._dateMs ?? correctedDateMs(item.publish_date);
+			return dateMs >= startMs && dateMs <= endMs;
+		});
 	});
 
 	const xDomain = $derived([debouncedDateRange.start, debouncedDateRange.end]);
@@ -463,48 +472,50 @@
 	// Delay showing theme sections until after transition completes
 	$effect(() => {
 		if (!loadingThemeArticles && inThemeView.state) {
-			// Wait for transition duration before showing theme sections
 			const timer = setTimeout(() => {
 				showThemeSections = true;
 			}, transitionDuration / 2);
 			return () => clearTimeout(timer);
 		} else if (!inThemeView.state) {
-			// Reset when not in theme view
 			showThemeSections = false;
 		}
 	});
 
-	const EVENT_COUNT_THRESHOLD = 10;
-
 	const groupedByEvent = $derived.by(() => {
-		return Array.from(
-			new Map(
-				filteredDataWithDateRange
-					.filter((d) => d.event)
-					.map((item) => [item.event, item])
-			).values()
-		)
-			.map((item) => {
-				return {
-					name: item.event,
-					articles: filteredDataWithDateRange.filter(
-						(d) => d.event === item.event
-					)
-				};
-			})
-			.sort((a, b) => b.articles.length - a.articles.length)
-			.filter(d => eventsToInclude.map(d => d.name).includes(d.name))
-		// .filter((d) => d.articles.length >= EVENT_COUNT_THRESHOLD);
+		// Fast path: no pub/lean filters — eventsToInclude already has the right grouping
+		if (
+			filters.publication === "All" &&
+			filters.publicationLean === "All"
+		) {
+			return eventsToInclude;
+		}
+
+		const include = eventNameSet;
+		const articlesByEvent = new Map();
+
+		for (const item of filteredDataWithDateRange) {
+			if (!item.event || !include.has(item.event)) continue;
+			let list = articlesByEvent.get(item.event);
+			if (!list) {
+				list = [];
+				articlesByEvent.set(item.event, list);
+			}
+			list.push(item);
+		}
+
+		return Array.from(articlesByEvent.entries())
+			.map(([name, articles]) => ({ name, articles }))
+			.sort((a, b) => b.articles.length - a.articles.length);
 	});
 
 	let filteredPublications = $derived.by(() => {
-		return [
-			...new Set(
-				eventsToInclude
-					.map((event) => event.articles.map((article) => article.media_name))
-					.flat()
-			)
-		];
+		const pubs = new Set();
+		for (const event of eventsToInclude) {
+			for (const article of event.articles) {
+				pubs.add(article.media_name);
+			}
+		}
+		return [...pubs];
 	});
 
 
@@ -539,7 +550,7 @@
 					{summaryContent}
 					controlsHeight={debouncedControlsHeight}
 					{vizColors}
-					eventsToInclude={eventsToInclude.map(d => d.name)}
+					eventsToInclude={eventNamesToInclude}
 				/>
 			</section>
 

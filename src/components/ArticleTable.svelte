@@ -36,7 +36,9 @@
 	// Derived state
 	const filteredArticles = $derived(
 		uniqueArticles.filter((article) =>
-			article.title.toLowerCase().includes(searchTerm.toLowerCase())
+			(article.title ?? "")
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase())
 		)
 	);
 
@@ -63,13 +65,25 @@
 		})
 	);
 
-	const totalPages = $derived(Math.ceil(sortedArticles.length / itemsPerPage));
+	const totalPages = $derived(
+		Math.max(1, Math.ceil(sortedArticles.length / itemsPerPage))
+	);
 	const paginatedArticles = $derived(
 		sortedArticles.slice(
 			(currentPage - 1) * itemsPerPage,
 			currentPage * itemsPerPage
 		)
 	);
+
+	// Keep page in range when search/filter shrinks the result set
+	$effect(() => {
+		void searchTerm;
+		currentPage = 1;
+	});
+
+	$effect(() => {
+		if (currentPage > totalPages) currentPage = totalPages;
+	});
 
 	// Methods
 	function setSort(key) {

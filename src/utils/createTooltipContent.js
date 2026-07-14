@@ -13,7 +13,12 @@ export function createTooltipContent(node) {
 	const publication = getPublicationName(node.publication || node.media_name);
 	const publicationDate = node.publish_date || node.publication_date;
 	const lean = node.lean;
-	const themes = node.themes.split(",").map(theme => theme.trim());
+	const themes = node.themes
+		? String(node.themes)
+				.split(",")
+				.map((theme) => theme.trim())
+				.filter(Boolean)
+		: [];
 
 
 

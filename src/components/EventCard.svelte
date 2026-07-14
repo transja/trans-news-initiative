@@ -2,7 +2,7 @@
 	import { tick } from "svelte";
 	import { slide } from "svelte/transition";
 	import { quintOut } from "svelte/easing";
-	import Beeswarm from "./charts/Beeswarm.svelte";
+	import LineChart from "./charts/LineChart.svelte";
 	import { ChevronUp } from "@lucide/svelte";
 	import { group } from "d3-array";
 	import { timeMonths, timeMonth } from "d3-time";
@@ -22,17 +22,22 @@
 	let contentEl;
 	let headerButtonEl;
 
+	const years = $derived.by(() => {
+		const startYear = xDomain[0].getFullYear();
+		const endYear = xDomain[1].getFullYear();
+		const list = [];
+		for (let year = startYear; year <= endYear; year++) {
+			list.push(year.toString());
+		}
+		return list;
+	});
+
 	const chartData = $derived.by(() => {
+		if (!isOpen) return [];
+
 		const articlesByYear = group(event.articles, (d) =>
 			new Date(d.publish_date).getFullYear().toString()
 		);
-
-		const startYear = xDomain[0].getFullYear();
-		const endYear = xDomain[1].getFullYear();
-		const years = [];
-		for (let year = startYear; year <= endYear; year++) {
-			years.push(year.toString());
-		}
 
 		return years.map((year) => {
 			const articlesInYear = articlesByYear.get(year) || [];
@@ -66,6 +71,8 @@
 			};
 		});
 	});
+
+	const lineChartData = $derived(isOpen ? sparklineData : []);
 
 	async function handleToggleAndFocus() {
 		onToggle();
@@ -105,7 +112,7 @@
 	>
 		<div class="accordion-header-content">
 			<h3>{event.name}</h3>
-			<span>{event.articles.length} news articles</span>
+			<span>{event.articles.length.toLocaleString()} news articles</span>
 		</div>
 
 		<div class="sparkline-wrapper" aria-hidden="true">
@@ -126,11 +133,9 @@
 			aria-labelledby="accordion-header-{eventIndex}"
 			onkeydown={handleContentKeydown}
 		>
-			<div class="beeswarm-container event-content-block">
-				<h4 class="chart-label">
-					News articles by publish date <Info instance="chart_beeswarm" />
-				</h4>
-				<Beeswarm data={event.articles} {xDomain} />
+			<div class="articles-timeline event-content-block">
+				<h4 class="chart-label">News articles by publish month</h4>
+				<LineChart data={lineChartData} {years} />
 			</div>
 			<div class="column-chart-container event-content-block">
 				<h4 class="chart-label">Publication political lean by year <Info instance="lean" /></h4>
