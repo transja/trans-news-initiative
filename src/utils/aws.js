@@ -1,6 +1,6 @@
-const BASE_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/output/latest';
+const BASE_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/output';
 
-const STAGING_FOLDER = '/staging';
+const STAGING_FOLDER = '/staging/latest';
 
 // Helper function to add cache busting parameter
 function addCacheBuster(url) {
@@ -10,7 +10,7 @@ function addCacheBuster(url) {
 
 export async function getMonthlyCounts(debug = false, staging = false) {
   if (debug) console.time('aws.getMonthlyCounts');
-  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : ''}/monthly.json`);
+  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : '/latest'}/monthly.json`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch monthly counts: ${response.statusText}`);
@@ -22,7 +22,7 @@ export async function getMonthlyCounts(debug = false, staging = false) {
 
 export async function getTotalArticleCount(debug = false, staging = false) {
   if (debug) console.time('aws.getTotalArticleCount');
-  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : ''}/article_count.json`);
+  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : '/latest'}/article_count.json`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch total article count: ${response.statusText}`);
@@ -40,7 +40,7 @@ export async function getArticlesByTheme(theme, debug = false, staging = false) 
     return [];
   };
   const key = theme.trim();
-  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : ''}/${key}.json`);
+  const url = addCacheBuster(`${BASE_URL}${staging ? STAGING_FOLDER : '/latest'}/${key}.json`);
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch articles for theme ${theme}: ${response.statusText}`);
