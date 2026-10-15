@@ -1,8 +1,7 @@
 <script>
-    let data = $props();
-    let tableData = Object.values(data);
+    let { data = [] } = $props();
     const columnsToRemove = ["shortTheme", "longThemeLEN", "descriptionLEN", "notes on inclusions/exclusions"];
-    let columns = tableData.length > 0 ? Object.keys(tableData[0][0]).filter(col => !columnsToRemove.includes(col)) : [];
+    let columns = $derived(data.length > 0 ? Object.keys(data[0]).filter(col => !columnsToRemove.includes(col)) : []);
 
     function formatTitles(string) {
         if (string == "groundNewsLean") {
@@ -22,21 +21,21 @@
 <div class="table-wrapper">
     <table>
         <colgroup>
-            {#each columns as col}
+            {#each columns as col (col)}
                 <col class="{col}-column">
             {/each}
         </colgroup>
         <thead>
             <tr>
-                {#each columns as col}
+                {#each columns as col (col)}
                     <th>{@html formatTitles(col)}</th>
                 {/each}
             </tr>
         </thead>
         <tbody>
-            {#each tableData[0] as row}
+            {#each data as row, i (i)}
                 <tr>
-                    {#each columns as col}
+                    {#each columns as col (col)}
                         <td>{@html row[col]}</td>
                     {/each}
                 </tr>

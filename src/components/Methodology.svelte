@@ -5,31 +5,27 @@
 	import themeData from "$data/themeDefs.csv";
 
 	const copy = getContext("copy");
+
+	const tables = { ...copy, themeData };
 </script>
 
 <section id="methodology">
 	<div class="inner">
 		<h2>Methods</h2>
 		<p class="error-form">{@html copy.errorForm}</p>
-		{#each copy.methods as graf, i}
-			{#if i == 0}
-				<h3>Initial article collection</h3>
-			{:else if i == 3}
-				<h3>Article classification</h3>
-			{:else if i == 5}
-				<h3>Publication political lean</h3>
-			{/if}
-			<p>{@html graf.value}</p>
-			{#if i == 1}
-				<MethodologyTable data={copy.queryTerms} />
-			{:else if i == 2}
-				<MethodologyTable data={copy.articleData} />
-			{:else if i == 4}
-				<MethodologyTable data={themeData} />
-			{:else if i == 6}
-				<MethodologyTable data={copy.leans} />
-			{:else if i == 7}
-				<MethodologyTable data={copy.avgLeans} />
+		{#each copy.methods as block, i (i)}
+			{#if block.type === "hed"}
+				<h3>{@html block.value}</h3>
+			{:else if block.type === "text"}
+				<p>{@html block.value}</p>
+			{:else if block.type === "list"}
+				<ul>
+					{#each block.value as item, j (j)}
+						<li>{@html item.value}</li>
+					{/each}
+				</ul>
+			{:else if block.type === "table" && tables[block.value]}
+				<MethodologyTable data={tables[block.value]} />
 			{/if}
 		{/each}
 	</div>
@@ -52,10 +48,20 @@
 		margin: 0;
 	}
 
-	p {
+	p,
+	li {
 		font-size: var(--16px);
 		line-height: 1.65;
 		margin: 0 0 1rem 0;
+	}
+
+	ul {
+		margin: 0 0 1rem 0;
+		padding-left: 1.5rem;
+	}
+
+	li {
+		margin-bottom: 0.5rem;
 	}
 
 	.error-form {
