@@ -8,7 +8,7 @@
 
 	import "$styles/app.css";
 	import Header from "$components/Header.svelte";
-	import { browser } from "$app/environment";
+	import ErrorFallback from "$components/ErrorFallback.svelte";
 
 	let { children } = $props();
 
@@ -27,7 +27,6 @@
 			activePage.page = path;
 		}
 	});
-
 </script>
 
 <svelte:head>
@@ -40,4 +39,8 @@
 	<main id="content">
 		{@render children?.()}
 	</main>
+
+	{#snippet failed(error, reset)}
+		<ErrorFallback {reset} />
+	{/snippet}
 </svelte:boundary>
