@@ -1,64 +1,53 @@
 <script>
-	import { onMount, getContext } from "svelte";
-	import { activePage } from "$runes/misc.svelte.js";
+	import { getContext } from "svelte";
 	import tjaLogo from "$svg/logos/TJA_color.svg";
 	import umLogo from "$svg/logos/UM_color.svg";
 	import polygraphLogo from "$svg/logos/Polygraph_color.svg";
 	import DataCta from "$components/DataCta.svelte";
 
-	const copyPromise = Promise.resolve(getContext("copy"));
+	const copy = getContext("copy");
 	const logos = [tjaLogo, umLogo, polygraphLogo];
 </script>
 
 <section id="about">
-	{#await copyPromise}
-		<div class="inner">
-			<p>Loading...</p>
+	<div class="inner">
+		<div class="about-wrapper">
+			<h2>About the initiative</h2>
+			{#each copy.longdesc as graf, i (i)}
+				<p>{@html graf.value}</p>
+			{/each}
+			<p class="error-form">{@html copy.errorForm}</p>
 		</div>
-	{:then copy}
-		<div class="inner">
-			<div class="about-wrapper">
-				<h2>About the initiative</h2>
-				{#each copy.longdesc as graf, i}
-					<p>{@html graf.value}</p>
+		<div class="org-contributor-wrapper">
+			<div class="orgs">
+				<h3>Organizations</h3>
+				{#each copy.orgBios as org, i (org.name)}
+					<div class="org">
+						<a href={org.website}>
+							<div class="logo">
+								{@html logos[i]}
+							</div>
+						</a>
+						<p>{@html org.bio}</p>
+					</div>
 				{/each}
-				<p class="error-form">{@html copy.errorForm}</p>
 			</div>
-			<div class="org-contributor-wrapper">
-				<div class="orgs">
-					<h3>Organizations</h3>
-					{#each copy.orgBios as org, i}
-						<div class="org">
-							<a href={org.website}>
-								<div class="logo">
-									{@html logos[i]}
-								</div>
-							</a>
-							<p>{@html org.bio}</p>
-						</div>
-					{/each}
-				</div>
-				<div class="contributors">
-					<h3>Contributors</h3>
-					{#each copy.individualBios as individual, i}
-						<div class="contributor">
-							<p class="name">{@html individual.name}</p>
-							<p class="title">{@html individual.title}</p>
-							<p class="bio">{@html individual.bio}</p>
-						</div>
-					{/each}
-				</div>
-			</div>
-			<div class="data-cta-wrapper">
-				<DataCta />
+			<div class="contributors">
+				<h3>Contributors</h3>
+				{#each copy.individualBios as individual (individual.name)}
+					<div class="contributor">
+						<p class="name">{@html individual.name}</p>
+						<p class="title">{@html individual.title}</p>
+						<p class="bio">{@html individual.bio}</p>
+					</div>
+				{/each}
 			</div>
 		</div>
-		<p class="copyright">{@html copy.copyright}</p>
-	{:catch error}
-		<div class="inner">
-			<p>There was an error loading this content. Please try again later.</p>
+		<div class="data-cta-wrapper">
+			<DataCta />
 		</div>
-	{/await}
+	</div>
+	<p class="copyright">{@html copy.copyright}</p>
 </section>
 
 <style>

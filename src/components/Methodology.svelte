@@ -91,95 +91,13 @@
 		gap: 1rem;
 	}
 
-	.methodology-wrapper {
-		max-width: 720px;
-	}
-
-	.org-contributor-wrapper {
-		width: 100%;
-		display: flex;
-		flex-direction: row;
-		gap: 10rem;
-	}
-
-	.orgs,
-	.contributors {
-		width: 50%;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.orgs p,
-	.contributors p {
-		font-size: var(--16px);
-		margin: 0;
-	}
-
-	.logo {
-		width: 200px;
-		transition: transform 0.25s linear;
-	}
-
-	.logo:hover {
-		transform: translateY(-2px);
-	}
-
-	.org,
-	.contributor {
-		display: flex;
-		flex-direction: column;
-		gap: 0;
-		border-top: 1px solid var(--color-gray-200);
-		padding-top: 1rem;
-		margin-bottom: 4rem;
-	}
-
-	.org {
-		gap: 1rem;
-	}
-
-	.contributors p.name {
-		font-weight: 700;
-		font-size: var(--20px);
-	}
-
-	.contributors p.title {
-		font-style: italic;
-	}
-
-	.contributors p.bio {
-		margin-top: 1rem;
-	}
-
-	@media (max-width: 900px) {
-		.org-contributor-wrapper {
-			gap: 4rem;
-		}
-	}
-
-	@media (max-width: 720px) {
-		.org-contributor-wrapper {
-			flex-direction: column;
-		}
-
-		.orgs,
-		.contributors {
-			width: 100%;
-		}
-	}
-
 	@media (max-width: 600px) {
-		#about {
-			padding: 8rem 1rem 1rem 1rem;
-		}
-
 		h2 {
 			font-size: var(--32px);
 		}
 
 		p,
-		.orgs p,
-		.contributors p {
+		li {
 			font-size: var(--14px);
 		}
 	}
