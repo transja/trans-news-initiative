@@ -83,7 +83,7 @@
 		--form-divider: #d7d8e1;
 		--form-focus: #2e69ff;
 		--form-submit: #18bd5b;
-		--form-submit-hover: #14a54f;
+		--form-submit-hover: #16aa52;
 
 		width: calc(100% - 2rem);
 		max-width: 752px;

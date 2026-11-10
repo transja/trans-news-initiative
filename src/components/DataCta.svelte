@@ -47,9 +47,10 @@
 		transition: background-color 0.15s;
 	}
 
+	/* !important beats the pages' `#about a:hover` / `#methodology a:hover` link colors */
 	.cta-button:hover {
-		color: #fff;
-		background: #14a54f;
+		color: #fff !important;
+		background: #16aa52;
 	}
 
 	@media (max-width: 600px) {
