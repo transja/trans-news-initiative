@@ -1,4 +1,6 @@
 const BASE_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/output';
+const DOWNLOADS_URL = 'https://polygraph-pub.s3.amazonaws.com/trans-journalism-initiative/downloads';
+const DOWNLOAD_FILENAME = 'tni-data.zip';
 
 const STAGING_FOLDER = '/staging/latest';
 
@@ -49,4 +51,20 @@ export async function getArticlesByTheme(theme, debug = false, staging = false) 
   if (debug) console.timeEnd(`aws.getArticlesByTheme (${theme})`);
 
   return data || [];
+}
+
+async function sha256(text) {
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Must match `echo -n "<password>" | shasum -a 256` used to name the S3 folder
+export async function getDataDownloadUrl(password) {
+  const hash = await sha256(password);
+  const url = `${DOWNLOADS_URL}/${hash}/${DOWNLOAD_FILENAME}`;
+  const response = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+  if (response.ok) return url;
+  if (response.status === 403 || response.status === 404) return null;
+  throw new Error(`Failed to check data download: ${response.statusText}`);
 }

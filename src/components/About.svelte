@@ -4,6 +4,7 @@
 	import tjaLogo from "$svg/logos/TJA_color.svg";
 	import umLogo from "$svg/logos/UM_color.svg";
 	import polygraphLogo from "$svg/logos/Polygraph_color.svg";
+	import DataCta from "$components/DataCta.svelte";
 
 	const copyPromise = Promise.resolve(getContext("copy"));
 	const logos = [tjaLogo, umLogo, polygraphLogo];
@@ -47,6 +48,9 @@
 						</div>
 					{/each}
 				</div>
+			</div>
+			<div class="data-cta-wrapper">
+				<DataCta />
 			</div>
 		</div>
 		<p class="copyright">{@html copy.copyright}</p>
@@ -100,6 +104,12 @@
 
 	.about-wrapper {
 		max-width: 720px;
+	}
+
+	.data-cta-wrapper {
+		width: 100%;
+		max-width: 720px;
+		margin-bottom: 4rem;
 	}
 
 	.error-form {

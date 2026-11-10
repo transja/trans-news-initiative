@@ -2,6 +2,7 @@
 	import { getContext } from "svelte";
 
 	import MethodologyTable from "$components/MethodologyTable.svelte";
+	import DataCta from "$components/DataCta.svelte";
 	import themeData from "$data/themeDefs.csv";
 
 	const copy = getContext("copy");
@@ -28,6 +29,9 @@
 				<MethodologyTable data={tables[block.value]} />
 			{/if}
 		{/each}
+		<div class="data-cta-wrapper">
+			<DataCta />
+		</div>
 	</div>
 </section>
 
@@ -62,6 +66,10 @@
 
 	li {
 		margin-bottom: 0.5rem;
+	}
+
+	.data-cta-wrapper {
+		margin-top: 3rem;
 	}
 
 	.error-form {
